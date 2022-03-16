@@ -15,7 +15,7 @@ set(SFML_DIR, "C:/Program Files (x86)/SFML/SFML-2.5.1")
 find_package(SFML 2.5 COMPONENTS audio graphics window system REQUIRED)
 
 # add the executable
-add_executable(ZPR_Game src/test.cpp src/InputHandler.cpp src/GameController.cpp)
+add_executable(ZPR_Game src/test.cpp src/InputHandler.cpp src/GameController.cpp src/Renderer.cpp)
 
 # add SFML files to include
 target_include_directories(ZPR_Game PRIVATE ${INCLUDE_DIRECTORIES} "C:/Program Files (x86)/SFML/SFML-2.5.1/include")
