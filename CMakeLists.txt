@@ -4,8 +4,10 @@ include(ExternalProject)
 # set the project name
 project(ZPR_Game)
 
+set(EXTERNALS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
+
 # add SFML as external project
-set(SFML_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/SFML")
+set(SFML_DIR "${EXTERNALS_DIR}/SFML")
 set(SFML_INSTALL "${SFML_DIR}/install")
 ExternalProject_Add(SFML
     PREFIX ${SFML_DIR}
@@ -15,6 +17,16 @@ ExternalProject_Add(SFML
         -DCMAKE_INSTALL_PREFIX=${SFML_INSTALL}
 )
 
+set(BOX2D_DIR "${EXTERNALS_DIR}/Box2D")
+set(BOX2D_INSTALL "${BOX2D_DIR}/install")
+ExternalProject_Add(BOX2D
+    PREFIX ${BOX2D_DIR}
+    GIT_REPOSITORY https://github.com/erincatto/box2d.git
+    GIT_TAG 9ebbbcd960ad424e03e5de6e66a40764c16f51bc
+    CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${BOX2D_INSTALL}
+)
+
 # add files of main project to the executable
 set(SRCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 add_executable(${PROJECT_NAME} "${SRCS_DIR}/test.cpp"
@@ -22,15 +34,21 @@ add_executable(${PROJECT_NAME} "${SRCS_DIR}/test.cpp"
                         "${SRCS_DIR}/GameController.cpp"
                         "${SRCS_DIR}/Renderer.cpp")
 
-add_dependencies(${PROJECT_NAME} SFML)
+add_dependencies(${PROJECT_NAME} SFML BOX2D)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics-2 sfml-audio-2 sfml-window-2 sfml-system-2)
+set(SFML_DIR "${SFML_INSTALL}/lib/cmake/SFML")
+find_package(SFML "2.5" COMPONENTS audio graphics window system REQUIRED)
+
+set(box2d_DIR "${BOX2D_INSTALL}/lib/cmake/box2d")
+find_package(box2d "2.4" REQUIRED)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-audio sfml-window sfml-system box2d::box2d)
 
 # add SFML files to include
-target_include_directories(ZPR_Game PRIVATE ${INCLUDE_DIRECTORIES} "${SFML_INSTALL}/include")
+target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRECTORIES} "${SFML_INSTALL}/include" "${BOX2D_INSTALL}/include")
 
 set(SFML_DLLS_DIR "${SFML_INSTALL}/bin")
-target_link_directories(ZPR_Game PRIVATE ${LINK_DIRECTORIES} ${SFML_DLLS_DIR})
+#target_link_directories(ZPR_Game PRIVATE ${LINK_DIRECTORIES} ${SFML_DLLS_DIR})
 
 # Copy the executable and .dll's to /release after finishing the build
 set(EXE_SRC "${CMAKE_CACHEFILE_DIR}/ZPR_Game.exe")
