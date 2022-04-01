@@ -4,6 +4,10 @@ include(ExternalProject)
 # set the project name
 project(ZPR_Game)
 
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    add_compile_options(-Wall -Wextra -pedantic -Werror)
+endif()
+
 set(EXTERNALS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
 
 # add SFML as external project
