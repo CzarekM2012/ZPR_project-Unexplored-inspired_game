@@ -1,3 +1,4 @@
 build/*
-release/ZPR_Game.exe
-.vscode/*
+release/*
+external/*
+.vscode/
