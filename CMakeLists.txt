@@ -31,6 +31,10 @@ ExternalProject_Add(BOX2D
         -DCMAKE_INSTALL_PREFIX=${BOX2D_INSTALL}
 )
 
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    add_compile_options(-Wall -Wextra -pedantic -Werror)
+endif()
+
 # add files of main project to the executable
 set(SRCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 add_executable(${PROJECT_NAME} "${SRCS_DIR}/test.cpp"
