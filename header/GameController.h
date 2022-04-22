@@ -4,18 +4,20 @@
 #include "State.h"
 
 class GameController {
-    const float STEP = 1;    
+    const float STEP = 50;   
     State state;
 
-    public:             
+public:
+    b2World* world;
     static bool stop;
 
     GameController();
+    ~GameController() {delete world;};
 
     void run();
 
-    State getStateCopy() {
-        State result = state; // TODO: Check it this really copies
+    State getStateCopy() const {
+        State result = state;
         return result;
     }
 

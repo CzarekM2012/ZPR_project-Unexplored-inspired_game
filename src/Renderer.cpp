@@ -1,20 +1,25 @@
 #include <SFML/Graphics.hpp>
 
+#include<iostream>
+#include<memory>
+
 #include "../header/Renderer.h"
 
-Renderer::Renderer() {
-    shape = sf::CircleShape(100.f);
-    shape.setFillColor(sf::Color::Green);
-}
+void Renderer::render(const State & state) const {
 
-void Renderer::render(sf::RenderWindow& window, State state) {
+    window->clear(sf::Color(100,100,100));
 
-    if(state.getObjectCount() == 0)
+    if(state.getObjectCount() == 0) { // Just in case and for debug, should not happen normally
+        window->display(); // Keeps the window displaying
+        std::cout << "No objects to display!" << std::endl;
         return;
+    }
 
-    shape.setPosition(sf::Vector2f(state.get(0)->x, state.get(0)->y));
+    for (auto object : state.objects) {
+        //std::cout << object->body->GetPosition().x << " " << object->body->GetPosition().y << std::endl;
+        object->synchronize();
+        window->draw(object->getView());
+	}
 
-    window.clear();
-    window.draw(shape);
-    window.display();
+    window->display();
 }

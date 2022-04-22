@@ -1,16 +1,17 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-
+#include <box2d\box2d.h>
 #include "State.h"
 
 class Renderer {
+private:
+    sf::RenderWindow * window;
 
-    sf::CircleShape shape;
+public:
+    Renderer() {};
+    Renderer(sf::RenderWindow * render_window) : window(render_window) {};
 
-    public:
-    Renderer();
-
-    void render(sf::RenderWindow& window, State state);
+    void render(const State & state) const;
 
 };
