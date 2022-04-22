@@ -1,19 +1,20 @@
 #pragma once
 
 #include <vector>
+#include <algorithm>
+#include <memory>
 
 #include "PhysicalObject.h"
 
 class State {
-    std::vector<PhysicalObject*> objects;
 
-    public:             
+public:        
+    std::vector<std::shared_ptr<PhysicalObject>> objects;
+
     State() {};
-    // TODO: Check for possible memory leaks, maybe switch to unique_ptr or sth similar
 
-    void add(PhysicalObject * object) {objects.push_back(object);};
+    void add(std::shared_ptr<PhysicalObject> object) { objects.push_back(object); };
 
-    PhysicalObject* get(int index) {return objects.size() > index ? objects[index] : nullptr;}  // TODO: Rewrite as an overloaded operator []
-    //std::vector<PhysicalObject*> getObjects() {return objects;}
-    int getObjectCount() {return objects.size();};
+    std::shared_ptr<PhysicalObject> get(unsigned int index) const {return objects.size() > index ? objects[index] : nullptr;}  // TODO: Rewrite as an overloaded operator []
+    int getObjectCount() const {return objects.size();};
 };

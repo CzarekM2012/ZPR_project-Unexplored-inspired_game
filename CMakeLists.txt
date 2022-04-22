@@ -40,7 +40,8 @@ set(SRCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 add_executable(${PROJECT_NAME} "${SRCS_DIR}/test.cpp"
                         "${SRCS_DIR}/InputHandler.cpp"
                         "${SRCS_DIR}/GameController.cpp"
-                        "${SRCS_DIR}/Renderer.cpp")
+                        "${SRCS_DIR}/Renderer.cpp"
+                        "${SRCS_DIR}/PhysicalObject.cpp")
 
 add_dependencies(${PROJECT_NAME} SFML BOX2D)
 
