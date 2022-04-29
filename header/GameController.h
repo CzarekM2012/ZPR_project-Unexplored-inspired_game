@@ -4,7 +4,10 @@
 #include "State.h"
 
 class GameController {
-    const float STEP = 50;   
+    const float FORCE_MOVE = 50;
+    const float FORCE_LOOK = 250;
+    const float FORCE_LOOK_MIN = 5;
+    const float LOOK_ACC_DEG = 1;
     State state;
 
 public:

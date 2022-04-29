@@ -7,6 +7,7 @@
 
 #include "../header/GameController.h"
 #include "../header/InputHandler.h"
+#include "../header/ObjectClasses.h"
 
 using namespace std::chrono_literals;
 
@@ -16,26 +17,61 @@ GameController::GameController() {
 
     world = new b2World(b2Vec2(0, 0));
 
-    b2PolygonShape * shape = new b2PolygonShape();
+    state.add(std::shared_ptr<PhysicalObject>(new Player()))->createPhysicalObject(world, 10, 10);
 
-    b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7), b2Vec2(5, 5), b2Vec2(5, -5)}; 
-    shape->Set(pentagon, 5);
-    state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 10, 10, true, shape, sf::Color::Green)));
+    state.add(std::shared_ptr<PhysicalObject>(new Box()))->createPhysicalObject(world, 80, 38);
+    state.add(std::shared_ptr<PhysicalObject>(new Box()))->createPhysicalObject(world, 74, 50);
+    state.add(std::shared_ptr<PhysicalObject>(new Box()))->createPhysicalObject(world, 82, 63);
+    
+    // Add some walls
+    std::shared_ptr<Wall> wall;
+    wall = std::shared_ptr<Wall>(new Wall());
+    wall->setSize(200, 4);
+    state.add(wall);
+    wall->createPhysicalObject(world, 100, 0);
 
-    shape->SetAsBox(5, 5);
-    state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 80, 38, true, shape, sf::Color::Yellow)));
-    state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 74, 50, true, shape, sf::Color::Yellow)));
-    state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 82, 63, true, shape, sf::Color::Yellow)));
+    wall = std::shared_ptr<Wall>(new Wall());
+    wall->setSize(200, 4);
+    state.add(wall);
+    wall->createPhysicalObject(world, 100, 107.5);
 
-    // Walls
-    shape->SetAsBox(100, 2);
-    state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 100, 0, false, shape, sf::Color(20, 20, 20))));
-    state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 100, 107.5, false, shape, sf::Color(20, 20, 20))));
-    shape->SetAsBox(2, 60);
-    state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 0, 50, false, shape, sf::Color(20, 20, 20))));
-    state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 191.5, 50, false, shape, sf::Color(20, 20, 20))));
-    shape->SetAsBox(2, 20);
-    state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 95, 50, false, shape, sf::Color(20, 20, 20))));
+    wall = std::shared_ptr<Wall>(new Wall());
+    wall->setSize(200, 4);
+    state.add(wall);
+    wall->createPhysicalObject(world, 0, 50, 90);
+
+    wall = std::shared_ptr<Wall>(new Wall());
+    wall->setSize(200, 4);
+    state.add(wall);
+    wall->createPhysicalObject(world, 191.5, 50, 90);
+
+    wall = std::shared_ptr<Wall>(new Wall());
+    wall->setSize(40, 4);
+    state.add(wall);
+    wall->createPhysicalObject(world, 95, 50, 90);
+
+    //std::dynamic_pointer_cast<Box>(state.getLast())->setSize(20, 10);
+
+    //b2PolygonShape * shape = new b2PolygonShape();
+
+    // b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7), b2Vec2(5, 5), b2Vec2(5, -5)}; 
+    // shape->Set(pentagon, 5);
+    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 10, 10, true, shape, sf::Color::Green)));
+
+    // shape->SetAsBox(5, 5);
+    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 80, 38, true, shape, sf::Color::Yellow)));
+    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 74, 50, true, shape, sf::Color::Yellow)));
+    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 82, 63, true, shape, sf::Color::Yellow)));
+
+    // // Walls
+    // shape->SetAsBox(100, 2);
+    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 100, 0, false, shape, sf::Color(20, 20, 20))));
+    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 100, 107.5, false, shape, sf::Color(20, 20, 20))));
+    // shape->SetAsBox(2, 60);
+    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 0, 50, false, shape, sf::Color(20, 20, 20))));
+    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 191.5, 50, false, shape, sf::Color(20, 20, 20))));
+    // shape->SetAsBox(2, 20);
+    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 95, 50, false, shape, sf::Color(20, 20, 20))));
 
     stop = false;
 }
@@ -50,7 +86,36 @@ void GameController::run() {
         }
 
         std::shared_ptr<PhysicalObject> player = state.get(0);
-        player->getBodyPtr()->ApplyLinearImpulseToCenter(b2Vec2(InputHandler::inputStateTab[0][0] * STEP, InputHandler::inputStateTab[0][1] * STEP), true);
+        auto bodyPtr = player->getBodyPtr();
+        bodyPtr->ApplyLinearImpulseToCenter(b2Vec2(
+            InputHandler::inputStateTab[0][InputHandler::INPUT_MOVE_X] * FORCE_MOVE,
+            InputHandler::inputStateTab[0][InputHandler::INPUT_MOVE_Y] * FORCE_MOVE
+        ), true);
+        
+
+        float angleDeg = player->getAngleDeg();
+        float lookAngle = InputHandler::inputStateTab[0][InputHandler::INPUT_LOOK_ANGLE];
+        float diff = abs(angleDeg - lookAngle);
+        int force = FORCE_LOOK;
+        if (diff > 180.0f) {
+            diff = 360.0f - diff;
+            force = -force;
+        }
+        force *= diff / 180.0f;
+        if (force >= 0) 
+            force += FORCE_LOOK_MIN;
+        else 
+            force -= FORCE_LOOK_MIN;
+
+        if(angleDeg > lookAngle)
+            force = -force;
+
+        if(diff > LOOK_ACC_DEG/2)
+            bodyPtr->ApplyAngularImpulse(force, true);
+        // else
+        //     std:: cout << "No rotation force needed" << std::endl;
+        // std:: cout << "Angle: " << player->getAngleDeg() << " Requested: " << InputHandler::inputStateTab[0][InputHandler::INPUT_LOOK_ANGLE] << " Force: " << force << std::endl;
+        
         world->Step(1, 8, 3);
         std::this_thread::sleep_for(1ms); //TODO: Add time control
     }

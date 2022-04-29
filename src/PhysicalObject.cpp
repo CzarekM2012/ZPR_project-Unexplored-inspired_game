@@ -1,41 +1,66 @@
 #include "../header/PhysicalObject.h"
 #include <iostream>
-PhysicalObject::PhysicalObject(b2World* world, float x, float y, bool dynamic, b2Shape * shape, sf::Color color) {	
+
+b2Body * PhysicalObject::createPhysicalObject(b2World* world, float x, float y, float angleDeg) {	
+
+	b2BodyDef * bodyDef = new b2BodyDef();
+    bodyDef->position.Set(x, y);
+    bodyDef->angle = angleDeg * DEG_TO_R;
+    if(isStatic())
+        bodyDef->type = b2_staticBody;
+    else
+        bodyDef->type = b2_dynamicBody;
     
-	auto bodyDef = new b2BodyDef();
-	if (dynamic) {
-		bodyDef->type = b2_dynamicBody;
-	}
-	else {
-		bodyDef->type = b2_staticBody;
-	}
-	bodyDef->position.Set(x, y);
-
-	body = world->CreateBody(bodyDef);
-    if (dynamic) {
-        body->SetLinearDamping(DAMPING);
-        body->SetAngularDamping(DAMPING);
+    body = world->CreateBody(bodyDef);
+    body->SetLinearDamping(getDamping());
+    body->SetAngularDamping(getDamping());
+    
+    b2Shape * shape = getShape();
+    if(isStatic())
+        this->body->CreateFixture(shape, 0);
+    else {
+	    b2FixtureDef * fixtureDef = new b2FixtureDef();
+	    fixtureDef->shape = shape;
+        fixtureDef->density = getDensity();
+	    fixtureDef->friction = getFriction();
+	    this->body->CreateFixture(fixtureDef);
     }
-	auto fixtureDef = new b2FixtureDef();
-	fixtureDef->shape = shape;
-
-	if (dynamic) {
-		fixtureDef->density = 1.0f;
-		fixtureDef->friction = 0.3f;
-		this->body->CreateFixture(fixtureDef);
-	}
-	else {
-		this->body->CreateFixture(shape, 0);
-	}
-
-	view = std::make_unique<sf::ConvexShape>(*generateView(body));
-	setColor(color);
+	
+    view = std::make_unique<sf::ConvexShape>(*generateView(body));
+    return body;
 }
+
+// b2Body * PhysicalObject::createPhysicalObject(b2World* world, float x, float y) {	
+    
+// 	auto bodyDef = new b2BodyDef();
+//     bodyDef->position.Set(x, y);
+//     //dynamic
+// 	bodyDef->type = b2_dynamicBody;
+//     //static
+// 	bodyDef->type = b2_staticBody;
+
+// 	body = world->CreateBody(bodyDef);
+//     //dynamic
+//     body->SetLinearDamping(DAMPING);
+//     body->SetAngularDamping(DAMPING);
+    
+// 	auto fixtureDef = new b2FixtureDef();
+// 	fixtureDef->shape = shape;
+//     //dynamic
+//     fixtureDef->density = 1.0f;
+// 	fixtureDef->friction = 0.3f;
+// 	this->body->CreateFixture(fixtureDef);
+//     //static
+// 	this->body->CreateFixture(shape, 0); 
+	
+// 	view = std::make_unique<sf::ConvexShape>(*generateView(body));
+// 	setColor(color);
+// }
 
 void PhysicalObject::synchronize() {
     float bodyPositionX = body->GetPosition().x * M_TO_PX;
     float bodyPositionY = body->GetPosition().y * M_TO_PX;
-    float bodyRotate = body->GetAngle() * R_TO_PX;
+    float bodyRotate = getAngleDeg();
 
     view->setPosition(bodyPositionX, bodyPositionY);
     view->setRotation(bodyRotate);

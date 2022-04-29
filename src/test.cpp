@@ -22,7 +22,8 @@ int main()
 {
     std::cout << "Started" << std::endl;
 
-    sf::RenderWindow window(sf::VideoMode(1920, 1080), "ZPR Game");;
+    //sf::RenderWindow window(sf::VideoMode(1920, 1080), "ZPR Game");
+    sf::RenderWindow window(sf::VideoMode(960, 540), "ZPR Game");
     Renderer renderer(&window);    
 
     std::thread gameLogicThread(&GameController::run, &gameController); // ~Use a GameController function on gameController object
