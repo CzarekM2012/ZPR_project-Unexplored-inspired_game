@@ -29,11 +29,12 @@ int main()
     std::thread gameLogicThread(&GameController::run, &gameController); // ~Use a GameController function on gameController object
     while (window.isOpen()) {
         sf::Event event;
-        window.pollEvent(event);
-        if (event.type == sf::Event::Closed)
-            window.close();
 
-        inputHandler.handleInput(event);
+        if (window.pollEvent(event) && event.type == sf::Event::Closed) { // Event doesn't by itself tell if something has happened (if nothing happens can return 0)
+            window.close();
+        }
+
+        inputHandler.handleInput(event); // This should be called even if no new event has appeared (for e.g. checking if keyboard keys are still pressed)
         renderer.render(gameController.getStateCopy());
         std::this_thread::sleep_for(10ms);
     }

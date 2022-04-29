@@ -3,6 +3,7 @@
 
 #include "../header/InputHandler.h"
 #include <box2d/box2d.h>
+#include <iostream>
 
 float InputHandler::inputStateTab[PLAYER_COUNT_MAX][STATE_CONTROLS_PER_PLAYER];
 
@@ -18,27 +19,52 @@ void InputHandler::handleInput(sf::Event event) {
     UNUSED(event);
 
     b2Vec2 input(0, 0);
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W) && !sf::Keyboard::isKeyPressed(sf::Keyboard::S)) //TODO: Simplify this mess
-        input.y = -INPUT_SCALE;
-    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::S) && !sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-        input.y = INPUT_SCALE;
 
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) && !sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        input.x = -INPUT_SCALE;
-    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::D) && !sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        input.x = INPUT_SCALE;
+    // Is joystick #0 connected?
+    bool padConnected = sf::Joystick::isConnected(0);
+
+    // Movement
+    if(padConnected) {
+        input.x = sf::Joystick::getAxisPosition(0, sf::Joystick::X) / SFML_AXIS_INPUT_SCALE;
+        input.y = sf::Joystick::getAxisPosition(0, sf::Joystick::Y) / SFML_AXIS_INPUT_SCALE;
+        //std::cout << "Connected: " << padConnected << " Button count: " << sf::Joystick::getButtonCount(0) << " Pressed: " << sf::Joystick::isButtonPressed(0, 2) << " Pos: " << sf::Joystick::getAxisPosition(0, sf::Joystick::Y) << std::endl;
+    } else {
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::W) && !sf::Keyboard::isKeyPressed(sf::Keyboard::S)) //TODO: Simplify this mess
+            input.y = -INPUT_SCALE;
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::S) && !sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+            input.y = INPUT_SCALE;
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::A) && !sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+            input.x = -INPUT_SCALE;
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::D) && !sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+            input.x = INPUT_SCALE;
+    }
     
-    input.Normalize(); // Should only be normalized for keyboard input, analog sticks have to be handled a bit differently
+    if(input.Length() < AXIS_DEADZONE)
+        input.SetZero();
+    else if(input.Length() > 1.0f)
+        input.Normalize();
+    
     inputStateTab[0][INPUT_MOVE_X] = input.x;
     inputStateTab[0][INPUT_MOVE_Y] = input.y;
 
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q) && !sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-        inputStateTab[0][INPUT_LOOK_ANGLE] -= ANGLE_STEP_KEYBOARD;
-    else if(sf::Keyboard::isKeyPressed(sf::Keyboard::E) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-        inputStateTab[0][INPUT_LOOK_ANGLE] += ANGLE_STEP_KEYBOARD;
-    
+    // Look angle
+    if(padConnected) {
+        input.x = sf::Joystick::getAxisPosition(0, sf::Joystick::U) / SFML_AXIS_INPUT_SCALE;
+        input.y = sf::Joystick::getAxisPosition(0, sf::Joystick::V) / SFML_AXIS_INPUT_SCALE;
+        
+        if(input.Length() > AXIS_DEADZONE)
+            inputStateTab[0][INPUT_LOOK_ANGLE] = atan2(input.y, input.x) / b2_pi * 180 - 90;
+    } else {
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q) && !sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+            inputStateTab[0][INPUT_LOOK_ANGLE] -= ANGLE_STEP_KEYBOARD;
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::E) && !sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+            inputStateTab[0][INPUT_LOOK_ANGLE] += ANGLE_STEP_KEYBOARD;
+    }
+
     if(inputStateTab[0][INPUT_LOOK_ANGLE] > 180.0f)
         inputStateTab[0][INPUT_LOOK_ANGLE] -= 360.f;
     else if(inputStateTab[0][INPUT_LOOK_ANGLE] < -180.0f)
         inputStateTab[0][INPUT_LOOK_ANGLE] += 360.f;
+
 }

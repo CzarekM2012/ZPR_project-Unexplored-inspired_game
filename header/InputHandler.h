@@ -5,6 +5,8 @@
 class InputHandler {
     static constexpr float INPUT_SCALE = 1;
     static constexpr float ANGLE_STEP_KEYBOARD = 5.0f;
+    static constexpr float SFML_AXIS_INPUT_SCALE = 100;
+    static constexpr float AXIS_DEADZONE = 0.2f;
     
     public:
     static const int PLAYER_COUNT_MAX = 4;
