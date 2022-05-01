@@ -1,6 +1,9 @@
-#include <SFML/Window/Event.hpp>
-
 #pragma once
+
+#include<memory>
+#include <SFML/Window/Event.hpp>
+#include "../external/readerwriterqueue/readerwriterqueue.h"
+#include "../header/Action.h"
 
 class InputHandler {
     static constexpr float INPUT_SCALE = 1;
@@ -8,6 +11,8 @@ class InputHandler {
     static constexpr float SFML_AXIS_INPUT_SCALE = 100;
     static constexpr float AXIS_DEADZONE = 0.2f;
     
+    std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q;
+
     public:
     static const int PLAYER_COUNT_MAX = 4;
     static const int STATE_CONTROLS_PER_PLAYER = 3; // movement (x, y, sums to max. 1) and angle the player should face in deg
@@ -20,7 +25,7 @@ class InputHandler {
     // contrary to Actions, that are sent into message queue only once, when they appear
     static float inputStateTab[PLAYER_COUNT_MAX][STATE_CONTROLS_PER_PLAYER];
 
-    InputHandler();
+    InputHandler(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q);
 
     void handleInput(sf::Event event);
 

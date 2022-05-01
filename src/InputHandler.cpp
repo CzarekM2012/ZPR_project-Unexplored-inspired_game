@@ -1,4 +1,3 @@
-
 #include <SFML/Window/Event.hpp>
 
 #include "../header/InputHandler.h"
@@ -7,7 +6,7 @@
 
 float InputHandler::inputStateTab[PLAYER_COUNT_MAX][STATE_CONTROLS_PER_PLAYER];
 
-InputHandler::InputHandler() {
+InputHandler::InputHandler(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q) : action_q(q) {
     // TODO: Check if necessary
     for(int i = 0; i < PLAYER_COUNT_MAX; ++i)
         for(int j = 0; j < STATE_CONTROLS_PER_PLAYER; ++j)
@@ -67,4 +66,23 @@ void InputHandler::handleInput(sf::Event event) {
     else if(inputStateTab[0][INPUT_LOOK_ANGLE] < -180.0f)
         inputStateTab[0][INPUT_LOOK_ANGLE] += 360.f;
 
+    // Handling of one-time-pressed keys and buttons
+    if(event.type == sf::Event::EventType::KeyPressed) {
+        Action action(-1, 0);
+        switch(event.key.code) {
+            case sf::Keyboard::Num1:
+                action = Action(-1, Action::TYPE_DEBUG);
+                action_q->enqueue(action);
+                break;
+
+            case sf::Keyboard::E:
+                action = Action(0, Action::TYPE_PICK_LEFT);
+                action_q->enqueue(action);
+                break;
+
+            default:
+                break;
+        }
+    }
+    
 }

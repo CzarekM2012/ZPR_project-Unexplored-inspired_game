@@ -8,26 +8,18 @@
 
 class Entity : public PhysicalObject {
 protected:
-    const int HP_INF = 1000000000;
-    int hp;
+    bool invulnerable = false;
+    int hp = 1;
 
 public:
-    bool isInvulnerable() const { return hp == HP_INF; };
-};
+    bool isInvulnerable() const { return invulnerable; };
 
-class Player : public Entity {
-public:
-    Player() {
-        hp = 100;
-        color = sf::Color::Green;
-    }
-
-
-    b2Shape * getShape() {
-        b2PolygonShape * shape = new b2PolygonShape();
-        b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7), b2Vec2(5, 5), b2Vec2(5, -5)}; 
-        shape->Set(pentagon, 5);
-        return shape;
+    void damage(int value) {
+        hp = hp - value;
+        if (hp < 0) {
+            hp = 0;
+            body->DestroyFixture(body->GetFixtureList());
+        }
     }
 };
 
@@ -42,7 +34,7 @@ public:
         this->height = height;
     }
 
-    b2Shape * getShape() {
+    b2Shape * getShape() const {
         b2PolygonShape * shape = new b2PolygonShape();
         shape->SetAsBox(width/2, height/2);
         return shape;
@@ -70,7 +62,7 @@ public:
 class Wall : public RectangleObject {
 public:
     Wall() {
-        hp = HP_INF;
+        hp = invulnerable;
         dynamic = false;
         color = sf::Color::Black;
     }
@@ -81,20 +73,78 @@ public:
     }
 };
 
-// class Item : public PhysicalObject {
-// private:
-//     std::weak_ptr<Entity> owner;
-// };
+class Item : public PhysicalObject {
+private:
+    std::weak_ptr<Entity> owner;
 
-// class Weapon : public Item {
-// private:
-//     int damage;
-// };
+public:
+    std::weak_ptr<Entity> getOwner() { return owner; };
+    void setOwner(std::shared_ptr<Entity> newOwner) { owner = newOwner; };
+};
 
-// class Armor : public Item {
-// private:
-//     int armor;
-// };
+class Weapon : public Item {
+protected:
+    int damage;
+};
+
+class Sword : public Weapon {
+public:
+    Sword() {
+        damage = 10;
+        color = sf::Color(180, 180, 180);
+    };
+
+    b2Shape * getShape() const {
+        b2PolygonShape * shape = new b2PolygonShape();
+        b2Vec2 triangle[] = {b2Vec2(-2, -2), b2Vec2(0, 3), b2Vec2(2, -2)}; 
+        shape->Set(triangle, 3);
+        return shape;
+    }
+};
+
+class Shield : public Item {
+protected:
+    int defense;
+
+public:
+
+    Shield() {
+        defense = 7;
+        color = sf::Color(180, 180, 180);
+    }
+
+    b2Shape * getShape() const {
+        b2PolygonShape * shape = new b2PolygonShape();
+        shape->SetAsBox(1, 4);
+        return shape;
+    }
+};
+
+class Player : public Entity {
+    std::shared_ptr<Item> item_lh;
+
+public:
+    Player() {
+        hp = 100;
+        color = sf::Color::Green;
+    }
+
+    void equipLeftHand(std::shared_ptr<Item> item) {
+        item_lh = item;
+        updateEquipment();
+    }
+
+    void updateEquipment() {
+        this->body->CreateFixture(item_lh->getShape(), item_lh->getDensity());
+    }
+
+    b2Shape * getShape() const {
+        b2PolygonShape * shape = new b2PolygonShape();
+        b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7), b2Vec2(5, 5), b2Vec2(5, -5)}; 
+        shape->Set(pentagon, 5);
+        return shape;
+    }
+};
 
 // class Example : public Other {
 // public:

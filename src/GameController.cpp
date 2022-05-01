@@ -6,14 +6,15 @@
 #include <box2d/box2d.h>
 
 #include "../header/GameController.h"
-#include "../header/InputHandler.h"
 #include "../header/ObjectClasses.h"
 
 using namespace std::chrono_literals;
 
 bool GameController::stop;
 
-GameController::GameController() {
+#define UNUSED(x) (void)(x) //For now to disable "unused parameter" error
+
+GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q) : action_q(q) {
 
     world = new b2World(b2Vec2(0, 0));
 
@@ -50,6 +51,11 @@ GameController::GameController() {
     state.add(wall);
     wall->createPhysicalObject(world, 95, 50, 90);
 
+    // Test some stuff
+    state.add(std::shared_ptr<PhysicalObject>(new Sword()))->createPhysicalObject(world, 10, 30);
+    state.getLast()->setCollision(false);
+    state.add(std::shared_ptr<PhysicalObject>(new Shield()))->createPhysicalObject(world, 16, 30);
+    state.getLast()->setCollision(false);
     //std::dynamic_pointer_cast<Box>(state.getLast())->setSize(20, 10);
 
     //b2PolygonShape * shape = new b2PolygonShape();
@@ -85,38 +91,60 @@ void GameController::run() {
             continue;
         }
 
-        std::shared_ptr<PhysicalObject> player = state.get(0);
-        auto bodyPtr = player->getBodyPtr();
-        bodyPtr->ApplyLinearImpulseToCenter(b2Vec2(
-            InputHandler::inputStateTab[0][InputHandler::INPUT_MOVE_X] * FORCE_MOVE,
-            InputHandler::inputStateTab[0][InputHandler::INPUT_MOVE_Y] * FORCE_MOVE
-        ), true);
+        // (player movement direction and look angles)
+        for(int i = 0; i < 1; ++i)  //TODO: Change '1' to ~'playerCount' when supported
+            processPlayerInputStates(i);
         
 
-        float angleDeg = player->getAngleDeg();
-        float lookAngle = InputHandler::inputStateTab[0][InputHandler::INPUT_LOOK_ANGLE];
-        float diff = abs(angleDeg - lookAngle);
-        int force = FORCE_LOOK;
-        if (diff > 180.0f) {
-            diff = 360.0f - diff;
-            force = -force;
+        Action action;
+        if(action_q->try_dequeue(action)) {
+            processAction(action);
         }
-        force *= diff / 180.0f;
-        if (force >= 0) 
-            force += FORCE_LOOK_MIN;
-        else 
-            force -= FORCE_LOOK_MIN;
-
-        if(angleDeg > lookAngle)
-            force = -force;
-
-        if(diff > LOOK_ACC_DEG/2)
-            bodyPtr->ApplyAngularImpulse(force, true);
-        // else
-        //     std:: cout << "No rotation force needed" << std::endl;
-        // std:: cout << "Angle: " << player->getAngleDeg() << " Requested: " << InputHandler::inputStateTab[0][InputHandler::INPUT_LOOK_ANGLE] << " Force: " << force << std::endl;
         
+        // Process Physics
         world->Step(1, 8, 3);
+
+        // Wait for the next tick
         std::this_thread::sleep_for(1ms); //TODO: Add time control
     }
+}
+
+void GameController::processPlayerInputStates(int playerId) {
+    UNUSED(playerId);
+
+    std::shared_ptr<PhysicalObject> player = state.get(0);
+    auto bodyPtr = player->getBodyPtr();
+    bodyPtr->ApplyLinearImpulseToCenter(b2Vec2(
+        InputHandler::inputStateTab[0][InputHandler::INPUT_MOVE_X] * FORCE_MOVE,
+        InputHandler::inputStateTab[0][InputHandler::INPUT_MOVE_Y] * FORCE_MOVE
+    ), true);
+    
+    float angleDeg = player->getAngleDeg();
+    float lookAngle = InputHandler::inputStateTab[0][InputHandler::INPUT_LOOK_ANGLE];
+    float diff = abs(angleDeg - lookAngle);
+    
+    int force = FORCE_LOOK;
+    if (diff > 180.0f) {
+        diff = 360.0f - diff;
+        force = -force;
+    }
+    force *= diff / 180.0f;
+    
+    if (force >= 0) 
+        force += FORCE_LOOK_MIN;
+    else 
+        force -= FORCE_LOOK_MIN;
+    
+    if(angleDeg > lookAngle)
+        force = -force;
+    if(diff > LOOK_ACC_DEG/2)
+        bodyPtr->ApplyAngularImpulse(force, true);
+    // else
+    //     std:: cout << "No rotation force needed" << std::endl;
+    // std:: cout << "Angle: " << player->getAngleDeg() << " Requested: " << InputHandler::inputStateTab[0][InputHandler::INPUT_LOOK_ANGLE] << " Force: " << force << std::endl;
+}
+
+void GameController::processAction(const Action & action) {
+    if(action.getType() == Action::TYPE_DEBUG)
+        std::cout << "Received Debug Action!" << std::endl;
 }

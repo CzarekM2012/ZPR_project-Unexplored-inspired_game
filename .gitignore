@@ -1,4 +1,6 @@
 build/*
 release/*
 external/*
-.vscode/
+.vscode/*
+
+!external/readerwriterqueue/

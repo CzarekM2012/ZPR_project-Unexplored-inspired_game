@@ -32,7 +32,7 @@ ExternalProject_Add(BOX2D
 )
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    add_compile_options(-Wall -Wextra -pedantic -Werror)
+    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
 endif()
 
 # add files of main project to the executable

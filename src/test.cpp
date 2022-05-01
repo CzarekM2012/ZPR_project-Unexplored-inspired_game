@@ -13,10 +13,7 @@
 #include "../header/Renderer.h"
 
 using namespace std::chrono_literals;
-
-InputHandler inputHandler;
-GameController gameController;
-Renderer renderer;
+const float ACTION_Q_SIZE = 10;
 
 int main()
 {
@@ -24,7 +21,11 @@ int main()
 
     //sf::RenderWindow window(sf::VideoMode(1920, 1080), "ZPR Game");
     sf::RenderWindow window(sf::VideoMode(960, 540), "ZPR Game");
-    Renderer renderer(&window);    
+    Renderer renderer(&window);
+
+    std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q(new moodycamel::ReaderWriterQueue<Action>(ACTION_Q_SIZE));
+    InputHandler inputHandler(action_q);
+    GameController gameController(action_q);
 
     std::thread gameLogicThread(&GameController::run, &gameController); // ~Use a GameController function on gameController object
     while (window.isOpen()) {

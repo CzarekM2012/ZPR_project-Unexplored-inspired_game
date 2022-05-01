@@ -36,12 +36,12 @@ public:
 
     void setColor(sf::Color color) { this->color = color; view->setFillColor(color); };
 
-    virtual b2Shape * getShape() { b2PolygonShape * shape = new b2PolygonShape(); shape->SetAsBox(5, 5); return shape; };
-    bool  isStatic()    { return !dynamic; };
-    bool  isDynamic()   { return dynamic;  }; 
-    float getDensity()  { return density;  };  
-    float getDamping()  { return damping;  };  
-    float getFriction() { return friction; }; 
+    virtual b2Shape * getShape() const { b2PolygonShape * shape = new b2PolygonShape(); shape->SetAsBox(5, 5); return shape; };
+    bool  isStatic()    const { return !dynamic; };
+    bool  isDynamic()   const { return dynamic;  }; 
+    float getDensity()  const { return density;  };  
+    float getDamping()  const { return damping;  };  
+    float getFriction() const { return friction; }; 
 
     float getAngleDeg() { float ang = fmod((body->GetAngle() * R_TO_DEG) - 180, 360.0f); return ang < 0 ? ang + 180.0f : ang - 180.0f; }; // Returns angle in degrees in range (-180, 180)
 
@@ -49,4 +49,14 @@ public:
     void setDensity(float value)  { density = value;  };  
     void setDamping(float value)  { damping = value;  };  
     void setFriction(float value) { friction = value; };  
+
+    void setCollision(bool on) {
+        auto fixtureList = body->GetFixtureList();
+        b2Filter collisionFilter; // Default values are ~group 1, collide with every group
+        if(!on)
+            collisionFilter.maskBits = 0; // Don't accept collisions with anything  
+
+        for(; fixtureList != nullptr; fixtureList = fixtureList->GetNext())
+            fixtureList->SetFilterData(collisionFilter);
+    }
 };
