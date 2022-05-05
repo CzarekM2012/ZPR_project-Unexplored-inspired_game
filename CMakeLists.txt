@@ -28,9 +28,18 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/release")
 
 set(EXTERNALS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
+#list(APPEND CMAKE_PREFIX_PATH "/usr/lib/x86-64-linux-gnu")
+#find_package(SFML "2.5" COMPONENTS sfml-graphics sfml-audio sfml-window sfml-system)
+#find_package(box2d "2.4")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    execute_process(
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/download_dependencies.sh
+    )
+endif()
+
 add_subdirectory("${EXTERNALS_DIR}/SFML" EXCLUDE_FROM_ALL)
 add_subdirectory("${EXTERNALS_DIR}/Box2d" EXCLUDE_FROM_ALL)
-
+#add_compile_options(-pthread)
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     #add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
@@ -44,5 +53,8 @@ add_executable(${PROJECT_NAME}
     "${SRCS_DIR}/Renderer.cpp")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-audio sfml-window sfml-system box2d)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
+endif()
 
 add_dependencies(${PROJECT_NAME} sfml-graphics sfml-audio sfml-window sfml-system box2d)
