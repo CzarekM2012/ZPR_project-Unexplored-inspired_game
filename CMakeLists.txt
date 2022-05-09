@@ -38,7 +38,7 @@ add_subdirectory("${EXTERNALS_DIR}/SFML" EXCLUDE_FROM_ALL)
 add_subdirectory("${EXTERNALS_DIR}/Box2d" EXCLUDE_FROM_ALL)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    add_compile_options(-Wall -Wextra -pedantic -Werror)
+    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
 endif()
 
 # set executable and all .dll's to be built directly inside ./release directory
