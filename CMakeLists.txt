@@ -5,6 +5,9 @@ project(
     ZPR_Game
     LANGUAGES CXX)
 
+set(EXTERNALS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
+set(SRCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 # Update submodules as needed
@@ -20,17 +23,11 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif()
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/external/Box2d/CMakeLists.txt")
+if(NOT EXISTS "${EXTERNALS_DIR}/Box2d/CMakeLists.txt" OR
+   NOT EXISTS "${EXTERNALS_DIR}/SFML/CMakeLists.txt")
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
-# set executable and all .dll's to be built directly inside ./release directory
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/release")
-
-set(EXTERNALS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
-#list(APPEND CMAKE_PREFIX_PATH "/usr/lib/x86-64-linux-gnu")
-#find_package(SFML "2.5" COMPONENTS sfml-graphics sfml-audio sfml-window sfml-system)
-#find_package(box2d "2.4")
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     execute_process(
         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/download_dependencies.sh
@@ -39,13 +36,15 @@ endif()
 
 add_subdirectory("${EXTERNALS_DIR}/SFML" EXCLUDE_FROM_ALL)
 add_subdirectory("${EXTERNALS_DIR}/Box2d" EXCLUDE_FROM_ALL)
-#add_compile_options(-pthread)
+
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    #add_compile_options(-Wall -Wextra -pedantic -Werror)
+    add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
+# set executable and all .dll's to be built directly inside ./release directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/release")
+
 # add files of main project to the executable
-set(SRCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 add_executable(${PROJECT_NAME}
     "${SRCS_DIR}/test.cpp"
     "${SRCS_DIR}/InputHandler.cpp"
