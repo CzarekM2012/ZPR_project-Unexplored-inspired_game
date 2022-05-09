@@ -24,7 +24,8 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 endif()
 
 if(NOT EXISTS "${EXTERNALS_DIR}/Box2d/CMakeLists.txt" OR
-   NOT EXISTS "${EXTERNALS_DIR}/SFML/CMakeLists.txt")
+   NOT EXISTS "${EXTERNALS_DIR}/SFML/CMakeLists.txt" OR
+   NOT EXISTS "${EXTERNALS_DIR}/readerwriterqueue/CMakeLists.txt")
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
@@ -36,6 +37,7 @@ endif()
 
 add_subdirectory("${EXTERNALS_DIR}/SFML" EXCLUDE_FROM_ALL)
 add_subdirectory("${EXTERNALS_DIR}/Box2d" EXCLUDE_FROM_ALL)
+add_subdirectory("${EXTERNALS_DIR}/readerwriterqueue" EXCLUDE_FROM_ALL)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
@@ -56,4 +58,4 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
 endif()
 
-add_dependencies(${PROJECT_NAME} sfml-graphics sfml-audio sfml-window sfml-system box2d)
+add_dependencies(${PROJECT_NAME} sfml-graphics sfml-audio sfml-window sfml-system box2d readerwriterqueue)

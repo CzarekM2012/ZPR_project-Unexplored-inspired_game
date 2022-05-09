@@ -6,3 +6,7 @@
 	path = external/Box2d
 	url = https://github.com/erincatto/box2d.git
 	branch = v2.4.1
+[submodule "external/readerwriterqueue"]
+	path = external/readerwriterqueue
+	url = https://github.com/cameron314/readerwriterqueue.git
+	branch = 8e7627d18c2108aca178888d88514179899a044f
