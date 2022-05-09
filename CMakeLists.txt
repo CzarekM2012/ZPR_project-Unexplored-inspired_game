@@ -5,8 +5,10 @@ project(
     ZPR_Game
     LANGUAGES CXX)
 
-set(EXTERNALS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external")
-set(SRCS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(EXTERNAL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
+set(EXTERNAL_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/external)
+set(SRCS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(RELEASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/release)
 
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
@@ -23,9 +25,9 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif()
 
-if(NOT EXISTS "${EXTERNALS_DIR}/Box2d/CMakeLists.txt" OR
-   NOT EXISTS "${EXTERNALS_DIR}/SFML/CMakeLists.txt" OR
-   NOT EXISTS "${EXTERNALS_DIR}/readerwriterqueue/CMakeLists.txt")
+if(NOT EXISTS ${EXTERNAL_SOURCE_DIR}/Box2d/CMakeLists.txt OR
+   NOT EXISTS ${EXTERNAL_SOURCE_DIR}/SFML/CMakeLists.txt OR
+   NOT EXISTS ${EXTERNAL_SOURCE_DIR}/readerwriterqueue/CMakeLists.txt)
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
@@ -35,27 +37,39 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     )
 endif()
 
-add_subdirectory("${EXTERNALS_DIR}/SFML" EXCLUDE_FROM_ALL)
-add_subdirectory("${EXTERNALS_DIR}/Box2d" EXCLUDE_FROM_ALL)
-add_subdirectory("${EXTERNALS_DIR}/readerwriterqueue" EXCLUDE_FROM_ALL)
+add_subdirectory(${EXTERNAL_SOURCE_DIR}/SFML EXCLUDE_FROM_ALL)
+add_subdirectory(${EXTERNAL_SOURCE_DIR}/Box2d EXCLUDE_FROM_ALL)
+add_subdirectory(${EXTERNAL_SOURCE_DIR}/readerwriterqueue EXCLUDE_FROM_ALL)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
 endif()
 
-# set executable and all .dll's to be built directly inside ./release directory
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/release")
-
 # add files of main project to the executable
 add_executable(${PROJECT_NAME}
-    "${SRCS_DIR}/test.cpp"
-    "${SRCS_DIR}/InputHandler.cpp"
     "${SRCS_DIR}/GameController.cpp"
-    "${SRCS_DIR}/Renderer.cpp")
+    "${SRCS_DIR}/InputHandler.cpp"
+    "${SRCS_DIR}/PhysicalObject.cpp"
+    "${SRCS_DIR}/Renderer.cpp"
+    "${SRCS_DIR}/test.cpp")
 
-target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-audio sfml-window sfml-system box2d)
+#set executable to be built directly inside ./release directory
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${RELEASE_DIR})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-audio sfml-window sfml-system box2d readerwriterqueue)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
 endif()
 
 add_dependencies(${PROJECT_NAME} sfml-graphics sfml-audio sfml-window sfml-system box2d readerwriterqueue)
+
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD 
+    COMMENT "Copying necessary SFML .dll files from ${EXTERNAL_BINARY_DIR}/SFML/lib to ${RELEASE_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-graphics-d-2.dll
+                                     ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-system-d-2.dll
+                                     ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-window-d-2.dll ${RELEASE_DIR}
+    COMMENT "Copying necessary Box2d .dll files from ${EXTERNAL_BINARY_DIR}/Box2d/bin to ${RELEASE_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/Box2d/bin/libbox2d.dll ${RELEASE_DIR}
+)
