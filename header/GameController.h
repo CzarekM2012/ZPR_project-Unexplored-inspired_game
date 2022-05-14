@@ -10,6 +10,8 @@ class GameController {
     const float FORCE_LOOK_MIN = 5;
     const float LOOK_ACC_DEG = 1;
 
+    const float PICKUP_RANGE = 10;
+
     State state;
 
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q;

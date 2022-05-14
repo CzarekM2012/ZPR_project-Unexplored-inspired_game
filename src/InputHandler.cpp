@@ -87,13 +87,14 @@ void InputHandler::handleInput(sf::Event event) {
     // Handling of one-time-pressed keys and buttons
     if (event.type == sf::Event::EventType::KeyPressed) {
         Action action(-1, 0);
-        switch (event.key.code) {
-            case sf::Keyboard::Num1:
+
+        switch(event.key.code) {
+            case sf::Keyboard::Tilde:
                 action = Action(-1, Action::TYPE_DEBUG);
                 action_q->enqueue(action);
                 break;
 
-            case sf::Keyboard::E:
+            case sf::Keyboard::Num1:
                 action = Action(0, Action::TYPE_PICK_LEFT);
                 action_q->enqueue(action);
                 break;
