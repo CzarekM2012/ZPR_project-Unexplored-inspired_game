@@ -38,6 +38,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/SFML EXCLUDE_FROM_ALL)
+# defining this name controls whether or not Box2d functions will be exported to .dll's properly
+add_compile_definitions(box2d_EXPORTS)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/Box2d EXCLUDE_FROM_ALL)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/readerwriterqueue EXCLUDE_FROM_ALL)
 
