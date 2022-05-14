@@ -17,14 +17,14 @@ class GameController {
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q;
 
     void processPlayerInputStates(int playerId);
-    void processAction(const Action & action);
+    void processAction(const Action& action);
 
-public:
+   public:
     b2World* world;
     static bool stop;
 
     GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q);
-    ~GameController() {delete world;};
+    ~GameController() { delete world; };
 
     void run();
 
@@ -33,6 +33,5 @@ public:
         return result;
     }
 
-    void signalStop() {this->stop = true;};
-
+    void signalStop() { this->stop = true; };
 };
