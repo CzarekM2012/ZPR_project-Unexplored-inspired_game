@@ -2,6 +2,7 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <algorithm>
 
 #include <box2d/box2d.h>
 
@@ -145,6 +146,44 @@ void GameController::processPlayerInputStates(int playerId) {
 }
 
 void GameController::processAction(const Action & action) {
-    if(action.getType() == Action::TYPE_DEBUG)
+
+    std::shared_ptr<Player> player;
+    if(action.getPlayerId() >= 0)
+        player = std::dynamic_pointer_cast<Player>(state.get(action.getPlayerId()));
+    
+    auto playerBody = player->getBodyPtr();
+    auto playerPos = playerBody->GetPosition();
+
+    std::vector< std::shared_ptr<PhysicalObject> > foundObjects;
+    switch (action.getType()) {
+    case Action::TYPE_DEBUG:
         std::cout << "Received Debug Action!" << std::endl;
+        break;
+    
+    case Action::TYPE_PICK_LEFT:
+        std::cout << "Received Pickup Action!" << std::endl;
+
+        // TODO: Replace loop with something like:
+        //std::copy_if(state.objects.begin(), state.objects.end(), foundObjects.begin(),
+        //    [&player](std::shared_ptr<PhysicalObject> object){return (object->getBodyPtr()->GetPosition() - player->getBodyPtr()->GetPosition()).Length() < 10 && std::dynamic_pointer_cast<Item>(object);}); //TODO: change '10' to sth like "PICKUP_RANGE"
+        //player->equipLeftHand(std::dynamic_pointer_cast<Item>(*foundObjects.begin()));
+        
+        for(auto object_it : state.objects) {
+            auto body = object_it->getBodyPtr();
+            auto pos = body->GetPosition();
+
+            if(PICKUP_RANGE * PICKUP_RANGE < (pos.x - playerPos.x) * (pos.x - playerPos.x) + (pos.y - playerPos.y) * (pos.y - playerPos.y))
+                continue;
+            
+            if(auto item = std::dynamic_pointer_cast<Item>(object_it)) {
+                std::cout << "Found " << typeid(*object_it).name() <<  " at (" << pos.x << " " << pos.y << ")" << std::endl;
+                player->equipLeftHand(item);
+                break;
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
 }

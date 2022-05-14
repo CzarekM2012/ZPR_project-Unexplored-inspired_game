@@ -37,7 +37,7 @@ int main()
 
         inputHandler.handleInput(event); // This should be called even if no new event has appeared (for e.g. checking if keyboard keys are still pressed)
         renderer.render(gameController.getStateCopy());
-        std::this_thread::sleep_for(10ms);
+        //std::this_thread::sleep_for(10ms);
     }
     std::cout << "Window closed" << std::endl;
     
