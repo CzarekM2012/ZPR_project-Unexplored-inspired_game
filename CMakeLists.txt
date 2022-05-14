@@ -37,6 +37,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     )
 endif()
 
+# specify configuration which will be used for generating sfml .dll's (affects their names)
+set(CMAKE_BUILD_TYPE "Release")
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/SFML EXCLUDE_FROM_ALL)
 # defining this name controls whether or not Box2d functions will be exported to .dll's properly
 add_compile_definitions(box2d_EXPORTS)
@@ -67,11 +69,11 @@ endif()
 add_dependencies(${PROJECT_NAME} sfml-graphics sfml-audio sfml-window sfml-system box2d readerwriterqueue)
 
 add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD 
+    TARGET ${PROJECT_NAME} POST_BUILD
     COMMENT "Copying necessary SFML .dll files from ${EXTERNAL_BINARY_DIR}/SFML/lib to ${RELEASE_DIR}"
-    COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-graphics-d-2.dll
-                                     ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-system-d-2.dll
-                                     ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-window-d-2.dll ${RELEASE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-graphics-2.dll
+                                     ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-system-2.dll
+                                     ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-window-2.dll ${RELEASE_DIR}
     COMMENT "Copying necessary Box2d .dll files from ${EXTERNAL_BINARY_DIR}/Box2d/bin to ${RELEASE_DIR}"
     COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/Box2d/bin/libbox2d.dll ${RELEASE_DIR}
 )
