@@ -83,6 +83,9 @@ class Item : public PhysicalObject {
     std::weak_ptr<Entity> owner;
 
    public:
+    Item() {
+        density = 0.001;  // For now, not to encumber the player too much
+    };
     std::weak_ptr<Entity> getOwner() { return owner; };
     void setOwner(std::shared_ptr<Entity> newOwner) { owner = newOwner; };
 };
@@ -122,7 +125,7 @@ class Shield : public Item {
 
     b2Shape* getShape() const {
         b2PolygonShape* shape = new b2PolygonShape();
-        shape->SetAsBox(1, 4);
+        shape->SetAsBox(14, 1);
         return shape;
     }
 };
@@ -144,6 +147,7 @@ class Player : public Entity {
 
     void updateEquipment() {
         this->body->CreateFixture(item_lh->getShape(), item_lh->getDensity());
+        this->generateViews();
     }
 
     b2Shape* getShape() const {

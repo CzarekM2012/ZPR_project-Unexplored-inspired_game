@@ -43,7 +43,7 @@ add_subdirectory(${EXTERNAL_SOURCE_DIR}/Box2d EXCLUDE_FROM_ALL)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/readerwriterqueue EXCLUDE_FROM_ALL)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
+    add_compile_options(-Wall -Wextra -pedantic -faligned-new)
 endif()
 
 add_subdirectory(${SRCS_DIR})
