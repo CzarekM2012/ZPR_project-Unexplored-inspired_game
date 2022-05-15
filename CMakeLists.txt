@@ -49,7 +49,7 @@ add_subdirectory(${EXTERNAL_SOURCE_DIR}/readerwriterqueue EXCLUDE_FROM_ALL)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/Catch2)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new -fsanitize=undefined)
+    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
 endif()
 
 add_executable(tests
