@@ -24,7 +24,7 @@ class PhysicalObject {
     sf::Color color = sf::Color::Magenta;
 
     b2Body* body;  // box2d requires use of basic pointers, b2World takes care of bodies
-    std::unique_ptr<sf::ConvexShape> view;
+    std::vector<sf::ConvexShape> views;
 
    public:
     PhysicalObject(){};
@@ -32,13 +32,13 @@ class PhysicalObject {
     b2Body* createPhysicalObject(b2World* world, float x, float y, float angle = 0);  // creates a box2d object and a view to render it, has to provide correct shape and parameters like mass or color
 
     b2Body* getBodyPtr() const { return body; };
-    sf::ConvexShape getView() const { return *view; };
-    sf::ConvexShape* generateView(b2Body* body) const;
+    std::vector<sf::ConvexShape> getViews() const { return views; };
+    void generateViews();
     void synchronize();
 
     void setColor(sf::Color color) {
         this->color = color;
-        view->setFillColor(color);
+        views[0].setFillColor(color);
     };
 
     virtual b2Shape* getShape() const {

@@ -25,7 +25,7 @@ b2Body* PhysicalObject::createPhysicalObject(b2World* world, float x, float y, f
         this->body->CreateFixture(fixtureDef);
     }
 
-    view = std::make_unique<sf::ConvexShape>(*generateView(body));
+    generateViews();
     return body;
 }
 
@@ -62,21 +62,25 @@ void PhysicalObject::synchronize() {
     float bodyPositionY = body->GetPosition().y * M_TO_PX;
     float bodyRotate = getAngleDeg();
 
-    view->setPosition(bodyPositionX, bodyPositionY);
-    view->setRotation(bodyRotate);
+    for(auto & view : views) {
+        view.setPosition(bodyPositionX, bodyPositionY);
+        view.setRotation(bodyRotate);
+    }
 }
 
-sf::ConvexShape* PhysicalObject::generateView(b2Body* body) const {
-    sf::ConvexShape* bodyView = new sf::ConvexShape();
-    bodyView->setFillColor(color);
+void PhysicalObject::generateViews() {
+
+    views.clear();
 
     for (b2Fixture* fixturePtr = body->GetFixtureList(); fixturePtr != nullptr; fixturePtr = fixturePtr->GetNext()) {
         b2Shape* shapeBuffer = fixturePtr->GetShape();
+        sf::ConvexShape bodyView;
+        bodyView.setFillColor(color);
         if (shapeBuffer->m_type == b2Shape::Type::e_polygon) {
             b2PolygonShape* realBodyShape = static_cast<b2PolygonShape*>(shapeBuffer);
 
             const int vertexCount = realBodyShape->m_count;
-            bodyView->setPointCount(vertexCount);
+            bodyView.setPointCount(vertexCount);
 
             for (int i = 0; i < vertexCount; ++i) {
                 b2Vec2 currVerts = realBodyShape->m_vertices[i];
@@ -84,12 +88,11 @@ sf::ConvexShape* PhysicalObject::generateView(b2Body* body) const {
                 float posX = currVerts.x * M_TO_PX;
                 float posY = currVerts.y * M_TO_PX;
 
-                bodyView->setPoint(i, sf::Vector2f(posX, posY));
+                bodyView.setPoint(i, sf::Vector2f(posX, posY));
             }
 
-            bodyView->setOrigin(0, 0);
+            bodyView.setOrigin(0, 0);
         }
+        views.push_back(bodyView);
     }
-
-    return bodyView;
 }
