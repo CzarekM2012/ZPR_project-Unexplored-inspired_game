@@ -49,13 +49,15 @@ add_subdirectory(${EXTERNAL_SOURCE_DIR}/readerwriterqueue EXCLUDE_FROM_ALL)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/Catch2)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
+    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new -fsanitize=undefined)
 endif()
 
 add_executable(tests
     ${TESTS_DIR}/main.cpp
     ${TESTS_DIR}/test.cpp)
-target_link_libraries(tests PRIVATE Catch2::Catch2)
+target_link_libraries(tests PRIVATE
+    Catch2::Catch2
+    -fsanitize=undefined)
 set_target_properties(tests PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR})
 
@@ -77,7 +79,14 @@ add_executable(${PROJECT_NAME}
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${RELEASE_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-audio sfml-window sfml-system box2d readerwriterqueue)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    sfml-graphics
+    sfml-audio
+    sfml-window
+    sfml-system
+    box2d
+    readerwriterqueue
+    -fsanitize=undefined)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
 endif()
