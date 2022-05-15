@@ -4,11 +4,9 @@
 #include <iostream>
 #include "../header/InputHandler.h"
 
-
 float InputHandler::inputStateTab[PLAYER_COUNT_MAX][STATE_CONTROLS_PER_PLAYER];
 
-InputHandler::InputHandler(
-    std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q)
+InputHandler::InputHandler(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q)
     : action_q(q) {
     // TODO: Check if necessary
     for (int i = 0; i < PLAYER_COUNT_MAX; ++i)
@@ -88,7 +86,7 @@ void InputHandler::handleInput(sf::Event event) {
     if (event.type == sf::Event::EventType::KeyPressed) {
         Action action(-1, 0);
 
-        switch(event.key.code) {
+        switch (event.key.code) {
             case sf::Keyboard::Tilde:
                 action = Action(-1, Action::TYPE_DEBUG);
                 action_q->enqueue(action);

@@ -1,10 +1,7 @@
 #include "../header/PhysicalObject.h"
 #include <iostream>
 
-b2Body* PhysicalObject::createPhysicalObject(b2World* world,
-                                             float x,
-                                             float y,
-                                             float angleDeg) {
+b2Body* PhysicalObject::createPhysicalObject(b2World* world, float x, float y, float angleDeg) {
     b2BodyDef* bodyDef = new b2BodyDef();
     bodyDef->position.Set(x, y);
     bodyDef->angle = angleDeg * DEG_TO_R;
@@ -73,12 +70,10 @@ sf::ConvexShape* PhysicalObject::generateView(b2Body* body) const {
     sf::ConvexShape* bodyView = new sf::ConvexShape();
     bodyView->setFillColor(color);
 
-    for (b2Fixture* fixturePtr = body->GetFixtureList(); fixturePtr != nullptr;
-         fixturePtr = fixturePtr->GetNext()) {
+    for (b2Fixture* fixturePtr = body->GetFixtureList(); fixturePtr != nullptr; fixturePtr = fixturePtr->GetNext()) {
         b2Shape* shapeBuffer = fixturePtr->GetShape();
         if (shapeBuffer->m_type == b2Shape::Type::e_polygon) {
-            b2PolygonShape* realBodyShape =
-                static_cast<b2PolygonShape*>(shapeBuffer);
+            b2PolygonShape* realBodyShape = static_cast<b2PolygonShape*>(shapeBuffer);
 
             const int vertexCount = realBodyShape->m_count;
             bodyView->setPointCount(vertexCount);

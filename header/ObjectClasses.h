@@ -4,15 +4,15 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
-#define UNUSED(x) (void)(x) //For now to disable "unused parameter" error
+#define UNUSED(x) (void)(x)  // For now to disable "unused parameter" error
 
 /// A typical object with health pool. Most can be destroyed
 class Entity : public PhysicalObject {
-protected:
+   protected:
     bool invulnerable = false;
     int hp = 1;
 
-public:
+   public:
     bool isInvulnerable() const { return invulnerable; };
 
     void damage(int value) {
@@ -25,26 +25,26 @@ public:
 };
 
 class RectangleObject : public Entity {
-protected:
+   protected:
     float width;
     float height;
 
-public:
+   public:
     void setSize(float width, float height) {
         this->width = width;
         this->height = height;
     }
 
-    b2Shape * getShape() const {
-        b2PolygonShape * shape = new b2PolygonShape();
-        shape->SetAsBox(width/2, height/2);
+    b2Shape* getShape() const {
+        b2PolygonShape* shape = new b2PolygonShape();
+        shape->SetAsBox(width / 2, height / 2);
         return shape;
     }
 };
 
 /// A simple object to test physics
 class Box : public RectangleObject {
-public:
+   public:
     Box() {
         hp = 100;
         width = 10;
@@ -54,23 +54,24 @@ public:
         color = sf::Color::Yellow;
     }
 
-    Box(int w, int h) : Box() {
+    Box(int w, int h)
+        : Box() {
         width = w;
         height = h;
     }
-    
 };
 
 /// Immovable and indestructibe obstacle
 class Wall : public RectangleObject {
-public:
+   public:
     Wall() {
         hp = invulnerable;
         dynamic = false;
         color = sf::Color::Black;
     }
 
-    Wall(int w, int h) : Wall() {
+    Wall(int w, int h)
+        : Wall() {
         width = w;
         height = h;
     }
@@ -78,31 +79,31 @@ public:
 
 /// Items can be equiped by players. They don't collide until equipped
 class Item : public PhysicalObject {
-private:
+   private:
     std::weak_ptr<Entity> owner;
 
-public:
+   public:
     std::weak_ptr<Entity> getOwner() { return owner; };
     void setOwner(std::shared_ptr<Entity> newOwner) { owner = newOwner; };
 };
 
 /// Weapons can be used to deal damage to entities
 class Weapon : public Item {
-protected:
+   protected:
     int damage;
 };
 
 /// A basic weapon to test game mechanics
 class Sword : public Weapon {
-public:
+   public:
     Sword() {
         damage = 10;
         color = sf::Color(180, 180, 180);
     };
 
-    b2Shape * getShape() const {
-        b2PolygonShape * shape = new b2PolygonShape();
-        b2Vec2 triangle[] = {b2Vec2(-2, -2), b2Vec2(0, 3), b2Vec2(2, -2)}; 
+    b2Shape* getShape() const {
+        b2PolygonShape* shape = new b2PolygonShape();
+        b2Vec2 triangle[] = {b2Vec2(-2, -2), b2Vec2(0, 3), b2Vec2(2, -2)};
         shape->Set(triangle, 3);
         return shape;
     }
@@ -110,18 +111,17 @@ public:
 
 /// A basic shield to test game mechanics
 class Shield : public Item {
-protected:
+   protected:
     int defense;
 
-public:
-
+   public:
     Shield() {
         defense = 7;
         color = sf::Color(180, 180, 180);
     }
 
-    b2Shape * getShape() const {
-        b2PolygonShape * shape = new b2PolygonShape();
+    b2Shape* getShape() const {
+        b2PolygonShape* shape = new b2PolygonShape();
         shape->SetAsBox(1, 4);
         return shape;
     }
@@ -131,7 +131,7 @@ public:
 class Player : public Entity {
     std::shared_ptr<Item> item_lh;
 
-public:
+   public:
     Player() {
         hp = 100;
         color = sf::Color::Green;
@@ -146,9 +146,9 @@ public:
         this->body->CreateFixture(item_lh->getShape(), item_lh->getDensity());
     }
 
-    b2Shape * getShape() const {
-        b2PolygonShape * shape = new b2PolygonShape();
-        b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7), b2Vec2(5, 5), b2Vec2(5, -5)}; 
+    b2Shape* getShape() const {
+        b2PolygonShape* shape = new b2PolygonShape();
+        b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7), b2Vec2(5, 5), b2Vec2(5, -5)};
         shape->Set(pentagon, 5);
         return shape;
     }
@@ -156,8 +156,8 @@ public:
 
 // class Example : public Other {
 // public:
-//     virtual b2Body * createPhysicalObject(b2World* world, float x, float y) {	
-        
+//     virtual b2Body * createPhysicalObject(b2World* world, float x, float y) {
+
 // 	    auto bodyDef = new b2BodyDef();
 //         bodyDef->position.Set(x, y);
 //         //dynamic
@@ -177,10 +177,9 @@ public:
 // 	    fixtureDef->friction = 0.3f;
 // 	    this->body->CreateFixture(fixtureDef);
 //         //static
-// 	    this->body->CreateFixture(shape, 0); 
-    
+// 	    this->body->CreateFixture(shape, 0);
+
 // 	    view = std::make_unique<sf::ConvexShape>(*generateView(body));
 // 	    setColor(color);
 //     };
 // };
-

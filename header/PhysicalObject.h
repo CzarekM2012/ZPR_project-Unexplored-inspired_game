@@ -15,30 +15,21 @@ class PhysicalObject {
     const float DEG_TO_R = b2_pi / 180;
 
     // Body params
-    bool dynamic =
-        true;  // If the object should move at all, params like Density or
-               // Friction don't matter if the object is static
-    float density = 1.0f;  // Density determines object's mass
-    float damping = 0.9f;  // How much force object should loose with time. Used
-                           // to simulate friction against the floor
-    float friction =
-        0.3f;  // Friction on contact with other objects, not the floor
+    bool dynamic = true;    // If the object should move at all, params like Density or
+                            // Friction don't matter if the object is static
+    float density = 1.0f;   // Density determines object's mass
+    float damping = 0.9f;   // How much force object should loose with time. Used
+                            // to simulate friction against the floor
+    float friction = 0.3f;  // Friction on contact with other objects, not the floor
     sf::Color color = sf::Color::Magenta;
 
-    b2Body* body;  // box2d requires use of basic pointers, b2World takes care
-                   // of bodies
+    b2Body* body;  // box2d requires use of basic pointers, b2World takes care of bodies
     std::unique_ptr<sf::ConvexShape> view;
 
    public:
     PhysicalObject(){};
 
-    b2Body* createPhysicalObject(
-        b2World* world,
-        float x,
-        float y,
-        float angle =
-            0);  // creates a box2d object and a view to render it, has to
-                 // provide correct shape and parameters like mass or color
+    b2Body* createPhysicalObject(b2World* world, float x, float y, float angle = 0);  // creates a box2d object and a view to render it, has to provide correct shape and parameters like mass or color
 
     b2Body* getBodyPtr() const { return body; };
     sf::ConvexShape getView() const { return *view; };
@@ -73,11 +64,9 @@ class PhysicalObject {
 
     void setCollision(bool on) {
         auto fixtureList = body->GetFixtureList();
-        b2Filter collisionFilter;  // Default values are ~group 1, collide with
-                                   // every group
+        b2Filter collisionFilter;  // Default values are ~group 1, collide with every group
         if (!on)
-            collisionFilter.maskBits =
-                0;  // Don't accept collisions with anything
+            collisionFilter.maskBits = 0;  // Don't accept collisions with anything
 
         for (; fixtureList != nullptr; fixtureList = fixtureList->GetNext())
             fixtureList->SetFilterData(collisionFilter);
