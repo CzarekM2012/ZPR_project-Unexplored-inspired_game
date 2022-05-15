@@ -10,3 +10,7 @@
 	path = external/readerwriterqueue
 	url = https://github.com/cameron314/readerwriterqueue.git
 	branch = 8e7627d18c2108aca178888d88514179899a044f
+[submodule "external/Catch2"]
+	path = external/Catch2
+	url = https://github.com/catchorg/Catch2.git
+	branch = 62fd660583d3ae7a7886930b413c3c570e89786c
