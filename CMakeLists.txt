@@ -56,8 +56,7 @@ add_executable(tests
     ${TESTS_DIR}/main.cpp
     ${TESTS_DIR}/test.cpp)
 target_link_libraries(tests PRIVATE
-    Catch2::Catch2
-    -fsanitize=undefined)
+    Catch2::Catch2)
 set_target_properties(tests PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR})
 
@@ -85,8 +84,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     sfml-window
     sfml-system
     box2d
-    readerwriterqueue
-    -fsanitize=undefined)
+    readerwriterqueue)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
 endif()
