@@ -6,6 +6,7 @@
 
 #define UNUSED(x) (void)(x) //For now to disable "unused parameter" error
 
+/// A typical object with health pool. Most can be destroyed
 class Entity : public PhysicalObject {
 protected:
     bool invulnerable = false;
@@ -41,6 +42,7 @@ public:
     }
 };
 
+/// A simple object to test physics
 class Box : public RectangleObject {
 public:
     Box() {
@@ -59,6 +61,7 @@ public:
     
 };
 
+/// Immovable and indestructibe obstacle
 class Wall : public RectangleObject {
 public:
     Wall() {
@@ -73,6 +76,7 @@ public:
     }
 };
 
+/// Items can be equiped by players. They don't collide until equipped
 class Item : public PhysicalObject {
 private:
     std::weak_ptr<Entity> owner;
@@ -82,11 +86,13 @@ public:
     void setOwner(std::shared_ptr<Entity> newOwner) { owner = newOwner; };
 };
 
+/// Weapons can be used to deal damage to entities
 class Weapon : public Item {
 protected:
     int damage;
 };
 
+/// A basic weapon to test game mechanics
 class Sword : public Weapon {
 public:
     Sword() {
@@ -102,6 +108,7 @@ public:
     }
 };
 
+/// A basic shield to test game mechanics
 class Shield : public Item {
 protected:
     int defense;
@@ -120,6 +127,7 @@ public:
     }
 };
 
+/// Controlled by the player. Most complex than most entities
 class Player : public Entity {
     std::shared_ptr<Item> item_lh;
 

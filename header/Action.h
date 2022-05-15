@@ -1,4 +1,4 @@
-
+/// A simple object to pass information between InputHandler and GameController
 class Action {
     int playerId;
     int type;

@@ -1,3 +1,21 @@
+/*!
+ \mainpage Project description
+
+ \section features Features:
+ - local PvP arena
+ - top-down view
+ - static camera, limited interface
+ - simple, polygon-based character and object models (and matching hitboxes)
+ - mainly melee with some ranged (and maybe magical) weapons
+ - items provide players with custom actions like lunge or throw
+ - requires controllers
+
+ @file main.cpp Main file that creates window, objects and threads
+ @file GameController.cpp
+ @file InputHandler.cpp
+ @file PhysicalObject.cpp
+ @file Renderer.cpp
+*/
 #include <chrono>
 #include <iostream>
 #include <thread>

@@ -5,7 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
-
+/// An object in game world paired with Box2D body. Base of the class hierarchy
 class PhysicalObject {
    protected:
     const int M_TO_PX = 5;  // box2d meter to SFML pixels size convertion ratio

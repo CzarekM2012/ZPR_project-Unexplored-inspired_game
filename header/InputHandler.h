@@ -5,6 +5,7 @@
 #include "../external/readerwriterqueue/readerwriterqueue.h"
 #include "../header/Action.h"
 
+/// Passes player input to the GameController through states and Action queue
 class InputHandler {
     static constexpr float INPUT_SCALE = 1;
     static constexpr float ANGLE_STEP_KEYBOARD = 0.1f; //TODO: Change interpretation to something framerate-independent

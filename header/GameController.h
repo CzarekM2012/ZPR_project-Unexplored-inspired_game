@@ -4,6 +4,8 @@
 
 #include "InputHandler.h"
 #include "State.h"
+
+/// Controls game logic and physics. Runs in its own thread
 class GameController {
     const float FORCE_MOVE = 50;
     const float FORCE_LOOK = 250;

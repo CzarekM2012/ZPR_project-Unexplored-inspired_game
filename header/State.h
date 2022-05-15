@@ -7,6 +7,7 @@
 
 #include "PhysicalObject.h"
 
+/// A simple vector of PhysicalObject. Represents whole state of the game
 class State {
    public:
     std::vector<std::shared_ptr<PhysicalObject>> objects;

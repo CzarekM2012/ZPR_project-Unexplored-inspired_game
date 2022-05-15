@@ -4,6 +4,7 @@
 #include <box2d\box2d.h>
 #include "State.h"
 
+/// Draws state of game, synchronized every frame 
 class Renderer {
 private:
     sf::RenderWindow * window;
