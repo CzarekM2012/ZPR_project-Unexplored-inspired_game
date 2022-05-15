@@ -8,6 +8,7 @@ project(
 set(EXTERNAL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 set(EXTERNAL_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/external)
 set(SRCS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 set(RELEASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/release)
 
 find_package(Git QUIET)
@@ -27,7 +28,8 @@ endif()
 
 if(NOT EXISTS ${EXTERNAL_SOURCE_DIR}/Box2d/CMakeLists.txt OR
    NOT EXISTS ${EXTERNAL_SOURCE_DIR}/SFML/CMakeLists.txt OR
-   NOT EXISTS ${EXTERNAL_SOURCE_DIR}/readerwriterqueue/CMakeLists.txt)
+   NOT EXISTS ${EXTERNAL_SOURCE_DIR}/readerwriterqueue/CMakeLists.txt OR
+   NOT EXISTS ${EXTERNAL_SOURCE_DIR}/Catch2/CMakeLists.txt)
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
@@ -44,10 +46,24 @@ add_subdirectory(${EXTERNAL_SOURCE_DIR}/SFML EXCLUDE_FROM_ALL)
 add_compile_definitions(box2d_EXPORTS)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/Box2d EXCLUDE_FROM_ALL)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/readerwriterqueue EXCLUDE_FROM_ALL)
+add_subdirectory(${EXTERNAL_SOURCE_DIR}/Catch2)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
 endif()
+
+add_executable(tests
+    ${TESTS_DIR}/main.cpp
+    ${TESTS_DIR}/test.cpp)
+target_link_libraries(tests PRIVATE Catch2::Catch2)
+set_target_properties(tests PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR})
+
+# append directory with Catch module to CMAKE_MODULE_PATH
+list(APPEND CMAKE_MODULE_PATH "${Catch2_SOURCE_DIR}/contrib")
+include(CTest)
+include(Catch)
+catch_discover_tests(tests)
 
 # add files of main project to the executable
 add_executable(${PROJECT_NAME}
