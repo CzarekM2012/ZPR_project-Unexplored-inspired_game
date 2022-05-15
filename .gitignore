@@ -1,6 +1,7 @@
 build/*
 release/*
 .vscode/*
-tests/tests.exe
+tests/*
+!tests/*.cpp
 docs/*
 !docs/.gitkeep
