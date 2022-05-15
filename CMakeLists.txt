@@ -55,7 +55,7 @@ add_executable(${PROJECT_NAME}
     "${SRCS_DIR}/InputHandler.cpp"
     "${SRCS_DIR}/PhysicalObject.cpp"
     "${SRCS_DIR}/Renderer.cpp"
-    "${SRCS_DIR}/test.cpp")
+    "${SRCS_DIR}/main.cpp")
 
 #set executable to be built directly inside ./release directory
 set_target_properties(${PROJECT_NAME} PROPERTIES
