@@ -1,3 +1,7 @@
 build/*
-release/ZPR_Game
+release/*
 .vscode/*
+tests/*
+!tests/*.cpp
+docs/*
+!docs/.gitkeep
