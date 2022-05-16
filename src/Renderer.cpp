@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 
-#include "../header/Renderer.h"
+#include "Renderer.h"
 
 void Renderer::render(const State& state) const {
     window->clear(sf::Color(100, 100, 100));

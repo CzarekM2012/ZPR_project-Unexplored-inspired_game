@@ -7,12 +7,13 @@ project(
 
 set(EXTERNAL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
 set(EXTERNAL_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/external)
+set(HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/header)
 set(SRCS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 set(RELEASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/release)
 
 find_package(Git QUIET)
-if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+if(GIT_FOUND AND EXISTS ${PROJECT_SOURCE_DIR}/.git)
 # Update submodules as needed
     option(GIT_SUBMODULE "Check submodules during build" ON)
     if(GIT_SUBMODULE)
@@ -48,6 +49,8 @@ add_subdirectory(${EXTERNAL_SOURCE_DIR}/Box2d EXCLUDE_FROM_ALL)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/readerwriterqueue EXCLUDE_FROM_ALL)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/Catch2)
 
+include_directories(${HEADER_DIR})
+
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
 endif()
@@ -61,18 +64,18 @@ set_target_properties(tests PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR})
 
 # append directory with Catch module to CMAKE_MODULE_PATH
-list(APPEND CMAKE_MODULE_PATH "${Catch2_SOURCE_DIR}/contrib")
+list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
 include(CTest)
 include(Catch)
 catch_discover_tests(tests)
 
 # add files of main project to the executable
 add_executable(${PROJECT_NAME}
-    "${SRCS_DIR}/GameController.cpp"
-    "${SRCS_DIR}/InputHandler.cpp"
-    "${SRCS_DIR}/PhysicalObject.cpp"
-    "${SRCS_DIR}/Renderer.cpp"
-    "${SRCS_DIR}/main.cpp")
+    ${SRCS_DIR}/GameController.cpp
+    ${SRCS_DIR}/InputHandler.cpp
+    ${SRCS_DIR}/PhysicalObject.cpp
+    ${SRCS_DIR}/Renderer.cpp
+    ${SRCS_DIR}/main.cpp)
 
 #set executable to be built directly inside ./release directory
 set_target_properties(${PROJECT_NAME} PROPERTIES
