@@ -60,10 +60,14 @@ All following commands should be executed from within the main project directory
 ## Running and testing
 
 ### Run the game:
-.\release\ZPR_Game.exe or ./release/ZPR_Game
+    .\release\ZPR_Game.exe 
+### or:
+    ./release/ZPR_Game
 
 ### Run unit tests:
-.\tests\tests.exe or ./tests/tests
+    .\tests\bin\tests.exe
+### or:
+    ./tests/bin/tests
 
 
 ## Controls
