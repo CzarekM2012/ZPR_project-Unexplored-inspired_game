@@ -47,79 +47,10 @@ add_subdirectory(${EXTERNAL_SOURCE_DIR}/SFML EXCLUDE_FROM_ALL)
 add_compile_definitions(box2d_EXPORTS)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/Box2d EXCLUDE_FROM_ALL)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/readerwriterqueue EXCLUDE_FROM_ALL)
-add_subdirectory(${EXTERNAL_SOURCE_DIR}/Catch2)
-
-include_directories(${HEADER_DIR})
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
 endif()
 
-add_executable(tests
-    ${TESTS_DIR}/main.cpp
-    ${TESTS_DIR}/test.cpp
-    ${SRCS_DIR}/GameController.cpp
-    ${SRCS_DIR}/InputHandler.cpp
-    ${SRCS_DIR}/PhysicalObject.cpp
-    ${SRCS_DIR}/Renderer.cpp)
-target_link_libraries(tests PRIVATE
-    sfml-graphics
-    sfml-audio
-    sfml-window
-    sfml-system
-    box2d
-    readerwriterqueue
-    Catch2::Catch2)
-
-set_target_properties(tests PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR})
-
-# append directory with Catch module to CMAKE_MODULE_PATH
-list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/contrib)
-include(CTest)
-include(Catch)
-catch_discover_tests(tests)
-
-# add files of main project to the executable
-add_executable(${PROJECT_NAME}
-    ${SRCS_DIR}/GameController.cpp
-    ${SRCS_DIR}/InputHandler.cpp
-    ${SRCS_DIR}/PhysicalObject.cpp
-    ${SRCS_DIR}/Renderer.cpp
-    ${SRCS_DIR}/main.cpp)
-
-#set executable to be built directly inside ./release directory
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${RELEASE_DIR})
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    sfml-graphics
-    sfml-audio
-    sfml-window
-    sfml-system
-    box2d
-    readerwriterqueue)
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
-endif()
-
-add_dependencies(${PROJECT_NAME} sfml-graphics sfml-audio sfml-window sfml-system box2d readerwriterqueue)
-
-if(WIN32)
-    add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMENT "Copying necessary SFML .dll files from ${EXTERNAL_BINARY_DIR}/SFML/lib to ${RELEASE_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-graphics-2.dll
-                                         ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-system-2.dll
-                                         ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-window-2.dll ${RELEASE_DIR}
-        COMMENT "Copying necessary Box2d .dll files from ${EXTERNAL_BINARY_DIR}/Box2d/bin to ${RELEASE_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/Box2d/bin/libbox2d.dll ${RELEASE_DIR}
-
-        COMMENT "Copying necessary SFML .dll files from ${EXTERNAL_BINARY_DIR}/SFML/lib to ${TESTS_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-graphics-2.dll
-                                         ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-system-2.dll
-                                         ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-window-2.dll ${TESTS_DIR}
-        COMMENT "Copying necessary Box2d .dll files from ${EXTERNAL_BINARY_DIR}/Box2d/bin to ${TESTS_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/Box2d/bin/libbox2d.dll ${TESTS_DIR}
-)
-endif()
+add_subdirectory(${SRCS_DIR})
+add_subdirectory(${TESTS_DIR})
