@@ -14,13 +14,26 @@
 ## Building
 All following commands should be executed from within the main project directory that contains this README.
 
+### On Linux there are some dependecies that need to be installed first:
+- libxrandr-dev
+- libudev-dev
+- libfreetype-dev
+- libopenal-dev
+- libvorbis-dev
+- libflac-dev
+- libxinerama-dev
+- libxcursor-dev
+
+### All can be installed at once with apt using a script located in 'scripts' folder:
+    scripts/download_dependencies.sh
+    
+### CMake configuration on Linux: 
+    cmake -S . -B build -G "Unix Makefiles"
+
 ### CMake configuration on Windows: 
 (testowane na kompilatorze MinGW W64 4.3.4)
 
     cmake -S . -B build -G "MinGW Makefiles" 
-
-### CMake configuration on Linux: 
-    cmake -S . -B build -G "Unix Makefiles" 
 
 ### Build whole project: 
     cmake --build build 
