@@ -11,13 +11,10 @@
  - items provide players with custom actions like lunge or throw
  - requires controllers
 
-## Building
-All following commands should be executed from within the main project directory that contains this README.
-
 ## Dependencies
-# Windows
+### Windows
 All dependencies should be already provided alongside the project, so there should be no need to download anything else.
-# Linux
+### Linux
 Following software needs to be installed before attempting to build the project:
  - freetype
  - x11
@@ -30,10 +27,14 @@ Following software needs to be installed before attempting to build the project:
  - vorbisenc
  - vorbisfile
  - openal
- - pthread
+ - pthread  
+
 The exact names of the packages may vary from distribution to distribution. Development headers of those packages need to be installed as well.
 'scripts/download_dependencies' is a shell script downloading dependencies using apt package manager.
-    
+
+## Building
+All following commands should be executed from within the main project directory that contains this README.
+
 ### CMake configuration on Linux: 
     cmake -S . -B build -G "Unix Makefiles"
 
