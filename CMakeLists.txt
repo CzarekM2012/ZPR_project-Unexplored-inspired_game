@@ -34,12 +34,6 @@ if(NOT EXISTS ${EXTERNAL_SOURCE_DIR}/Box2d/CMakeLists.txt OR
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    execute_process(
-        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/download_dependencies.sh
-    )
-endif()
-
 # specify configuration which will be used for generating sfml .dll's (affects their names)
 set(CMAKE_BUILD_TYPE "Release")
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/SFML EXCLUDE_FROM_ALL)

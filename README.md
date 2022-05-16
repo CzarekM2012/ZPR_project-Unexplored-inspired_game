@@ -14,18 +14,25 @@
 ## Building
 All following commands should be executed from within the main project directory that contains this README.
 
-### On Linux there are some dependecies that need to be installed first:
-- libxrandr-dev
-- libudev-dev
-- libfreetype-dev
-- libopenal-dev
-- libvorbis-dev
-- libflac-dev
-- libxinerama-dev
-- libxcursor-dev
-
-### All can be installed at once with apt using a script located in 'scripts' folder:
-    scripts/download_dependencies.sh
+## Dependencies
+# Windows
+All dependencies should be already provided alongside the project, so there should be no need to download anything else.
+# Linux
+Following software needs to be installed before attempting to build the project:
+ - freetype
+ - x11
+ - xrandr
+ - udev
+ - opengl
+ - flac
+ - ogg
+ - vorbis
+ - vorbisenc
+ - vorbisfile
+ - openal
+ - pthread
+The exact names of the packages may vary from distribution to distribution. Development headers of those packages need to be installed as well.
+'scripts/download_dependencies' is a shell script downloading dependencies using apt package manager.
     
 ### CMake configuration on Linux: 
     cmake -S . -B build -G "Unix Makefiles"
