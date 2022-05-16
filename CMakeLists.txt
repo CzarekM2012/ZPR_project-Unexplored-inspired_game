@@ -57,9 +57,20 @@ endif()
 
 add_executable(tests
     ${TESTS_DIR}/main.cpp
-    ${TESTS_DIR}/test.cpp)
+    ${TESTS_DIR}/test.cpp
+    ${SRCS_DIR}/GameController.cpp
+    ${SRCS_DIR}/InputHandler.cpp
+    ${SRCS_DIR}/PhysicalObject.cpp
+    ${SRCS_DIR}/Renderer.cpp)
 target_link_libraries(tests PRIVATE
+    sfml-graphics
+    sfml-audio
+    sfml-window
+    sfml-system
+    box2d
+    readerwriterqueue
     Catch2::Catch2)
+
 set_target_properties(tests PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${TESTS_DIR})
 
@@ -103,5 +114,12 @@ if(WIN32)
                                          ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-window-2.dll ${RELEASE_DIR}
         COMMENT "Copying necessary Box2d .dll files from ${EXTERNAL_BINARY_DIR}/Box2d/bin to ${RELEASE_DIR}"
         COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/Box2d/bin/libbox2d.dll ${RELEASE_DIR}
+
+        COMMENT "Copying necessary SFML .dll files from ${EXTERNAL_BINARY_DIR}/SFML/lib to ${TESTS_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-graphics-2.dll
+                                         ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-system-2.dll
+                                         ${EXTERNAL_BINARY_DIR}/SFML/lib/sfml-window-2.dll ${TESTS_DIR}
+        COMMENT "Copying necessary Box2d .dll files from ${EXTERNAL_BINARY_DIR}/Box2d/bin to ${TESTS_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_BINARY_DIR}/Box2d/bin/libbox2d.dll ${TESTS_DIR}
 )
 endif()

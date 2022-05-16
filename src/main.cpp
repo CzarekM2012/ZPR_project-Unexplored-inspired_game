@@ -30,7 +30,7 @@
 #include "Renderer.h"
 
 using namespace std::chrono_literals;
-const float ACTION_Q_SIZE = 10;
+const int ACTION_Q_SIZE = 10;
 
 int main() {
     std::cout << "Started" << std::endl;
