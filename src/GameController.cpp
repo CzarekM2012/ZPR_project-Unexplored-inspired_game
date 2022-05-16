@@ -4,11 +4,10 @@
 #include <memory>
 #include <thread>
 
-
 #include <box2d/box2d.h>
 
-#include "../header/GameController.h"
-#include "../header/ObjectClasses.h"
+#include "GameController.h"
+#include "ObjectClasses.h"
 
 using namespace std::chrono_literals;
 
@@ -16,7 +15,8 @@ bool GameController::stop;
 
 #define UNUSED(x) (void)(x)  ///< For now to disable "unused parameter" error
 
-GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q) : action_q(q) {
+GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q)
+    : action_q(q) {
     world = new b2World(b2Vec2(0, 0));
 
     state.add(std::shared_ptr<PhysicalObject>(new Player()))

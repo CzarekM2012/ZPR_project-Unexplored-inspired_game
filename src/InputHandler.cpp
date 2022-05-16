@@ -2,7 +2,7 @@
 
 #include <box2d/box2d.h>
 #include <iostream>
-#include "../header/InputHandler.h"
+#include "InputHandler.h"
 
 float InputHandler::inputStateTab[PLAYER_COUNT_MAX][STATE_CONTROLS_PER_PLAYER];
 

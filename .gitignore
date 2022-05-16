@@ -3,5 +3,6 @@ release/*
 .vscode/*
 tests/*
 !tests/*.cpp
+!tests/CMakeLists.txt
 docs/*
 !docs/.gitkeep

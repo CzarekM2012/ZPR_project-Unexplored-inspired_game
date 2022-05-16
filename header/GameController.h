@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../external/readerwriterqueue/readerwriterqueue.h"
+#include "readerwriterqueue.h"
 
 #include "InputHandler.h"
 #include "State.h"

@@ -25,12 +25,12 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
 
-#include "../header/GameController.h"
-#include "../header/InputHandler.h"
-#include "../header/Renderer.h"
+#include "GameController.h"
+#include "InputHandler.h"
+#include "Renderer.h"
 
 using namespace std::chrono_literals;
-const float ACTION_Q_SIZE = 10;
+const int ACTION_Q_SIZE = 10;
 
 int main() {
     std::cout << "Started" << std::endl;

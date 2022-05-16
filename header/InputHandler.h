@@ -2,9 +2,8 @@
 
 #include <SFML/Window/Event.hpp>
 #include <memory>
-#include "../external/readerwriterqueue/readerwriterqueue.h"
-#include "../header/Action.h"
-
+#include "Action.h"
+#include "readerwriterqueue.h"
 
 /// Passes player input to the GameController through states and Action queue
 class InputHandler {

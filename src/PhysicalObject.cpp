@@ -1,4 +1,4 @@
-#include "../header/PhysicalObject.h"
+#include "PhysicalObject.h"
 #include <iostream>
 
 b2Body* PhysicalObject::createPhysicalObject(b2World* world, float x, float y, float angleDeg) {
