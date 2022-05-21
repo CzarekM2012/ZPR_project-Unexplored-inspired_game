@@ -35,10 +35,13 @@ class RectangleObject : public Entity {
         this->height = height;
     }
 
-    b2Shape* getShape() const {
-        b2PolygonShape* shape = new b2PolygonShape();
-        shape->SetAsBox(width / 2, height / 2);
-        return shape;
+    virtual std::vector<b2PolygonShape> getBaseShapes() {
+        std::vector<b2PolygonShape> shapeVec;
+        b2PolygonShape shape;
+
+        shape.SetAsBox(width / 2, height / 2);
+        shapeVec.push_back(shape);
+        return shapeVec;
     }
 };
 
@@ -80,14 +83,14 @@ class Wall : public RectangleObject {
 /// Items can be equiped by players. They don't collide until equipped
 class Item : public PhysicalObject {
    private:
-    std::weak_ptr<Entity> owner;
+    Entity* owner;
 
    public:
     Item() {
         density = 0.001;  // For now, not to encumber the player too much
     };
-    std::weak_ptr<Entity> getOwner() { return owner; };
-    void setOwner(std::shared_ptr<Entity> newOwner) { owner = newOwner; };
+    Entity* getOwner() { return owner; };
+    void setOwner(Entity* newOwner) { owner = newOwner; };
 };
 
 /// Weapons can be used to deal damage to entities
@@ -104,11 +107,15 @@ class Sword : public Weapon {
         color = sf::Color(180, 180, 180);
     };
 
-    b2Shape* getShape() const {
-        b2PolygonShape* shape = new b2PolygonShape();
+    virtual std::vector<b2PolygonShape> getBaseShapes() {
+        std::vector<b2PolygonShape> shapeVec;
+        b2PolygonShape shape;
+
         b2Vec2 triangle[] = {b2Vec2(-2, -2), b2Vec2(0, 3), b2Vec2(2, -2)};
-        shape->Set(triangle, 3);
-        return shape;
+        shape.Set(triangle, 3);
+
+        shapeVec.push_back(shape);
+        return shapeVec;
     }
 };
 
@@ -123,16 +130,20 @@ class Shield : public Item {
         color = sf::Color(180, 180, 180);
     }
 
-    b2Shape* getShape() const {
-        b2PolygonShape* shape = new b2PolygonShape();
-        shape->SetAsBox(14, 1);
-        return shape;
+    virtual std::vector<b2PolygonShape> getBaseShapes() {
+        std::vector<b2PolygonShape> shapeVec;
+        b2PolygonShape shape;
+
+        shape.SetAsBox(14, 1);
+
+        shapeVec.push_back(shape);
+        return shapeVec;
     }
 };
 
 /// Controlled by the player. Most complex than most entities
 class Player : public Entity {
-    std::shared_ptr<Item> item_lh;
+    Item* item_lh;
 
    public:
     Player() {
@@ -140,21 +151,27 @@ class Player : public Entity {
         color = sf::Color::Green;
     }
 
-    void equipLeftHand(std::shared_ptr<Item> item) {
+    void equipLeftHand(Item* item) {
         item_lh = item;
         updateEquipment();
     }
 
-    void updateEquipment() {
-        this->body->CreateFixture(item_lh->getShape(), item_lh->getDensity());
-        this->generateViews();
+    void addItem() {
     }
 
-    b2Shape* getShape() const {
-        b2PolygonShape* shape = new b2PolygonShape();
+    void updateEquipment() {
+        // this->body->CreateFixture(item_lh->getShape(), item_lh->getDensity());
+        this->reset();
+    }
+
+    virtual std::vector<b2PolygonShape> getBaseShapes() {
+        std::vector<b2PolygonShape> shapeVec;
+        b2PolygonShape shape;
+
         b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7), b2Vec2(5, 5), b2Vec2(5, -5)};
-        shape->Set(pentagon, 5);
-        return shape;
+        shape.Set(pentagon, 5);
+        shapeVec.push_back(shape);
+        return shapeVec;
     }
 };
 

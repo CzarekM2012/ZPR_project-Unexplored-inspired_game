@@ -19,51 +19,65 @@ GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Act
     : action_q(q) {
     world = new b2World(b2Vec2(0, 0));
 
-    state.add(std::shared_ptr<PhysicalObject>(new Player()))
-        ->createPhysicalObject(world, 10, 10);
+    // state.add(std::unique_ptr<Player>(new Player()));
+    PhysicalObject* object = new Player();
+    state.add(object);
+    object->createPhysicalObject(world, 10, 10);
 
-    state.add(std::shared_ptr<PhysicalObject>(new Box()))
-        ->createPhysicalObject(world, 80, 38);
-    state.add(std::shared_ptr<PhysicalObject>(new Box()))
-        ->createPhysicalObject(world, 74, 50);
-    state.add(std::shared_ptr<PhysicalObject>(new Box()))
-        ->createPhysicalObject(world, 82, 63);
+    // dynamic_cast<Player*>(state.getLast())->createPhysicalObject(world, 10, 10);
+
+    object = new Box();
+    state.add(object);
+    object->createPhysicalObject(world, 80, 38);
+
+    object = new Box();
+    state.add(object);
+    object->createPhysicalObject(world, 74, 50);
+
+    object = new Box();
+    state.add(object);
+    object->createPhysicalObject(world, 82, 63);
+
+    // state.add(new Box())->createPhysicalObject(world, 80, 38);
+    // state.add(new Box())->createPhysicalObject(world, 74, 50);
+    // state.add(new Box())->createPhysicalObject(world, 82, 63);
 
     // Add some walls
-    std::shared_ptr<Wall> wall;
-    wall = std::shared_ptr<Wall>(new Wall());
-    wall->setSize(200, 4);
+    Wall* wall = new Wall();
     state.add(wall);
+    wall->setSize(200, 4);
     wall->createPhysicalObject(world, 100, 0);
 
-    wall = std::shared_ptr<Wall>(new Wall());
-    wall->setSize(200, 4);
+    wall = new Wall();
     state.add(wall);
+    wall->setSize(200, 4);
     wall->createPhysicalObject(world, 100, 107.5);
 
-    wall = std::shared_ptr<Wall>(new Wall());
-    wall->setSize(200, 4);
+    wall = new Wall();
     state.add(wall);
+    wall->setSize(200, 4);
     wall->createPhysicalObject(world, 0, 50, 90);
 
-    wall = std::shared_ptr<Wall>(new Wall());
-    wall->setSize(200, 4);
+    wall = new Wall();
     state.add(wall);
+    wall->setSize(200, 4);
     wall->createPhysicalObject(world, 191.5, 50, 90);
 
-    wall = std::shared_ptr<Wall>(new Wall());
-    wall->setSize(40, 4);
+    wall = new Wall();
     state.add(wall);
+    wall->setSize(40, 4);
     wall->createPhysicalObject(world, 95, 50, 90);
 
     // Test some stuff
-    state.add(std::shared_ptr<PhysicalObject>(new Sword()))
-        ->createPhysicalObject(world, 10, 30);
-    state.getLast()->setCollision(false);
-    state.add(std::shared_ptr<PhysicalObject>(new Shield()))
-        ->createPhysicalObject(world, 16, 30);
-    state.getLast()->setCollision(false);
-    // std::dynamic_pointer_cast<Box>(state.getLast())->setSize(20, 10);
+    object = new Sword();
+    state.add(object);
+    object->createPhysicalObject(world, 10, 30);
+    object->setCollision(false);
+
+    object = new Shield();
+    state.add(object);
+    object->createPhysicalObject(world, 16, 30);
+    object->setCollision(false);
 
     // b2PolygonShape * shape = new b2PolygonShape();
 
@@ -125,7 +139,7 @@ void GameController::run() {
 void GameController::processPlayerInputStates(int playerId) {
     UNUSED(playerId);
 
-    std::shared_ptr<PhysicalObject> player = state.get(0);
+    auto player = dynamic_cast<Player*>(state.get(0));
     auto bodyPtr = player->getBodyPtr();
     bodyPtr->ApplyLinearImpulseToCenter(
         b2Vec2(InputHandler::inputStateTab[0][InputHandler::INPUT_MOVE_X] *
@@ -163,9 +177,9 @@ void GameController::processPlayerInputStates(int playerId) {
 }
 
 void GameController::processAction(const Action& action) {
-    std::shared_ptr<Player> player;
+    Player* player = nullptr;
     if (action.getPlayerId() >= 0)
-        player = std::dynamic_pointer_cast<Player>(state.get(action.getPlayerId()));
+        player = dynamic_cast<Player*>(state.get(action.getPlayerId()));
 
     auto playerBody = player->getBodyPtr();
     auto playerPos = playerBody->GetPosition();
@@ -184,14 +198,14 @@ void GameController::processAction(const Action& action) {
             //    [&player](std::shared_ptr<PhysicalObject> object){return (object->getBodyPtr()->GetPosition() - player->getBodyPtr()->GetPosition()).Length() < 10 && std::dynamic_pointer_cast<Item>(object);}); //TODO: change '10' to sth like "PICKUP_RANGE"
             // player->equipLeftHand(std::dynamic_pointer_cast<Item>(*foundObjects.begin()));
 
-            for (auto object_it : state.objects) {
+            for (auto&& object_it : state.objects) {
                 auto body = object_it->getBodyPtr();
                 auto pos = body->GetPosition();
 
                 if (PICKUP_RANGE * PICKUP_RANGE < (pos.x - playerPos.x) * (pos.x - playerPos.x) + (pos.y - playerPos.y) * (pos.y - playerPos.y))
                     continue;
 
-                if (auto item = std::dynamic_pointer_cast<Item>(object_it)) {
+                if (auto item = dynamic_cast<Item*>(object_it.get())) {
                     std::cout << "Found " << typeid(*object_it).name() << " at (" << pos.x << " " << pos.y << ")" << std::endl;
                     player->equipLeftHand(item);
                     break;

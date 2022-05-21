@@ -14,20 +14,34 @@ b2Body* PhysicalObject::createPhysicalObject(b2World* world, float x, float y, f
     body->SetLinearDamping(getDamping());
     body->SetAngularDamping(getDamping());
 
-    b2Shape* shape = getShape();
-    if (isStatic())
-        this->body->CreateFixture(shape, 0);
-    else {
-        b2FixtureDef* fixtureDef = new b2FixtureDef();
-        fixtureDef->shape = shape;
-        fixtureDef->density = getDensity();
-        fixtureDef->friction = getFriction();
-        this->body->CreateFixture(fixtureDef);
-    }
+    reset();
 
-    generateViews();
     return body;
 }
+
+void PhysicalObject::createFixtures() {
+    b2FixtureDef fixtureDef;
+    fixtureDef.friction = getFriction();
+    fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
+
+    // std::cout << shapes.size() << std::endl;
+    for (b2PolygonShape shape : shapes) {
+        if (isStatic())
+            fixtureDef.density = 0;
+        else
+            fixtureDef.density = getDensity();
+
+        fixtureDef.shape = &shape;
+        body->CreateFixture(&fixtureDef);
+    }
+}
+
+void PhysicalObject::clearFixtures() {
+    for (auto fixtureList = body->GetFixtureList(); fixtureList != nullptr; fixtureList = fixtureList->GetNext())
+        body->DestroyFixture(fixtureList);
+}
+
+// PhysicalObject* owner = (PhysicalObject*)body->GetUserData();
 
 // b2Body * PhysicalObject::createPhysicalObject(b2World* world, float x, float
 // y) {
@@ -62,20 +76,22 @@ void PhysicalObject::synchronize() {
     float bodyPositionY = body->GetPosition().y * M_TO_PX;
     float bodyRotate = getAngleDeg();
 
-    for(auto & view : views) {
+    for (auto& view : views) {
         view.setPosition(bodyPositionX, bodyPositionY);
         view.setRotation(bodyRotate);
     }
 }
 
 void PhysicalObject::generateViews() {
-
     views.clear();
 
+    auto color = viewColors.begin();
     for (b2Fixture* fixturePtr = body->GetFixtureList(); fixturePtr != nullptr; fixturePtr = fixturePtr->GetNext()) {
         b2Shape* shapeBuffer = fixturePtr->GetShape();
         sf::ConvexShape bodyView;
-        bodyView.setFillColor(color);
+
+        bodyView.setFillColor(*(color++));
+
         if (shapeBuffer->m_type == b2Shape::Type::e_polygon) {
             b2PolygonShape* realBodyShape = static_cast<b2PolygonShape*>(shapeBuffer);
 

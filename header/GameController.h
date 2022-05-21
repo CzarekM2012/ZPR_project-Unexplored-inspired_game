@@ -30,9 +30,9 @@ class GameController {
 
     void run();
 
-    State getStateCopy() const {
-        State result = state;
-        return result;
+    const State* getStateCopy() const {
+        // State result = state;
+        return &state;
     }
 
     void signalStop() { this->stop = true; };

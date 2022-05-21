@@ -4,7 +4,6 @@
 #include <SFML/Graphics.hpp>
 #include "State.h"
 
-
 /// Draws state of game, synchronized every frame
 class Renderer {
    private:
@@ -15,5 +14,5 @@ class Renderer {
     Renderer(sf::RenderWindow* render_window)
         : window(render_window){};
 
-    void render(const State& state) const;
+    void render(const State* state) const;
 };
