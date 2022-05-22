@@ -17,13 +17,21 @@ class Entity : public PhysicalObject {
     int hp = 100;
 
    public:
-    bool isInvulnerable() const { return invulnerable; };
+    bool isInvulnerable() const { return invulnerable; }
+
+    int getHp() { return hp; }
+
+    int getMaxHp() { return maxHp; }
 
     void damage(int value) {
+        if (isInvulnerable())
+            return;
+
         hp = hp - value;
-        if (hp < 0) {
+        if (hp <= 0) {
             hp = 0;
-            body->DestroyFixture(body->GetFixtureList());
+            // Cannot destroy body here, could trigger when running step(). Checked inside game loop
+            toDestroy = true;
         }
     }
 
@@ -150,6 +158,14 @@ class Sword : public Weapon {
         shapeVec.push_back(shape);
         return shapeVec;
     }
+
+    void onContact(PhysicalObject* const other) {
+        auto target = dynamic_cast<Entity*>(other);
+        if (target) {
+            target->damage(10);
+            std::cout << "Current HP: " << target->getHp() << "/" << target->getMaxHp() << std::endl;
+        }
+    }
 };
 
 /// A basic shield to test game mechanics
@@ -171,7 +187,7 @@ class Shield : public Item {
         std::vector<b2PolygonShape> shapeVec;
         b2PolygonShape shape;
 
-        shape.SetAsBox(14, 1);
+        shape.SetAsBox(4, 1);
 
         shapeVec.push_back(shape);
         return shapeVec;
@@ -193,10 +209,7 @@ class Player : public Entity {
         if (item_lh != nullptr)
             dropLeftHand();
 
-        auto itemBody = item->getBodyPtr();
-        itemBody->GetWorld()->DestroyBody(itemBody);
-        item->generateViews();
-
+        item->destroyBody();
         item->setOwner(this);
         item_lh = item;
         // addItem(item);
@@ -217,10 +230,7 @@ class Player : public Entity {
         if (item_rh != nullptr)
             dropRightHand();
 
-        auto itemBody = item->getBodyPtr();
-        itemBody->GetWorld()->DestroyBody(itemBody);
-        item->generateViews();
-
+        item->destroyBody();
         item->setOwner(this);
         item_rh = item;
         // addItem(item);

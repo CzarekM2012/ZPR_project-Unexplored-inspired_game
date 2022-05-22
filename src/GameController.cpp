@@ -10,13 +10,34 @@
 
 using namespace std::chrono_literals;
 
+class MyContactListener : public b2ContactListener {
+    void BeginContact(b2Contact* contact) {
+        auto data = contact->GetFixtureA()->GetUserData();
+        PhysicalObject *objectA = nullptr, *objectB = nullptr;
+        objectA = reinterpret_cast<PhysicalObject*>(data.pointer);
+
+        data = contact->GetFixtureB()->GetUserData();
+        objectB = reinterpret_cast<PhysicalObject*>(data.pointer);
+        if (objectA && objectB) {
+            objectA->onContact(objectB);
+            objectB->onContact(objectA);
+        }
+    }
+
+    void EndContact(b2Contact* contact) {
+        UNUSED(contact);
+    }
+};
+
 bool GameController::stop;
+MyContactListener listener;
 
 #define UNUSED(x) (void)(x)  ///< For now to disable "unused parameter" error
 
 GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q)
     : action_q(q) {
     world = new b2World(b2Vec2(0, 0));
+    world->SetContactListener(&listener);
 
     // state.add(std::unique_ptr<Player>(new Player()));
     PhysicalObject* object = new Player();
@@ -129,6 +150,18 @@ void GameController::run() {
 
         // Process Physics
         world->Step(1, 8, 3);
+
+        std::vector<PhysicalObject*> toRemove;
+        for (auto&& object : state.objects) {
+            if (object->toDestroy) {
+                toRemove.push_back(object.get());
+            }
+        }
+
+        for (auto object : toRemove) {
+            object->destroyBody();
+            state.remove(object);
+        }
 
         for (auto&& object : state.objects) {
             object->synchronize();  // TODO: This probably sould be put in a critical section

@@ -23,7 +23,7 @@ void PhysicalObject::createOwnFixtures() {
     b2FixtureDef fixtureDef;
     fixtureDef.friction = getFriction();
     fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
-
+    std::cout << this << " " << fixtureDef.userData.pointer << " " << reinterpret_cast<PhysicalObject*>(fixtureDef.userData.pointer) << std::endl;
     // std::cout << shapes.size() << std::endl;
     for (b2PolygonShape shape : shapes)
         createFixture(shape);

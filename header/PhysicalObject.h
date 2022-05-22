@@ -5,6 +5,8 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
+#define UNUSED(x) (void)(x)  ///< For now to disable "unused parameter" error
+
 /// An object in game world paired with Box2D body. Base of the class hierarchy
 class PhysicalObject {
    protected:
@@ -27,6 +29,8 @@ class PhysicalObject {
     sf::Color color = sf::Color::Magenta;
 
    public:
+    bool toDestroy = false;  ///< should be destroyed by GameController
+
     PhysicalObject(){};
 
     b2Body* createPhysicalObject(b2World* world, float x, float y, float angle = 0);  ///< creates a box2d object and a view to render it. Params like shape or color are taken from virtual functions or set in constructors
@@ -45,6 +49,12 @@ class PhysicalObject {
         createOwnFixtures();
         resetColors();
         generateViews();
+    }
+
+    /// Cannot be triggered from collision callbacks to avoid collision with box2d step()
+    void destroyBody() {
+        body->GetWorld()->DestroyBody(body);
+        views.clear();
     }
 
     void resetColors() {
@@ -101,5 +111,9 @@ class PhysicalObject {
 
         for (; fixtureList != nullptr; fixtureList = fixtureList->GetNext())
             fixtureList->SetFilterData(collisionFilter);
+    }
+
+    virtual void onContact(PhysicalObject* const other) {
+        UNUSED(other);
     }
 };

@@ -31,6 +31,14 @@ class State {
         return objects[objects.size() - 1].get();
     };
 
+    void remove(PhysicalObject* objectPtr) {
+        auto it = find_if(objects.begin(), objects.end(), [&](std::unique_ptr<PhysicalObject>& object) { return object.get() == objectPtr; });
+        if (it != objects.end()) {
+            std::cout << "Deleting object" << std::endl;
+            objects.erase(it);
+        }
+    }
+
     PhysicalObject* get(unsigned int index) const {
         return objects.size() > index ? objects[index].get() : nullptr;
     }  // TODO: Rewrite as an overloaded operator []
