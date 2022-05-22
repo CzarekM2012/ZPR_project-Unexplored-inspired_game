@@ -19,29 +19,45 @@ b2Body* PhysicalObject::createPhysicalObject(b2World* world, float x, float y, f
     return body;
 }
 
-void PhysicalObject::createFixtures() {
+void PhysicalObject::createOwnFixtures() {
     b2FixtureDef fixtureDef;
     fixtureDef.friction = getFriction();
     fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
 
     // std::cout << shapes.size() << std::endl;
-    for (b2PolygonShape shape : shapes) {
-        if (isStatic())
-            fixtureDef.density = 0;
-        else
-            fixtureDef.density = getDensity();
+    for (b2PolygonShape shape : shapes)
+        createFixture(shape);
+}
 
-        fixtureDef.shape = &shape;
-        body->CreateFixture(&fixtureDef);
-    }
+void PhysicalObject::createFixture(const b2PolygonShape& shape, PhysicalObject* owner) {
+    if (owner == nullptr)
+        owner = this;
+
+    b2FixtureDef fixtureDef;
+    fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(owner);
+
+    if (owner->isStatic())
+        fixtureDef.density = 0;
+    else
+        fixtureDef.density = owner->getDensity();
+    fixtureDef.friction = owner->getFriction();
+
+    fixtureDef.shape = &shape;
+    body->CreateFixture(&fixtureDef);
 }
 
 void PhysicalObject::clearFixtures() {
-    for (auto fixtureList = body->GetFixtureList(); fixtureList != nullptr; fixtureList = fixtureList->GetNext())
-        body->DestroyFixture(fixtureList);
+    b2Fixture* lastFixture;
+    if (body->GetFixtureList() == nullptr)
+        return;
+    for (auto fixtureList = body->GetFixtureList(); fixtureList != nullptr;) {
+        lastFixture = fixtureList;
+        fixtureList = fixtureList->GetNext();
+        body->DestroyFixture(lastFixture);
+    }
 }
 
-// PhysicalObject* owner = (PhysicalObject*)body->GetUserData();
+// auto owner = reinterpret_cast<PhysicalObject*>(body->GetUserData());
 
 // b2Body * PhysicalObject::createPhysicalObject(b2World* world, float x, float
 // y) {
@@ -111,4 +127,19 @@ void PhysicalObject::generateViews() {
         }
         views.push_back(bodyView);
     }
+}
+
+float PhysicalObject::getLength() const {
+    float max = 0, min = 0;
+    for (auto shape : shapes) {
+        for (int i = 0; i < shape.m_count; ++i) {
+            float value = shape.m_vertices[i].y;
+            if (value > max)
+                max = value;
+
+            if (value < min)
+                min = value;
+        }
+    }
+    return max - min;
 }

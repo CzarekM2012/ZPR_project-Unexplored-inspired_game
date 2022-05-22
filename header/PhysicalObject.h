@@ -33,7 +33,8 @@ class PhysicalObject {
 
     b2Body* getBodyPtr() const { return body; };
     void clearFixtures();
-    void createFixtures();
+    void createOwnFixtures();  ///< Create fixtures based on this object's shapes. In case of players, item fixtures are created elsewhere
+    void createFixture(const b2PolygonShape& shape, PhysicalObject* owner = nullptr);
     void generateViews();
     void synchronize();
 
@@ -41,7 +42,7 @@ class PhysicalObject {
     void reset() {
         resetShapes();
         clearFixtures();
-        createFixtures();
+        createOwnFixtures();
         resetColors();
         generateViews();
     }
@@ -80,6 +81,7 @@ class PhysicalObject {
     float getDensity() const { return density; }
     float getDamping() const { return damping; }
     float getFriction() const { return friction; }
+    float getLength() const;
 
     float getAngleDeg() {
         float ang = fmod((body->GetAngle() * R_TO_DEG) - 180, 360.0f);

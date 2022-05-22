@@ -187,11 +187,11 @@ void GameController::processAction(const Action& action) {
     std::vector<std::shared_ptr<PhysicalObject> > foundObjects;
     switch (action.getType()) {
         case Action::TYPE_DEBUG:
-            std::cout << "Received Debug Action!" << std::endl;
+            std::cout << "Received DEBUG Action!" << std::endl;
             break;
 
         case Action::TYPE_PICK_LEFT:
-            std::cout << "Received Pickup Action!" << std::endl;
+            std::cout << "Received PICKUP Action!" << std::endl;
 
             // TODO: Replace loop with something like:
             // std::copy_if(state.objects.begin(), state.objects.end(), foundObjects.begin(),
@@ -206,11 +206,18 @@ void GameController::processAction(const Action& action) {
                     continue;
 
                 if (auto item = dynamic_cast<Item*>(object_it.get())) {
-                    std::cout << "Found " << typeid(*object_it).name() << " at (" << pos.x << " " << pos.y << ")" << std::endl;
-                    player->equipLeftHand(item);
-                    break;
+                    if (item->getOwner() == nullptr) {
+                        std::cout << "Found " << typeid(*object_it).name() << " at (" << pos.x << " " << pos.y << ")" << std::endl;
+                        player->equipLeftHand(item);
+                        break;
+                    }
                 }
             }
+            break;
+
+        case Action::TYPE_DROP_LEFT:
+            std::cout << "Received DROP Action!" << std::endl;
+            player->dropLeftHand();
             break;
 
         default:

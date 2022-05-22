@@ -8,6 +8,7 @@ class Action {
     static const int TYPE_NONE = 0;
     static const int TYPE_DEBUG = 1;
     static const int TYPE_PICK_LEFT = 2;
+    static const int TYPE_DROP_LEFT = 3;
 
     Action()
         : playerId(-1), type(TYPE_NONE){};

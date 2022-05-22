@@ -83,7 +83,7 @@ class Wall : public RectangleObject {
 /// Items can be equiped by players. They don't collide until equipped
 class Item : public PhysicalObject {
    private:
-    Entity* owner;
+    Entity* owner = nullptr;
 
    public:
     Item() {
@@ -151,17 +151,65 @@ class Player : public Entity {
         color = sf::Color::Green;
     }
 
-    void equipLeftHand(Item* item) {
+    void equipLeftHand(Item* const item) {
+        if (item_lh != nullptr)
+            dropLeftHand();
+
         item_lh = item;
+        // addItem(item);
         updateEquipment();
     }
 
-    void addItem() {
+    void dropLeftHand() {
+        auto item = item_lh;
+        if (item == nullptr)
+            return;
+
+        item_lh = nullptr;
+        updateEquipment();
+        dropItem(item);
+    }
+
+    void addItem(Item* const item, b2Vec2 relativePos) {
+        item->setOwner(this);
+
+        auto itemBody = item->getBodyPtr();
+        itemBody->GetWorld()->DestroyBody(itemBody);
+
+        item->generateViews();
+
+        for (auto shape : item->getBaseShapes()) {
+            relativePos.y += item->getLength() / 2;
+
+            for (int i = 0; i < shape.m_count; ++i) {
+                shape.m_vertices[i] += relativePos;
+                // TODO: Rot by angle
+            }
+
+            shape.Set(shape.m_vertices, shape.m_count);
+            createFixture(shape, item);
+        }
+
+        for (auto color : item->getBaseColors())
+            viewColors.insert(viewColors.begin(), color);
+    }
+
+    void dropItem(Item* const item) {
+        item->createPhysicalObject(this->body->GetWorld(), this->body->GetPosition().x, this->body->GetPosition().y, this->body->GetAngle() * R_TO_DEG);
+        item->setCollision(false);
+        item->setOwner(nullptr);
     }
 
     void updateEquipment() {
         // this->body->CreateFixture(item_lh->getShape(), item_lh->getDensity());
-        this->reset();
+        reset();
+
+        if (item_lh != nullptr)
+            addItem(item_lh, b2Vec2(5, 6));
+
+        generateViews();
+
+        // std::cout << body->GetMass() << std::endl;
     }
 
     virtual std::vector<b2PolygonShape> getBaseShapes() {
