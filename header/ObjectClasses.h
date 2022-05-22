@@ -94,6 +94,8 @@ class Item : public PhysicalObject {
     };
     Entity* getOwner() { return owner; };
     void setOwner(Entity* newOwner) { owner = newOwner; };
+
+    virtual void use() = 0;
 };
 
 /// Weapons can be used to deal damage to entities
@@ -109,6 +111,11 @@ class Sword : public Weapon {
         damage = 10;
         color = sf::Color(180, 180, 180);
     };
+
+   public:
+    void use() {
+        std::cout << "WIP Sword action" << std::endl;
+    }
 
     virtual std::vector<b2PolygonShape> getBaseShapes() {
         std::vector<b2PolygonShape> shapeVec;
@@ -131,6 +138,10 @@ class Shield : public Item {
     Shield() {
         defense = 7;
         color = sf::Color(180, 180, 180);
+    }
+
+    void use() {
+        std::cout << "WIP Shield action" << std::endl;
     }
 
     virtual std::vector<b2PolygonShape> getBaseShapes() {
@@ -239,6 +250,16 @@ class Player : public Entity {
         generateViews();
 
         // std::cout << body->GetMass() << std::endl;
+    }
+
+    void triggerActionLeft() {
+        if (item_lh != nullptr)
+            item_lh->use();
+    }
+
+    void triggerActionRight() {
+        if (item_rh != nullptr)
+            item_rh->use();
     }
 
     virtual std::vector<b2PolygonShape> getBaseShapes() {

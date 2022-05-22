@@ -212,6 +212,16 @@ void GameController::processAction(const Action& action) {
             player->dropRightHand();
             break;
 
+        case Action::TYPE_ACT_LEFT:
+            std::cout << "Received ACT_LEFT Action!" << std::endl;
+            player->triggerActionLeft();
+            break;
+
+        case Action::TYPE_ACT_RIGHT:
+            std::cout << "Received ACT_RIGHT Action!" << std::endl;
+            player->triggerActionRight();
+            break;
+
         default:
             break;
     }
