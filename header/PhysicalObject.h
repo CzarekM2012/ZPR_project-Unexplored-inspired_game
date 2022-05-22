@@ -36,7 +36,7 @@ class PhysicalObject {
     void createOwnFixtures();  ///< Create fixtures based on this object's shapes. In case of players, item fixtures are created elsewhere
     void createFixture(const b2PolygonShape& shape, PhysicalObject* owner = nullptr);
     void generateViews();
-    void synchronize();
+    virtual void synchronize();
 
     /// Re-generate all physical components and their graphical representations
     void reset() {

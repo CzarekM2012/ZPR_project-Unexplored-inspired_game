@@ -13,7 +13,8 @@
 class Entity : public PhysicalObject {
    protected:
     bool invulnerable = false;
-    int hp = 1;
+    int maxHp = 100;
+    int hp = 100;
 
    public:
     bool isInvulnerable() const { return invulnerable; };
@@ -24,6 +25,27 @@ class Entity : public PhysicalObject {
             hp = 0;
             body->DestroyFixture(body->GetFixtureList());
         }
+    }
+
+    void synchronize() {
+        float bodyPositionX = body->GetPosition().x * M_TO_PX;
+        float bodyPositionY = body->GetPosition().y * M_TO_PX;
+        float bodyRotate = getAngleDeg();
+
+        for (auto& view : views) {
+            view.setPosition(bodyPositionX, bodyPositionY);
+            view.setRotation(bodyRotate);
+        }
+
+        auto colors = getBaseColors();
+        auto color = colors[0];
+        float scale = static_cast<float>(hp) / maxHp;
+        // std::cout << scale << std::endl;
+        color.r *= scale;
+        color.g *= scale;
+        color.b *= scale;
+        // Display HP
+        views[views.size() - 1].setFillColor(color);
     }
 };
 
@@ -52,7 +74,8 @@ class RectangleObject : public Entity {
 class Box : public RectangleObject {
    public:
     Box() {
-        hp = 100;
+        // maxHp = 100;
+        // hp = maxHp;
         width = 10;
         height = 10;
         density = 0.1f;
@@ -71,7 +94,7 @@ class Box : public RectangleObject {
 class Wall : public RectangleObject {
    public:
     Wall() {
-        hp = invulnerable;
+        invulnerable = true;
         dynamic = false;
         color = sf::Color::Black;
     }
@@ -161,6 +184,7 @@ class Player : public Entity {
 
    public:
     Player() {
+        maxHp = 100;
         hp = 100;
         color = sf::Color::Green;
     }

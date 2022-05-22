@@ -16,7 +16,6 @@ void Renderer::render(const State* state) const {
 
     for (auto&& object : state->objects) {
         // std::cout << object->getBodyPtr()->GetPosition().x << " " << object->getBodyPtr()->GetPosition().y << std::endl;
-        object->synchronize();  // TODO: This probably sould be called on GameController's side and state copy put in a critical section
 
         for (auto view : object->getViews()) {
             window->draw(view);

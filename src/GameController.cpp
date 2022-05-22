@@ -130,6 +130,10 @@ void GameController::run() {
         // Process Physics
         world->Step(1, 8, 3);
 
+        for (auto&& object : state.objects) {
+            object->synchronize();  // TODO: This probably sould be put in a critical section
+        }
+
         // Wait for the next tick
         std::this_thread::sleep_for(1ms);  // TODO: Add time control
     }
