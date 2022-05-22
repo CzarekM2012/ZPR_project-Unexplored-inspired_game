@@ -2,7 +2,10 @@
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #include <memory>
+
+#include "PhysicalObject.h"
 
 #define UNUSED(x) (void)(x)  // For now to disable "unused parameter" error
 
@@ -143,7 +146,7 @@ class Shield : public Item {
 
 /// Controlled by the player. Most complex than most entities
 class Player : public Entity {
-    Item* item_lh;
+    Item *item_lh, *item_rh;
 
    public:
     Player() {
@@ -155,6 +158,11 @@ class Player : public Entity {
         if (item_lh != nullptr)
             dropLeftHand();
 
+        auto itemBody = item->getBodyPtr();
+        itemBody->GetWorld()->DestroyBody(itemBody);
+        item->generateViews();
+
+        item->setOwner(this);
         item_lh = item;
         // addItem(item);
         updateEquipment();
@@ -170,14 +178,31 @@ class Player : public Entity {
         dropItem(item);
     }
 
-    void addItem(Item* const item, b2Vec2 relativePos) {
-        item->setOwner(this);
+    void equipRightHand(Item* const item) {
+        if (item_rh != nullptr)
+            dropRightHand();
 
         auto itemBody = item->getBodyPtr();
         itemBody->GetWorld()->DestroyBody(itemBody);
-
         item->generateViews();
 
+        item->setOwner(this);
+        item_rh = item;
+        // addItem(item);
+        updateEquipment();
+    }
+
+    void dropRightHand() {
+        auto item = item_rh;
+        if (item == nullptr)
+            return;
+
+        item_rh = nullptr;
+        updateEquipment();
+        dropItem(item);
+    }
+
+    void addItem(Item* const item, b2Vec2 relativePos) {
         for (auto shape : item->getBaseShapes()) {
             relativePos.y += item->getLength() / 2;
 
@@ -202,10 +227,14 @@ class Player : public Entity {
 
     void updateEquipment() {
         // this->body->CreateFixture(item_lh->getShape(), item_lh->getDensity());
+
         reset();
 
         if (item_lh != nullptr)
-            addItem(item_lh, b2Vec2(5, 6));
+            addItem(item_lh, b2Vec2(4, 6));
+
+        if (item_rh != nullptr)
+            addItem(item_rh, b2Vec2(-4, 6));
 
         generateViews();
 

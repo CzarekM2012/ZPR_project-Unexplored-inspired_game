@@ -7,7 +7,6 @@
 #include <box2d/box2d.h>
 
 #include "GameController.h"
-#include "ObjectClasses.h"
 
 using namespace std::chrono_literals;
 
@@ -181,46 +180,65 @@ void GameController::processAction(const Action& action) {
     if (action.getPlayerId() >= 0)
         player = dynamic_cast<Player*>(state.get(action.getPlayerId()));
 
-    auto playerBody = player->getBodyPtr();
-    auto playerPos = playerBody->GetPosition();
-
-    std::vector<std::shared_ptr<PhysicalObject> > foundObjects;
+    Item* foundItem = nullptr;
     switch (action.getType()) {
         case Action::TYPE_DEBUG:
             std::cout << "Received DEBUG Action!" << std::endl;
             break;
 
         case Action::TYPE_PICK_LEFT:
-            std::cout << "Received PICKUP Action!" << std::endl;
+            std::cout << "Received PICKUP_LEFT Action!" << std::endl;
 
-            // TODO: Replace loop with something like:
-            // std::copy_if(state.objects.begin(), state.objects.end(), foundObjects.begin(),
-            //    [&player](std::shared_ptr<PhysicalObject> object){return (object->getBodyPtr()->GetPosition() - player->getBodyPtr()->GetPosition()).Length() < 10 && std::dynamic_pointer_cast<Item>(object);}); //TODO: change '10' to sth like "PICKUP_RANGE"
-            // player->equipLeftHand(std::dynamic_pointer_cast<Item>(*foundObjects.begin()));
-
-            for (auto&& object_it : state.objects) {
-                auto body = object_it->getBodyPtr();
-                auto pos = body->GetPosition();
-
-                if (PICKUP_RANGE * PICKUP_RANGE < (pos.x - playerPos.x) * (pos.x - playerPos.x) + (pos.y - playerPos.y) * (pos.y - playerPos.y))
-                    continue;
-
-                if (auto item = dynamic_cast<Item*>(object_it.get())) {
-                    if (item->getOwner() == nullptr) {
-                        std::cout << "Found " << typeid(*object_it).name() << " at (" << pos.x << " " << pos.y << ")" << std::endl;
-                        player->equipLeftHand(item);
-                        break;
-                    }
-                }
-            }
+            foundItem = getFirstPickableItem(player);
+            if (foundItem != nullptr)
+                player->equipLeftHand(foundItem);
             break;
 
         case Action::TYPE_DROP_LEFT:
-            std::cout << "Received DROP Action!" << std::endl;
+            std::cout << "Received DROP_LEFT Action!" << std::endl;
             player->dropLeftHand();
+            break;
+
+        case Action::TYPE_PICK_RIGHT:
+            std::cout << "Received PICKUP_RIGHT Action!" << std::endl;
+
+            foundItem = getFirstPickableItem(player);
+            if (foundItem != nullptr)
+                player->equipRightHand(foundItem);
+            break;
+
+        case Action::TYPE_DROP_RIGHT:
+            std::cout << "Received DROP_RIGHT Action!" << std::endl;
+            player->dropRightHand();
             break;
 
         default:
             break;
     }
+}
+
+Item* GameController::getFirstPickableItem(Player* player) const {
+    // TODO: Replace loop with something like:
+    // std::copy_if(state.objects.begin(), state.objects.end(), foundObjects.begin(),
+    //    [&player](std::shared_ptr<PhysicalObject> object){return (object->getBodyPtr()->GetPosition() - player->getBodyPtr()->GetPosition()).Length() < 10 && std::dynamic_pointer_cast<Item>(object);}); //TODO: change '10' to sth like "PICKUP_RANGE"
+    // player->equipLeftHand(std::dynamic_pointer_cast<Item>(*foundObjects.begin()));
+
+    auto playerBody = player->getBodyPtr();
+    auto playerPos = playerBody->GetPosition();
+
+    for (auto&& object_it : state.objects) {
+        auto body = object_it->getBodyPtr();
+        auto pos = body->GetPosition();
+
+        if (PICKUP_RANGE * PICKUP_RANGE < (pos.x - playerPos.x) * (pos.x - playerPos.x) + (pos.y - playerPos.y) * (pos.y - playerPos.y))
+            continue;
+
+        if (auto item = dynamic_cast<Item*>(object_it.get())) {
+            if (item->getOwner() == nullptr) {
+                std::cout << "Found " << typeid(*object_it).name() << " at (" << pos.x << " " << pos.y << ")" << std::endl;
+                return item;
+            }
+        }
+    }
+    return nullptr;
 }

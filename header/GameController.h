@@ -3,6 +3,7 @@
 #include "readerwriterqueue.h"
 
 #include "InputHandler.h"
+#include "ObjectClasses.h"
 #include "State.h"
 
 /// Controls game logic and physics. Runs in its own thread
@@ -34,6 +35,8 @@ class GameController {
         // State result = state;
         return &state;
     }
+
+    Item* getFirstPickableItem(Player* player) const;
 
     void signalStop() { this->stop = true; };
 };

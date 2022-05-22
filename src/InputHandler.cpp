@@ -102,6 +102,16 @@ void InputHandler::handleInput(sf::Event event) {
                 action_q->enqueue(action);
                 break;
 
+            case sf::Keyboard::Num3:
+                action = Action(0, Action::TYPE_PICK_RIGHT);
+                action_q->enqueue(action);
+                break;
+
+            case sf::Keyboard::Num4:
+                action = Action(0, Action::TYPE_DROP_RIGHT);
+                action_q->enqueue(action);
+                break;
+
             default:
                 break;
         }
