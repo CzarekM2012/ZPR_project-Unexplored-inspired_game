@@ -15,9 +15,33 @@ Player::Player() {
 }
 
 void Player::moveItems() {
+    if (itemLH && itemLH->isBeingUsed()) {
+        itemFront = nullptr;
+    } else if (itemRH && itemRH->isBeingUsed()) {
+        itemFront = nullptr;
+    } else if (itemLH && itemLH->holdInFrontWhenPossible && !itemLH->isOnCooldown()) {
+        itemFront = itemLH;
+    } else if (itemRH && itemRH->holdInFrontWhenPossible && !itemRH->isOnCooldown()) {
+        itemFront = itemRH;
+    } else {
+        itemFront = nullptr;
+    }
+
     if (itemLH && jointLH) {
         float angleDiff = -(jointLH->GetJointAngle() + targetAngleLH * DEG_TO_R);
+
+        if (itemFront == itemLH)
+            angleDiff = -jointLH->GetJointAngle();
+
         jointLH->SetMotorSpeed(angleDiff);
+    }
+    if (itemRH && jointRH) {
+        float angleDiff = -(jointRH->GetJointAngle() - targetAngleRH * DEG_TO_R);
+
+        if (itemFront == itemRH)
+            angleDiff = -jointRH->GetJointAngle();
+
+        jointRH->SetMotorSpeed(angleDiff);
     }
 }
 
@@ -26,16 +50,25 @@ void Player::tickItemTimers() {
         itemLH->useTick();
         itemLH->lowerCooldown(1);
     }
+    if (itemRH) {
+        itemRH->useTick();
+        itemRH->lowerCooldown(1);
+    }
 }
 
 void Player::setItemAngle(Item* item, float angle) {
-    if (itemLH == item)
+    if (item == itemLH)
         targetAngleLH = angle;
+    if (item == itemRH)
+        targetAngleRH = angle;
 }
 
 void Player::resetItemAngle(Item* item) {
-    if (itemLH == item)
-        targetAngleLH = ANGLE_LH;
+    if (item == itemLH)
+        targetAngleLH = ANGLE_SIDE;
+
+    if (item == itemRH)
+        targetAngleRH = ANGLE_SIDE;
 }
 
 void Player::equipLeftHand(Item* const item) {
@@ -72,10 +105,36 @@ void Player::dropLeftHand() {
 }
 
 void Player::equipRightHand(Item* const item) {
-    UNUSED(item);
+    if (itemRH != nullptr)
+        dropRightHand();
+
+    itemRH = item;
+    item->setOwner(this);
+    item->setCooldown(std::max(item->cooldownCollision, item->cooldownAction));
+
+    jointDef.bodyA = body;
+    jointDef.bodyB = item->getBodyPtr();
+    jointDef.localAnchorB.Set(0, -DIST_HELD - (item->getLength() / 2 - item->getBodyPtr()->GetLocalCenter().y));  // This way items can be rotated around the player
+
+    // Box2d anlges are form (-inf, inf), instead of (-pi, pi>
+    // angle is set based on angles of 2 bodies, which can be several rotations apart
+    // this formula compansates for them
+    jointDef.referenceAngle = DEG_TO_R - round((body->GetAngle() - item->getBodyPtr()->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
+
+    jointRH = dynamic_cast<b2RevoluteJoint*>(body->GetWorld()->CreateJoint(&jointDef));
+
+    resetItemAngle(item);
 }
 
 void Player::dropRightHand() {
+    if (itemRH == nullptr)
+        return;
+
+    itemRH->setOwner(nullptr);
+    itemRH->setCollision(false);
+    itemRH->resetCooldown();
+    itemRH = nullptr;
+    body->GetWorld()->DestroyJoint(jointRH);
 }
 
 void Player::dropItem(Item* const item) {
@@ -85,13 +144,25 @@ void Player::dropItem(Item* const item) {
 }
 
 void Player::triggerActionLeft() {
-    if (itemLH)
+    if (itemLH) {
         itemLH->useTrigger();
+    }
 }
 
 void Player::triggerActionRight() {
-    if (itemRH)
+    if (itemRH) {
         itemRH->useTrigger();
+    }
+}
+
+void Player::prepareItemLeft() {
+    if (itemLH)
+        targetAngleLH = itemLH->prepareAngle;
+}
+
+void Player::prepareItemRight() {
+    if (itemRH)
+        targetAngleRH = itemRH->prepareAngle;
 }
 
 std::vector<b2PolygonShape> Player::getBaseShapes() {

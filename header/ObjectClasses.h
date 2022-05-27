@@ -83,6 +83,8 @@ class Item : public PhysicalObject {
     float cooldownCollision = 1 * TICKS_PER_SECOND;
     float cooldownAction = 2 * TICKS_PER_SECOND;
     float actionTimeTotal = 1 * TICKS_PER_SECOND;
+    float prepareAngle = 0;
+    bool holdInFrontWhenPossible = false;
 
     Item() {
         density = 0.001;  // For now, not to encumber the player too much. Cannot be set to 0, it's reserved for static objects
@@ -92,10 +94,10 @@ class Item : public PhysicalObject {
 
     bool isOnCooldown() const { return cooldown > 0; }
     bool isBeingUsed() const { return getActionTimeLeft() > 0; }
-    bool canBeUsed() const { return isOnCooldown() || isBeingUsed(); }
+    bool canBeUsed() const { return !isOnCooldown() && !isBeingUsed(); }
 
     void useTrigger() {  ///< Triggers action. By itself only sets action timer. useTick() takes care of rest
-        if (!canBeUsed()) {
+        if (canBeUsed()) {
             actionTimeLeft = getActionTimeTotal();
         }
     };
@@ -156,6 +158,7 @@ class Sword : public Weapon {
     Sword() {
         damage = 10;
         color = sf::Color(180, 180, 180);
+        holdInFrontWhenPossible = true;
     };
 
    public:
@@ -214,6 +217,7 @@ class Shield : public Item {
     Shield() {
         defense = 7;
         color = sf::Color(180, 180, 180);
+        cooldownAction = 0;
     }
 
     void useTick(int tick) {
@@ -221,8 +225,7 @@ class Shield : public Item {
             case 33:
                 std::cout << "WIP Shield action" << std::endl;
                 if (auto player = dynamic_cast<Player*>(owner)) {
-                    player->setItemAngle(this, 0);
-                    player->getBodyPtr()->SetLinearDamping(0.99);
+                    player->getBodyPtr()->SetLinearDamping(0.99);  // TODO: Replace with a slowdown that works, maybe for all items while a button is held
                 }
                 break;
             case 1:
@@ -237,7 +240,7 @@ class Shield : public Item {
         std::vector<b2PolygonShape> shapeVec;
         b2PolygonShape shape;
 
-        shape.SetAsBox(4, 1);
+        shape.SetAsBox(6, 1);
 
         shapeVec.push_back(shape);
         return shapeVec;

@@ -94,9 +94,19 @@ GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Act
     object->createPhysicalObject(world, 10, 30);
     object->setCollision(false);
 
+    object = new Sword();
+    state.add(object);
+    object->createPhysicalObject(world, 25, 36);
+    object->setCollision(false);
+
     object = new Shield();
     state.add(object);
     object->createPhysicalObject(world, 16, 30);
+    object->setCollision(false);
+
+    object = new Shield();
+    state.add(object);
+    object->createPhysicalObject(world, 16, 45);
     object->setCollision(false);
 
     // b2PolygonShape * shape = new b2PolygonShape();
@@ -254,6 +264,16 @@ void GameController::processAction(const Action& action) {
         case Action::TYPE_DROP_RIGHT:
             std::cout << "Received DROP_RIGHT Action!" << std::endl;
             player->dropRightHand();
+            break;
+
+        case Action::TYPE_ACT_PREP_LEFT:
+            std::cout << "Received ACT_PREP_LEFT Action!" << std::endl;
+            player->prepareItemLeft();
+            break;
+
+        case Action::TYPE_ACT_PREP_RIGHT:
+            std::cout << "Received ACT_PREP_RIGHT Action!" << std::endl;
+            player->prepareItemRight();
             break;
 
         case Action::TYPE_ACT_LEFT:

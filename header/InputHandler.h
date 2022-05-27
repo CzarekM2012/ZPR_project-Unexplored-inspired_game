@@ -28,5 +28,6 @@ class InputHandler {
 
     InputHandler(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q);
 
-    void handleInput(sf::Event event);
+    void handleEvent(sf::Event event);
+    void handleStates();
 };

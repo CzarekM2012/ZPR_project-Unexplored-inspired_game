@@ -47,12 +47,13 @@ int main() {
     while (window.isOpen()) {
         sf::Event event;
 
-        if (window.pollEvent(event) && event.type == sf::Event::Closed) {  // Event doesn't by itself tell if something has happened, need to check pollEvent return
-            window.close();
+        if (window.pollEvent(event)) {
+            inputHandler.handleEvent(event);
+            if (event.type == sf::Event::Closed) {  // Event doesn't by itself tell if something has happened, need to check pollEvent return
+                window.close();
+            }
         }
-
-        inputHandler.handleInput(event);  // This should be called even if no new event has appeared
-                                          // (for e.g. checking if keyboard keys are still pressed)
+        inputHandler.handleStates();
         renderer.render(gameController.getStateCopy());
         // std::this_thread::sleep_for(10ms);
     }

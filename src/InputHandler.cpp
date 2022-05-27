@@ -15,9 +15,7 @@ InputHandler::InputHandler(std::shared_ptr<moodycamel::ReaderWriterQueue<Action>
 }
 
 #define UNUSED(x) (void)(x)  // For now to disable "unused parameter" error
-void InputHandler::handleInput(sf::Event event) {
-    UNUSED(event);
-
+void InputHandler::handleStates() {
     b2Vec2 input(0, 0);
 
     // Is joystick #0 connected?
@@ -81,8 +79,10 @@ void InputHandler::handleInput(sf::Event event) {
         inputStateTab[0][INPUT_LOOK_ANGLE] -= 360.f;
     else if (inputStateTab[0][INPUT_LOOK_ANGLE] < -180.0f)
         inputStateTab[0][INPUT_LOOK_ANGLE] += 360.f;
+}
 
-    // Handling of one-time-pressed keys and buttons
+/// Handling of one-time-pressed keys and buttons
+void InputHandler::handleEvent(sf::Event event) {
     if (event.type == sf::Event::EventType::KeyPressed) {
         Action action(-1, 0);
 
@@ -112,6 +112,25 @@ void InputHandler::handleInput(sf::Event event) {
                 action_q->enqueue(action);
                 break;
 
+            case sf::Keyboard::Num5:
+                action = Action(0, Action::TYPE_ACT_PREP_LEFT);
+                action_q->enqueue(action);
+                break;
+
+            case sf::Keyboard::Num6:
+                action = Action(0, Action::TYPE_ACT_PREP_RIGHT);
+                action_q->enqueue(action);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    if (event.type == sf::Event::EventType::KeyReleased) {
+        Action action(-1, 0);
+
+        switch (event.key.code) {
             case sf::Keyboard::Num5:
                 action = Action(0, Action::TYPE_ACT_LEFT);
                 action_q->enqueue(action);

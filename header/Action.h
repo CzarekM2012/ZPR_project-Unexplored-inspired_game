@@ -13,6 +13,8 @@ class Action {
     static const int TYPE_DROP_RIGHT = 5;
     static const int TYPE_ACT_LEFT = 6;
     static const int TYPE_ACT_RIGHT = 7;
+    static const int TYPE_ACT_PREP_LEFT = 8;
+    static const int TYPE_ACT_PREP_RIGHT = 9;
 
     Action()
         : playerId(-1), type(TYPE_NONE){};
