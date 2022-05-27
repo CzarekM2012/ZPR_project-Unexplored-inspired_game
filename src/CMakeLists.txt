@@ -3,6 +3,7 @@ add_executable(${PROJECT_NAME}
     GameController.cpp
     InputHandler.cpp
     PhysicalObject.cpp
+    Player.cpp
     Renderer.cpp
     main.cpp)
 

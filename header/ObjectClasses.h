@@ -5,57 +5,13 @@
 #include <iostream>
 #include <memory>
 
+#include "Entity.h"
 #include "PhysicalObject.h"
+#include "Player.h"
 
 #define UNUSED(x) (void)(x)  // For now to disable "unused parameter" error
 
-/// A typical object with health pool. Most can be destroyed
-class Entity : public PhysicalObject {
-   protected:
-    bool invulnerable = false;
-    int maxHp = 100;
-    int hp = 100;
-
-   public:
-    bool isInvulnerable() const { return invulnerable; }
-
-    int getHp() { return hp; }
-
-    int getMaxHp() { return maxHp; }
-
-    void damage(int value) {
-        if (isInvulnerable())
-            return;
-
-        hp = hp - value;
-        if (hp <= 0) {
-            hp = 0;
-            // Cannot destroy body here, could trigger when running step(). Checked inside game loop
-            toDestroy = true;
-        }
-    }
-
-    void synchronize() {
-        float bodyPositionX = body->GetPosition().x * M_TO_PX;
-        float bodyPositionY = body->GetPosition().y * M_TO_PX;
-        float bodyRotate = getAngleDeg();
-
-        for (auto& view : views) {
-            view.setPosition(bodyPositionX, bodyPositionY);
-            view.setRotation(bodyRotate);
-        }
-
-        auto colors = getBaseColors();
-        auto color = colors[0];
-        float scale = static_cast<float>(hp) / maxHp;
-        // std::cout << scale << std::endl;
-        color.r *= scale;
-        color.g *= scale;
-        color.b *= scale;
-        // Display HP
-        views[views.size() - 1].setFillColor(color);
-    }
-};
+const int TICKS_PER_SECOND = 33;
 
 class RectangleObject : public Entity {
    protected:
@@ -116,17 +72,76 @@ class Wall : public RectangleObject {
 
 /// Items can be equiped by players. They don't collide until equipped
 class Item : public PhysicalObject {
-   private:
+   protected:
     Entity* owner = nullptr;
+    int cooldown = 0;        ///< In ticks. While positive, disables collisions and use of item's abilities
+    int actionTimeLeft = 0;  ///< In ticks. Positive means that action is being used and will continue for that many ticks
+
+    virtual void useTick(int tick) { UNUSED(tick); }  ///< Can be overloaded to set behaviour each tick
 
    public:
+    float cooldownCollision = 1 * TICKS_PER_SECOND;
+    float cooldownAction = 2 * TICKS_PER_SECOND;
+    float actionTimeTotal = 1 * TICKS_PER_SECOND;
+
     Item() {
-        density = 0.001;  // For now, not to encumber the player too much
+        density = 0.001;  // For now, not to encumber the player too much. Cannot be set to 0, it's reserved for static objects
     };
     Entity* getOwner() { return owner; };
     void setOwner(Entity* newOwner) { owner = newOwner; };
 
-    virtual void use() = 0;
+    bool isOnCooldown() const { return cooldown > 0; }
+    bool isBeingUsed() const { return getActionTimeLeft() > 0; }
+    bool canBeUsed() const { return isOnCooldown() || isBeingUsed(); }
+
+    void useTrigger() {  ///< Triggers action. By itself only sets action timer. useTick() takes care of rest
+        if (!canBeUsed()) {
+            actionTimeLeft = getActionTimeTotal();
+        }
+    };
+    void useTick() {  ///< Continuous use, called each tick from GameController
+        if (isBeingUsed())
+            useTick(actionTimeLeft);
+
+        if (actionTimeLeft-- == 1) {
+            setCooldown(cooldownAction);
+            if (auto player = dynamic_cast<Player*>(owner)) {
+                player->resetItemAngle(this);
+            }
+        }
+    };
+    virtual float getActionTimeTotal() const { return actionTimeTotal; }
+    float getActionTimeLeft() const { return actionTimeLeft; };
+
+    void setCooldown(int ticks) {
+        if (isOnCooldown()) {
+            cooldown = std::max(cooldown, ticks);
+            return;
+        }
+        cooldown = ticks;
+        for_each(views.begin(), views.end(), [&](sf::ConvexShape& shape) { shape.setFillColor(sf::Color::Black); });
+        setCollision(false);
+    }
+
+    void lowerCooldown(int ticks) {
+        cooldown -= ticks;
+        if (cooldown < 0) {
+            cooldown = 0;
+            removeCooldownEffects();
+        }
+    }
+
+    void resetCooldown() {
+        cooldown = 0;
+        removeCooldownEffects();
+    }
+
+    void removeCooldownEffects() {
+        if (owner != nullptr)  // Otherwise could deal damage when dropped
+            setCollision(true);
+        resetColors();
+        generateViews();
+    }
 };
 
 /// Weapons can be used to deal damage to entities
@@ -144,25 +159,47 @@ class Sword : public Weapon {
     };
 
    public:
-    void use() {
-        std::cout << "WIP Sword action" << std::endl;
+    void useTick(int tick) {
+        switch (tick) {
+            case 33:
+                std::cout << "WIP Sword action" << std::endl;
+                if (auto player = dynamic_cast<Player*>(owner)) {
+                    player->setItemAngle(this, 0);
+                }
+                break;
+        }
+        auto ownerBody = owner->getBodyPtr();
+        float angle = ownerBody->GetAngle();
+        int force = 100;
+        b2Vec2 vec = b2Vec2(-force * sin(angle), force * cos(angle));
+        ownerBody->ApplyLinearImpulseToCenter(vec, true);
+        // ownerBody->SetLinearDamping(0);
     }
 
     virtual std::vector<b2PolygonShape> getBaseShapes() {
         std::vector<b2PolygonShape> shapeVec;
         b2PolygonShape shape;
 
-        b2Vec2 triangle[] = {b2Vec2(-2, -2), b2Vec2(0, 3), b2Vec2(2, -2)};
+        b2Vec2 triangle[] = {b2Vec2(-3, -1), b2Vec2(0, 8), b2Vec2(3, -1)};
         shape.Set(triangle, 3);
-
         shapeVec.push_back(shape);
+
+        shape.SetAsBox(0.5, 2, b2Vec2(0, -2), 0);
+        shapeVec.push_back(shape);
+
         return shapeVec;
     }
 
     void onContact(PhysicalObject* const other) {
         auto target = dynamic_cast<Entity*>(other);
         if (target) {
-            target->damage(10);
+            if (!isOnCooldown()) {
+                if (isBeingUsed())
+                    target->damage(20);
+                else
+                    target->damage(10);
+            }
+            setCooldown(cooldownCollision);
             std::cout << "Current HP: " << target->getHp() << "/" << target->getMaxHp() << std::endl;
         }
     }
@@ -179,8 +216,21 @@ class Shield : public Item {
         color = sf::Color(180, 180, 180);
     }
 
-    void use() {
-        std::cout << "WIP Shield action" << std::endl;
+    void useTick(int tick) {
+        switch (tick) {
+            case 33:
+                std::cout << "WIP Shield action" << std::endl;
+                if (auto player = dynamic_cast<Player*>(owner)) {
+                    player->setItemAngle(this, 0);
+                    player->getBodyPtr()->SetLinearDamping(0.99);
+                }
+                break;
+            case 1:
+                if (auto player = dynamic_cast<Player*>(owner)) {
+                    player->getBodyPtr()->SetLinearDamping(0.9);
+                }
+                break;
+        }
     }
 
     virtual std::vector<b2PolygonShape> getBaseShapes() {
@@ -189,119 +239,6 @@ class Shield : public Item {
 
         shape.SetAsBox(4, 1);
 
-        shapeVec.push_back(shape);
-        return shapeVec;
-    }
-};
-
-/// Controlled by the player. Most complex than most entities
-class Player : public Entity {
-    Item *item_lh, *item_rh;
-
-   public:
-    Player() {
-        maxHp = 100;
-        hp = 100;
-        color = sf::Color::Green;
-    }
-
-    void equipLeftHand(Item* const item) {
-        if (item_lh != nullptr)
-            dropLeftHand();
-
-        item->destroyBody();
-        item->setOwner(this);
-        item_lh = item;
-        // addItem(item);
-        updateEquipment();
-    }
-
-    void dropLeftHand() {
-        auto item = item_lh;
-        if (item == nullptr)
-            return;
-
-        item_lh = nullptr;
-        updateEquipment();
-        dropItem(item);
-    }
-
-    void equipRightHand(Item* const item) {
-        if (item_rh != nullptr)
-            dropRightHand();
-
-        item->destroyBody();
-        item->setOwner(this);
-        item_rh = item;
-        // addItem(item);
-        updateEquipment();
-    }
-
-    void dropRightHand() {
-        auto item = item_rh;
-        if (item == nullptr)
-            return;
-
-        item_rh = nullptr;
-        updateEquipment();
-        dropItem(item);
-    }
-
-    void addItem(Item* const item, b2Vec2 relativePos) {
-        for (auto shape : item->getBaseShapes()) {
-            relativePos.y += item->getLength() / 2;
-
-            for (int i = 0; i < shape.m_count; ++i) {
-                shape.m_vertices[i] += relativePos;
-                // TODO: Rot by angle
-            }
-
-            shape.Set(shape.m_vertices, shape.m_count);
-            createFixture(shape, item);
-        }
-
-        for (auto color : item->getBaseColors())
-            viewColors.insert(viewColors.begin(), color);
-    }
-
-    void dropItem(Item* const item) {
-        item->createPhysicalObject(this->body->GetWorld(), this->body->GetPosition().x, this->body->GetPosition().y, this->body->GetAngle() * R_TO_DEG);
-        item->setCollision(false);
-        item->setOwner(nullptr);
-    }
-
-    void updateEquipment() {
-        // this->body->CreateFixture(item_lh->getShape(), item_lh->getDensity());
-
-        reset();
-
-        if (item_lh != nullptr)
-            addItem(item_lh, b2Vec2(4, 6));
-
-        if (item_rh != nullptr)
-            addItem(item_rh, b2Vec2(-4, 6));
-
-        generateViews();
-
-        // std::cout << body->GetMass() << std::endl;
-    }
-
-    void triggerActionLeft() {
-        if (item_lh != nullptr)
-            item_lh->use();
-    }
-
-    void triggerActionRight() {
-        if (item_rh != nullptr)
-            item_rh->use();
-    }
-
-    virtual std::vector<b2PolygonShape> getBaseShapes() {
-        std::vector<b2PolygonShape> shapeVec;
-        b2PolygonShape shape;
-
-        b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7), b2Vec2(5, 5), b2Vec2(5, -5)};
-        shape.Set(pentagon, 5);
         shapeVec.push_back(shape);
         return shapeVec;
     }

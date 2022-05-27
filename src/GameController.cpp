@@ -154,12 +154,15 @@ void GameController::run() {
         std::vector<PhysicalObject*> toRemove;
         for (auto&& object : state.objects) {
             if (object->toDestroy) {
+                std::cout << "Adding object to remove list" << std::endl;
                 toRemove.push_back(object.get());
             }
         }
 
         for (auto object : toRemove) {
+            std::cout << "Destroying object" << std::endl;
             object->destroyBody();
+            std::cout << "Removing object from Physical object list" << std::endl;
             state.remove(object);
         }
 
@@ -205,6 +208,10 @@ void GameController::processPlayerInputStates(int playerId) {
         force = -force;
     if (diff > LOOK_ACC_DEG / 2)
         bodyPtr->ApplyAngularImpulse(force, true);
+
+    player->moveItems();
+    player->tickItemTimers();
+
     // else
     //     std:: cout << "No rotation force needed" << std::endl;
     // std:: cout << "Angle: " << player->getAngleDeg() << " Requested: " <<

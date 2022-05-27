@@ -14,6 +14,7 @@ class GameController {
     const float LOOK_ACC_DEG = 1;
 
     const float PICKUP_RANGE = 10;
+    const float TIME_STEP = 0.03;  ///< In seconds. How much time should pass between each physics step()
 
     State state;
 

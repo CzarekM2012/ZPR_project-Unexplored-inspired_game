@@ -34,7 +34,7 @@ class State {
     void remove(PhysicalObject* objectPtr) {
         auto it = find_if(objects.begin(), objects.end(), [&](std::unique_ptr<PhysicalObject>& object) { return object.get() == objectPtr; });
         if (it != objects.end()) {
-            std::cout << "Deleting object" << std::endl;
+            it->reset();
             objects.erase(it);
         }
     }
