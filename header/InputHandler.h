@@ -22,6 +22,19 @@ class InputHandler {
     static const int INPUT_MOVE_Y = 1;
     static const int INPUT_LOOK_ANGLE = 2;
 
+    // For XInput controller, default bindings may differ between gamepads
+    // Named "JOYSTICK" after SFML convention
+    static const int JOYSTICK_BUTTON_A = 0;
+    static const int JOYSTICK_BUTTON_B = 1;
+    static const int JOYSTICK_BUTTON_X = 2;
+    static const int JOYSTICK_BUTTON_Y = 3;
+    static const int JOYSTICK_BUTTON_LB = 4;
+    static const int JOYSTICK_BUTTON_RB = 5;
+    static const int JOYSTICK_BUTTON_LS = 6;  ///< Left stick press
+    static const int JOYSTICK_BUTTON_RS = 7;  ///< Right stick press
+    static const int JOYSTICK_BUTTON_L3 = 8;
+    static const int JOYSTICK_BUTTON_R3 = 9;
+
     // This is set by InputHandler in every pass, and then checked by GameController each tick
     // contrary to Actions, that are sent into message queue only once, when they appear
     static float inputStateTab[PLAYER_COUNT_MAX][STATE_CONTROLS_PER_PLAYER];

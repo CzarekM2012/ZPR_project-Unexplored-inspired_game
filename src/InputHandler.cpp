@@ -84,9 +84,51 @@ void InputHandler::handleStates() {
 /// Handling of one-time-pressed keys and buttons
 void InputHandler::handleEvent(sf::Event event) {
     Action action;
-    action.playerId = 0;
+
+    if (event.type == sf::Event::JoystickButtonPressed) {
+        action.playerId = event.joystickButton.joystickId;
+        switch (event.joystickButton.button) {
+            case JOYSTICK_BUTTON_X:
+                action.type = Action::Type::PICK_LEFT;
+                break;
+
+            case JOYSTICK_BUTTON_Y:
+                action.type = Action::Type::DROP_LEFT;
+                break;
+
+            case JOYSTICK_BUTTON_A:
+                action.type = Action::Type::PICK_RIGHT;
+                break;
+
+            case JOYSTICK_BUTTON_B:
+                action.type = Action::Type::DROP_RIGHT;
+                break;
+
+            case JOYSTICK_BUTTON_LB:
+                action.type = Action::Type::ACT_PREP_LEFT;
+                break;
+
+            case JOYSTICK_BUTTON_RB:
+                action.type = Action::Type::ACT_PREP_RIGHT;
+                break;
+        }
+    }
+
+    if (event.type == sf::Event::JoystickButtonReleased) {
+        action.playerId = event.joystickButton.joystickId;
+        switch (event.joystickButton.button) {
+            case JOYSTICK_BUTTON_LB:
+                action.type = Action::Type::ACT_LEFT;
+                break;
+
+            case JOYSTICK_BUTTON_RB:
+                action.type = Action::Type::ACT_RIGHT;
+                break;
+        }
+    }
 
     if (event.type == sf::Event::EventType::KeyPressed) {
+        action.playerId = 0;  // Keyboard is fo debug, always controls player 1
         switch (event.key.code) {
             case sf::Keyboard::Tilde:
                 action.type = Action::Type::DEBUG;
@@ -122,6 +164,7 @@ void InputHandler::handleEvent(sf::Event event) {
     }
 
     if (event.type == sf::Event::EventType::KeyReleased) {
+        action.playerId = 0;
         switch (event.key.code) {
             case sf::Keyboard::Num5:
                 action.type = Action::Type::ACT_LEFT;
