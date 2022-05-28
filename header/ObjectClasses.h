@@ -44,7 +44,7 @@ class Box : public RectangleObject {
         height = 10;
         density = 0.1f;
         damping = 0.1f;
-        color = sf::Color::Yellow;
+        primaryColor = sf::Color::Yellow;
     }
 
     Box(int w, int h)
@@ -60,7 +60,7 @@ class Wall : public RectangleObject {
     Wall() {
         invulnerable = true;
         dynamic = false;
-        color = sf::Color::Black;
+        primaryColor = sf::Color::Black;
     }
 
     Wall(int w, int h)
@@ -157,7 +157,7 @@ class Sword : public Weapon {
    public:
     Sword() {
         damage = 10;
-        color = sf::Color(180, 180, 180);
+        primaryColor = sf::Color(180, 180, 180);
         holdInFrontWhenPossible = true;
     };
 
@@ -216,7 +216,7 @@ class Shield : public Item {
    public:
     Shield() {
         defense = 7;
-        color = sf::Color(180, 180, 180);
+        primaryColor = sf::Color(180, 180, 180);
         cooldownAction = 0;
     }
 

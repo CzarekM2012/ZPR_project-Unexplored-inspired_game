@@ -30,6 +30,7 @@ class GameController {
     GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q);
     ~GameController() { delete world; };
 
+    void prepareGame();
     void run();
 
     const State* getStateCopy() const {

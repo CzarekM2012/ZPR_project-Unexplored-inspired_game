@@ -35,18 +35,36 @@ MyContactListener listener;
 #define UNUSED(x) (void)(x)  ///< For now to disable "unused parameter" error
 
 GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q)
-    : action_q(q) {
+    : action_q(q) {}
+
+void GameController::prepareGame() {
     world = new b2World(b2Vec2(0, 0));
     world->SetContactListener(&listener);
 
     // state.add(std::unique_ptr<Player>(new Player()));
-    PhysicalObject* object = new Player();
-    state.add(object);
-    object->createPhysicalObject(world, 10, 10);
+    Player* player = new Player();
+    player->setPrimaryColor(sf::Color::Red);
+    state.add(player);
+    player->createPhysicalObject(world, 10, 10);
+
+    player = new Player();
+    player->setPrimaryColor(sf::Color::Green);
+    state.add(player);
+    player->createPhysicalObject(world, 170, 10);
+
+    player = new Player();
+    player->setPrimaryColor(sf::Color::Blue);
+    state.add(player);
+    player->createPhysicalObject(world, 10, 90);
+
+    player = new Player();
+    state.add(player);
+    player->setPrimaryColor(sf::Color::Magenta);
+    player->createPhysicalObject(world, 170, 90);
 
     // dynamic_cast<Player*>(state.getLast())->createPhysicalObject(world, 10, 10);
 
-    object = new Box();
+    PhysicalObject* object = new Box();
     state.add(object);
     object->createPhysicalObject(world, 80, 38);
 
@@ -149,8 +167,7 @@ void GameController::run() {
         }
 
         // (player movement direction and look angles)
-        for (int i = 0; i < 1;
-             ++i)  // TODO: Change '1' to ~'playerCount' when supported
+        for (int i = 0; i < InputHandler::PLAYER_COUNT_MAX; ++i)
             processPlayerInputStates(i);
 
         Action action;
@@ -186,20 +203,18 @@ void GameController::run() {
 }
 
 void GameController::processPlayerInputStates(int playerId) {
-    UNUSED(playerId);
+    auto player = dynamic_cast<Player*>(state.get(playerId));
+    if (player == nullptr)
+        return;
 
-    auto player = dynamic_cast<Player*>(state.get(0));
     auto bodyPtr = player->getBodyPtr();
     bodyPtr->ApplyLinearImpulseToCenter(
-        b2Vec2(InputHandler::inputStateTab[0][InputHandler::INPUT_MOVE_X] *
-                   FORCE_MOVE,
-               InputHandler::inputStateTab[0][InputHandler::INPUT_MOVE_Y] *
-                   FORCE_MOVE),
+        b2Vec2(InputHandler::inputStateTab[playerId][InputHandler::INPUT_MOVE_X] * FORCE_MOVE,
+               InputHandler::inputStateTab[playerId][InputHandler::INPUT_MOVE_Y] * FORCE_MOVE),
         true);
 
     float angleDeg = player->getAngleDeg();
-    float lookAngle =
-        InputHandler::inputStateTab[0][InputHandler::INPUT_LOOK_ANGLE];
+    float lookAngle = InputHandler::inputStateTab[playerId][InputHandler::INPUT_LOOK_ANGLE];
     float diff = abs(angleDeg - lookAngle);
 
     int force = FORCE_LOOK;
@@ -237,6 +252,8 @@ void GameController::processAction(const Action& action) {
     // Only debug actions allowed without a valid player
     if (!player && action.type != Action::Type::DEBUG)
         return;
+
+    std::cout << "Action from player " << action.playerId << std::endl;
 
     Item* foundItem = nullptr;
     switch (action.type) {

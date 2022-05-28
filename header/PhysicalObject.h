@@ -26,14 +26,14 @@ class PhysicalObject {
     std::vector<b2PolygonShape> shapes;  ///< shapes of fixtures
     std::vector<sf::ConvexShape> views;  ///< objects displayed by the renderer
     std::vector<sf::Color> viewColors;   ///< displayed objects' colors
-    sf::Color color = sf::Color::Magenta;
+    sf::Color primaryColor = sf::Color::Magenta;
 
    public:
     bool toDestroy = false;  ///< should be destroyed by GameController
 
     PhysicalObject(){};
 
-    b2Body* createPhysicalObject(b2World* world, float x, float y, float angle = 0);  ///< creates a box2d object and a view to render it. Params like shape or color are taken from virtual functions or set in constructors
+    b2Body* createPhysicalObject(b2World* world, float x, float y, float angle = 0);  ///< creates a box2d object and a view to render it. Params like shape or primaryColor are taken from virtual functions or set in constructors
 
     b2Body* getBodyPtr() const { return body; };
     void clearFixtures();
@@ -57,6 +57,12 @@ class PhysicalObject {
         views.clear();
     }
 
+    /// Sets primary primaryColor and resets object colors. Base colors should be generated based on primary primaryColor
+    void setPrimaryColor(sf::Color color) {
+        primaryColor = color;
+        resetColors();
+    }
+
     void resetColors() {
         viewColors.clear();
         auto baseColors = getBaseColors();
@@ -70,8 +76,8 @@ class PhysicalObject {
     virtual std::vector<sf::Color> getBaseColors() {
         std::vector<sf::Color> colors;
         // colors.push_back(sf::Color::Magenta);
-        for (unsigned int i = 0; i < shapes.size(); ++i)  // By default set color of all fixtures to base color
-            colors.push_back(color);
+        for (unsigned int i = 0; i < shapes.size(); ++i)  // By default set primaryColor of all fixtures to base primaryColor
+            colors.push_back(primaryColor);
         return colors;
     }
 

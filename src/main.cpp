@@ -42,6 +42,7 @@ int main() {
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q(new moodycamel::ReaderWriterQueue<Action>(ACTION_Q_SIZE));
     InputHandler inputHandler(action_q);
     GameController gameController(action_q);
+    gameController.prepareGame();
 
     std::thread gameLogicThread(&GameController::run, &gameController);  // ~Use a GameController function on gameController object
     while (window.isOpen()) {

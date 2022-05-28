@@ -5,7 +5,7 @@
 Player::Player() {
     maxHp = 100;
     hp = 100;
-    color = sf::Color::Green;
+    primaryColor = sf::Color::Green;
 
     jointDef.collideConnected = false;
     jointDef.enableMotor = true;
