@@ -231,16 +231,20 @@ void GameController::processPlayerInputStates(int playerId) {
 
 void GameController::processAction(const Action& action) {
     Player* player = nullptr;
-    if (action.getPlayerId() >= 0)
-        player = dynamic_cast<Player*>(state.get(action.getPlayerId()));
+    if (action.playerId >= 0)
+        player = dynamic_cast<Player*>(state.get(action.playerId));
+
+    // Only debug actions allowed without a valid player
+    if (!player && action.type != Action::Type::DEBUG)
+        return;
 
     Item* foundItem = nullptr;
-    switch (action.getType()) {
-        case Action::TYPE_DEBUG:
+    switch (action.type) {
+        case Action::Type::DEBUG:
             std::cout << "Received DEBUG Action!" << std::endl;
             break;
 
-        case Action::TYPE_PICK_LEFT:
+        case Action::Type::PICK_LEFT:
             std::cout << "Received PICKUP_LEFT Action!" << std::endl;
 
             foundItem = getFirstPickableItem(player);
@@ -248,12 +252,12 @@ void GameController::processAction(const Action& action) {
                 player->equipLeftHand(foundItem);
             break;
 
-        case Action::TYPE_DROP_LEFT:
+        case Action::Type::DROP_LEFT:
             std::cout << "Received DROP_LEFT Action!" << std::endl;
             player->dropLeftHand();
             break;
 
-        case Action::TYPE_PICK_RIGHT:
+        case Action::Type::PICK_RIGHT:
             std::cout << "Received PICKUP_RIGHT Action!" << std::endl;
 
             foundItem = getFirstPickableItem(player);
@@ -261,27 +265,27 @@ void GameController::processAction(const Action& action) {
                 player->equipRightHand(foundItem);
             break;
 
-        case Action::TYPE_DROP_RIGHT:
+        case Action::Type::DROP_RIGHT:
             std::cout << "Received DROP_RIGHT Action!" << std::endl;
             player->dropRightHand();
             break;
 
-        case Action::TYPE_ACT_PREP_LEFT:
+        case Action::Type::ACT_PREP_LEFT:
             std::cout << "Received ACT_PREP_LEFT Action!" << std::endl;
             player->prepareItemLeft();
             break;
 
-        case Action::TYPE_ACT_PREP_RIGHT:
+        case Action::Type::ACT_PREP_RIGHT:
             std::cout << "Received ACT_PREP_RIGHT Action!" << std::endl;
             player->prepareItemRight();
             break;
 
-        case Action::TYPE_ACT_LEFT:
+        case Action::Type::ACT_LEFT:
             std::cout << "Received ACT_LEFT Action!" << std::endl;
             player->triggerActionLeft();
             break;
 
-        case Action::TYPE_ACT_RIGHT:
+        case Action::Type::ACT_RIGHT:
             std::cout << "Received ACT_RIGHT Action!" << std::endl;
             player->triggerActionRight();
             break;

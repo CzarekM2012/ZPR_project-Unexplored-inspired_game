@@ -83,43 +83,37 @@ void InputHandler::handleStates() {
 
 /// Handling of one-time-pressed keys and buttons
 void InputHandler::handleEvent(sf::Event event) {
-    if (event.type == sf::Event::EventType::KeyPressed) {
-        Action action(-1, 0);
+    Action action;
+    action.playerId = 0;
 
+    if (event.type == sf::Event::EventType::KeyPressed) {
         switch (event.key.code) {
             case sf::Keyboard::Tilde:
-                action = Action(-1, Action::TYPE_DEBUG);
-                action_q->enqueue(action);
+                action.type = Action::Type::DEBUG;
                 break;
 
             case sf::Keyboard::Num1:
-                action = Action(0, Action::TYPE_PICK_LEFT);
-                action_q->enqueue(action);
+                action.type = Action::Type::PICK_LEFT;
                 break;
 
             case sf::Keyboard::Num2:
-                action = Action(0, Action::TYPE_DROP_LEFT);
-                action_q->enqueue(action);
+                action.type = Action::Type::DROP_LEFT;
                 break;
 
             case sf::Keyboard::Num3:
-                action = Action(0, Action::TYPE_PICK_RIGHT);
-                action_q->enqueue(action);
+                action.type = Action::Type::PICK_RIGHT;
                 break;
 
             case sf::Keyboard::Num4:
-                action = Action(0, Action::TYPE_DROP_RIGHT);
-                action_q->enqueue(action);
+                action.type = Action::Type::DROP_RIGHT;
                 break;
 
             case sf::Keyboard::Num5:
-                action = Action(0, Action::TYPE_ACT_PREP_LEFT);
-                action_q->enqueue(action);
+                action.type = Action::Type::ACT_PREP_LEFT;
                 break;
 
             case sf::Keyboard::Num6:
-                action = Action(0, Action::TYPE_ACT_PREP_RIGHT);
-                action_q->enqueue(action);
+                action.type = Action::Type::ACT_PREP_RIGHT;
                 break;
 
             default:
@@ -128,21 +122,21 @@ void InputHandler::handleEvent(sf::Event event) {
     }
 
     if (event.type == sf::Event::EventType::KeyReleased) {
-        Action action(-1, 0);
-
         switch (event.key.code) {
             case sf::Keyboard::Num5:
-                action = Action(0, Action::TYPE_ACT_LEFT);
-                action_q->enqueue(action);
+                action.type = Action::Type::ACT_LEFT;
                 break;
 
             case sf::Keyboard::Num6:
-                action = Action(0, Action::TYPE_ACT_RIGHT);
-                action_q->enqueue(action);
+                action.type = Action::Type::ACT_RIGHT;
                 break;
 
             default:
                 break;
         }
+    }
+
+    if (action.type != Action::Type::NONE) {
+        action_q->enqueue(action);
     }
 }
