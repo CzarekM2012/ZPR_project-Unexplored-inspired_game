@@ -11,7 +11,7 @@
 
 #define UNUSED(x) (void)(x)  // For now to disable "unused parameter" error
 
-const int TICKS_PER_SECOND = 33;
+const int TICKS_PER_SECOND = 100;  // TODO: connect with GameController::TIME_STEP
 
 class RectangleObject : public Entity {
    protected:

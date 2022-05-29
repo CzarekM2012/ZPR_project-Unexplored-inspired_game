@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <chrono>
 #include <iostream>
 #include <memory>
 #include <thread>
@@ -166,6 +165,10 @@ void GameController::prepareGame() {
 
 void GameController::run() {
     running = true;
+    auto lastTime = std::chrono::steady_clock::now();
+    // int fps = 0;
+    // auto lastSecond = std::chrono::steady_clock::now();
+
     while (!stop) {
         if (state.getObjectCount() == 0) {
             std::this_thread::sleep_for(1ms);
@@ -225,7 +228,18 @@ void GameController::run() {
         drawableCopyMutex.unlock();
 
         // Wait for the next tick
-        std::this_thread::sleep_for(1ms);  // TODO: Add time control
+        // std::cout << "Duration = " << TIME_STEP.count() << ", Time to wait = " << (TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime)).count() << " Time spent: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime).count() << std::endl;
+        // std::this_thread::sleep_for(TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime));  // TODO: Add time control
+        while (TIME_STEP > std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime))  // TODO: Replace this with some form of non-active waiting
+            ;
+        lastTime = std::chrono::steady_clock::now();
+        // fps += 1;
+
+        // if (std::chrono::duration_cast<std::chrono::seconds>(lastTime - lastSecond).count() >= 1) {
+        //     lastSecond = std::chrono::steady_clock::now();
+        //     std::cout << "FPS: " << fps << std::endl;
+        //     fps = 0;
+        // }
     }
     running = false;
 }

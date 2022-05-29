@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <mutex>
 
 #include "readerwriterqueue.h"
@@ -16,7 +17,7 @@ class GameController {
     const float LOOK_ACC_DEG = 1;
 
     const float PICKUP_RANGE = 10;
-    const float TIME_STEP = 0.03;  ///< In seconds. How much time should pass between each physics step()
+    const std::chrono::duration<int64_t, std::milli> TIME_STEP = std::chrono::duration<int64_t, std::milli>(10);  ///< How much time (ms) should pass between each physics step() call
 
     State state;
     Player* players[InputHandler::PLAYER_COUNT_MAX];
