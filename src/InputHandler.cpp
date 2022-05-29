@@ -144,6 +144,10 @@ void InputHandler::handleEvent(sf::Event event) {
                 action.type = Action::Type::DEBUG;
                 break;
 
+            case sf::Keyboard::R:
+                action.type = Action::Type::RESTART;
+                break;
+
             case sf::Keyboard::Num1:
                 action.type = Action::Type::PICK_LEFT;
                 break;

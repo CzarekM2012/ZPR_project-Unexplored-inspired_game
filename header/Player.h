@@ -11,9 +11,9 @@ class Player : public Entity {
     const float ANGLE_SIDE = 45;
     const float DIST_HELD = 7;
 
-    Item *itemLH, *itemRH;                                         ///< Left and right hand items
-    Item* itemFront;                                               ///< Either left or right, should be held in front
-    b2RevoluteJoint *jointLH, *jointRH;                            ///< Left and right hand joint objects
+    Item *itemLH = nullptr, *itemRH = nullptr;                     ///< Left and right hand items
+    Item* itemFront = nullptr;                                     ///< Either left or right, should be held in front
+    b2RevoluteJoint *jointLH = nullptr, *jointRH = nullptr;        ///< Left and right hand joint objects
     b2RevoluteJointDef jointDef;                                   ///< Joint definition for hand slots. Used to create joints each time an item is picked up
     float targetAngleLH = ANGLE_SIDE, targetAngleRH = ANGLE_SIDE;  ///< Angle at which the item should be held. Can be changed to swing items
 
@@ -33,7 +33,6 @@ class Player : public Entity {
     void equipRightHand(Item* const item);
     void dropLeftHand();
     void dropRightHand();
-    void dropItem(Item* const item);
 
     void prepareItemLeft();
     void prepareItemRight();

@@ -38,6 +38,8 @@ GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Act
     : action_q(q) {}
 
 void GameController::prepareGame() {
+    const std::lock_guard<std::mutex> guard(drawableCopyMutex);
+
     world = new b2World(b2Vec2(0, 0));
     world->SetContactListener(&listener);
 
@@ -46,21 +48,25 @@ void GameController::prepareGame() {
     player->setPrimaryColor(sf::Color::Red);
     state.add(player);
     player->createPhysicalObject(world, 10, 10);
+    players[0] = player;
 
     player = new Player();
     player->setPrimaryColor(sf::Color::Green);
     state.add(player);
     player->createPhysicalObject(world, 170, 10);
+    players[1] = player;
 
     player = new Player();
     player->setPrimaryColor(sf::Color::Blue);
     state.add(player);
     player->createPhysicalObject(world, 10, 90);
+    players[2] = player;
 
     player = new Player();
     state.add(player);
     player->setPrimaryColor(sf::Color::Magenta);
     player->createPhysicalObject(world, 170, 90);
+    players[3] = player;
 
     // dynamic_cast<Player*>(state.getLast())->createPhysicalObject(world, 10, 10);
 
@@ -94,7 +100,7 @@ void GameController::prepareGame() {
     wall = new Wall();
     state.add(wall);
     wall->setSize(200, 4);
-    wall->createPhysicalObject(world, 0, 50, 90);
+    wall->createPhysicalObject(world, 1, 50, 90);
 
     wall = new Wall();
     state.add(wall);
@@ -159,6 +165,7 @@ void GameController::prepareGame() {
 }
 
 void GameController::run() {
+    running = true;
     while (!stop) {
         if (state.getObjectCount() == 0) {
             std::this_thread::sleep_for(1ms);
@@ -178,6 +185,7 @@ void GameController::run() {
         // Process Physics
         world->Step(1, 8, 3);
 
+        drawableCopyMutex.lock();
         std::vector<PhysicalObject*> toRemove;
         for (auto&& object : state.objects) {
             if (object->toDestroy) {
@@ -191,20 +199,40 @@ void GameController::run() {
             object->destroyBody();
             std::cout << "Removing object from Physical object list" << std::endl;
             state.remove(object);
+
+            int alive = 0;
+            for (int i = 0; i < InputHandler::PLAYER_COUNT_MAX; ++i) {
+                if (players[i] == object)
+                    players[i] = nullptr;
+
+                if (players[i])
+                    ++alive;
+            }
+
+            if (alive <= 1) {
+                drawableCopyMutex.unlock();
+                restartGame();
+                drawableCopyMutex.lock();
+            }
         }
 
         for (auto&& object : state.objects) {
-            object->synchronize();  // TODO: This probably sould be put in a critical section
+            object->synchronize();
         }
+
+        // std::this_thread::sleep_for(10ms); // For synchronization testing
+
+        drawableCopyMutex.unlock();
 
         // Wait for the next tick
         std::this_thread::sleep_for(1ms);  // TODO: Add time control
     }
+    running = false;
 }
 
 void GameController::processPlayerInputStates(int playerId) {
-    auto player = dynamic_cast<Player*>(state.get(playerId));
-    if (player == nullptr)
+    auto player = players[playerId];
+    if (!player)
         return;
 
     auto bodyPtr = player->getBodyPtr();
@@ -246,19 +274,43 @@ void GameController::processPlayerInputStates(int playerId) {
 
 void GameController::processAction(const Action& action) {
     Player* player = nullptr;
-    if (action.playerId >= 0)
-        player = dynamic_cast<Player*>(state.get(action.playerId));
+    if (action.playerId >= 0 && action.playerId < InputHandler::PLAYER_COUNT_MAX)
+        player = players[action.playerId];
 
     // Only debug actions allowed without a valid player
-    if (!player && action.type != Action::Type::DEBUG)
+    if (!player && action.type != Action::Type::DEBUG && action.type != Action::Type::RESTART)
         return;
 
     std::cout << "Action from player " << action.playerId << std::endl;
 
     Item* foundItem = nullptr;
+    Box* box;
     switch (action.type) {
         case Action::Type::DEBUG:
             std::cout << "Received DEBUG Action!" << std::endl;
+            drawableCopyMutex.lock();
+            box = new Box();
+            state.add(box);
+            box->createPhysicalObject(world, 80, 10);
+            box->damage(99);
+            box = new Box();
+            state.add(box);
+            box->createPhysicalObject(world, 80, 10);
+            box->damage(99);
+            box = new Box();
+            state.add(box);
+            box->createPhysicalObject(world, 80, 10);
+            box->damage(99);
+            box = new Box();
+            state.add(box);
+            box->createPhysicalObject(world, 80, 10);
+            box->damage(99);
+            drawableCopyMutex.unlock();
+            break;
+
+        case Action::Type::RESTART:
+            std::cout << "Received RESTART Action!" << std::endl;
+            restartGame();
             break;
 
         case Action::Type::PICK_LEFT:
@@ -312,6 +364,20 @@ void GameController::processAction(const Action& action) {
     }
 }
 
+void GameController::restartGame() {
+    std::cout << "Restarting..." << std::endl;
+    drawableCopyMutex.lock();
+    state.objects.clear();
+    drawableCopyMutex.unlock();
+    players[0] = nullptr;
+    players[1] = nullptr;
+    players[2] = nullptr;
+    players[3] = nullptr;
+    delete world;
+    prepareGame();
+    std::cout << "Restarting finished" << std::endl;
+}
+
 Item* GameController::getFirstPickableItem(Player* player) const {
     // TODO: Replace loop with something like:
     // std::copy_if(state.objects.begin(), state.objects.end(), foundObjects.begin(),
@@ -336,4 +402,20 @@ Item* GameController::getFirstPickableItem(Player* player) const {
         }
     }
     return nullptr;
+}
+
+std::vector<sf::ConvexShape> GameController::getDrawablesCopy() {
+    std::vector<sf::ConvexShape> drawables;
+    if (!drawableCopyMutex.try_lock()) {
+        // std::cout << "Lock failed!" << std::endl;
+        return drawables;
+    }
+
+    for (auto&& objectPtr : state.objects) {
+        auto toAdd = objectPtr->getViews();
+        drawables.insert(drawables.end(), toAdd.begin(), toAdd.end());
+    }
+
+    drawableCopyMutex.unlock();
+    return drawables;
 }

@@ -5,21 +5,34 @@
 
 #include "Renderer.h"
 
-void Renderer::render(const State* state) const {
+void Renderer::render(std::vector<sf::ConvexShape> shapes) {
     window->clear(sf::Color(100, 100, 100));
 
-    if (state->getObjectCount() == 0) {  // Just in case and for debug, should not happen normally
-        window->display();               // Keeps the window displaying
-        std::cout << "No objects to display!" << std::endl;
-        return;
-    }
+    // std::cout << "Before: " << shapes.size() << std::endl;
 
-    for (auto&& object : state->objects) {
+    if (shapes.empty())
+        shapes = lastDrawn;
+    else
+        lastDrawn = shapes;
+
+    // std::cout << "After: " << shapes.size() << std::endl;
+
+    // if (shapes.empty()) {   // Just in case and for debug, should not happen normally
+    //     window->display();  // Keeps the window displaying
+    //     std::cout << "No objects to display!" << std::endl;
+    //     return;
+    // }
+
+    // int i = 0;
+    for (auto shape : shapes) {
         // std::cout << object->getBodyPtr()->GetPosition().x << " " << object->getBodyPtr()->GetPosition().y << std::endl;
 
-        for (auto view : object->getViews()) {
-            window->draw(view);
-        }
+        // Blinking objects debug
+        // if (shape.getPosition().x == 0) {
+        //     std::cout << "FOUND " << ++i << std::endl;
+        //     continue;
+        // }
+        window->draw(shape);
     }
 
     window->display();

@@ -42,11 +42,19 @@ int main() {
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q(new moodycamel::ReaderWriterQueue<Action>(ACTION_Q_SIZE));
     InputHandler inputHandler(action_q);
     GameController gameController(action_q);
-    gameController.prepareGame();
 
-    std::thread gameLogicThread(&GameController::run, &gameController);  // ~Use a GameController function on gameController object
+    gameController.prepareGame();
+    std::thread gameLogicThread(&GameController::run, &gameController);
+
     while (window.isOpen()) {
         sf::Event event;
+
+        // if (!gameController.running) {
+        //     gameController.prepareGame();
+        //     gameLogicThread = new std::thread(&GameController::run, &gameController);
+        //     while (!gameController.running)
+        //         std::this_thread::sleep_for(1ms);
+        // }
 
         if (window.pollEvent(event)) {
             inputHandler.handleEvent(event);
@@ -55,7 +63,7 @@ int main() {
             }
         }
         inputHandler.handleStates();
-        renderer.render(gameController.getStateCopy());
+        renderer.render(gameController.getDrawablesCopy());
         // std::this_thread::sleep_for(10ms);
     }
     std::cout << "Window closed" << std::endl;

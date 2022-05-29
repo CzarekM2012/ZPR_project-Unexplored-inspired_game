@@ -137,12 +137,6 @@ void Player::dropRightHand() {
     body->GetWorld()->DestroyJoint(jointRH);
 }
 
-void Player::dropItem(Item* const item) {
-    item->createPhysicalObject(this->body->GetWorld(), this->body->GetPosition().x, this->body->GetPosition().y, this->body->GetAngle() * R_TO_DEG);
-    item->setCollision(false);
-    item->setOwner(nullptr);
-}
-
 void Player::triggerActionLeft() {
     if (itemLH) {
         itemLH->useTrigger();

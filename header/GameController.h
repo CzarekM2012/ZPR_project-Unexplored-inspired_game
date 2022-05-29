@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mutex>
+
 #include "readerwriterqueue.h"
 
 #include "InputHandler.h"
@@ -17,8 +19,10 @@ class GameController {
     const float TIME_STEP = 0.03;  ///< In seconds. How much time should pass between each physics step()
 
     State state;
+    Player* players[InputHandler::PLAYER_COUNT_MAX];
 
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q;
+    std::mutex drawableCopyMutex;
 
     void processPlayerInputStates(int playerId);
     void processAction(const Action& action);
@@ -26,17 +30,16 @@ class GameController {
    public:
     b2World* world;
     static bool stop;
+    bool running = false;
 
     GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q);
     ~GameController() { delete world; };
 
-    void prepareGame();
-    void run();
+    void prepareGame();  ///< Creates and populates world with objects, assigns players
+    void restartGame();  ///< Destroys current world and calls prepareGame()
+    void run();          ///< Processes physics and player input each tick untill 'stop' is set to true
 
-    const State* getStateCopy() const {
-        // State result = state;
-        return &state;
-    }
+    std::vector<sf::ConvexShape> getDrawablesCopy();
 
     Item* getFirstPickableItem(Player* player) const;
 

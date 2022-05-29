@@ -8,11 +8,12 @@
 class Renderer {
    private:
     sf::RenderWindow* window;
+    std::vector<sf::ConvexShape> lastDrawn;
 
    public:
     Renderer(){};
     Renderer(sf::RenderWindow* render_window)
         : window(render_window){};
 
-    void render(const State* state) const;
+    void render(std::vector<sf::ConvexShape> shapes);
 };

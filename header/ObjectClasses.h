@@ -121,7 +121,7 @@ class Item : public PhysicalObject {
             return;
         }
         cooldown = ticks;
-        for_each(views.begin(), views.end(), [&](sf::ConvexShape& shape) { shape.setFillColor(sf::Color::Black); });
+        // for_each(views.begin(), views.end(), [&](sf::ConvexShape& shape) { shape.setFillColor(sf::Color::Black); });
         setCollision(false);
     }
 
@@ -141,8 +141,28 @@ class Item : public PhysicalObject {
     void removeCooldownEffects() {
         if (owner != nullptr)  // Otherwise could deal damage when dropped
             setCollision(true);
-        resetColors();
-        generateViews();
+        // resetColors();
+        // generateViews();
+    }
+
+    void synchronize() {
+        float bodyPositionX = body->GetPosition().x * M_TO_PX;
+        float bodyPositionY = body->GetPosition().y * M_TO_PX;
+        float bodyRotate = getAngleDeg();
+
+        auto colors = getBaseColors();
+        for (unsigned int i = 0; i < views.size(); ++i) {
+            auto& view = views[i];
+            auto color = colors[i];
+
+            view.setPosition(bodyPositionX, bodyPositionY);
+            view.setRotation(bodyRotate);
+
+            if (isOnCooldown())
+                view.setFillColor(sf::Color::Black);
+            else
+                view.setFillColor(color);
+        }
     }
 };
 
@@ -203,7 +223,7 @@ class Sword : public Weapon {
                     target->damage(10);
             }
             setCooldown(cooldownCollision);
-            std::cout << "Current HP: " << target->getHp() << "/" << target->getMaxHp() << std::endl;
+            // std::cout << "Current HP: " << target->getHp() << "/" << target->getMaxHp() << std::endl;
         }
     }
 };

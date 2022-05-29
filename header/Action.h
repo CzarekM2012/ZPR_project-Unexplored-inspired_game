@@ -3,6 +3,7 @@ struct Action {
     enum Type {
         NONE,
         DEBUG,
+        RESTART,
         PICK_LEFT,
         DROP_LEFT,
         PICK_RIGHT,
