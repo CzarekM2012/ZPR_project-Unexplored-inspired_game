@@ -20,12 +20,12 @@ class GameController {
     const std::chrono::duration<int64_t, std::milli> TIME_STEP = std::chrono::duration<int64_t, std::milli>(10);  ///< How much time (ms) should pass between each physics step() call
 
     State state;
-    Player* players[InputHandler::PLAYER_COUNT_MAX];
+    std::array<Player*, InputHandler::PLAYER_COUNT_MAX> players;
 
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q;
     std::mutex drawableCopyMutex;
 
-    void processPlayerInputStates(int playerId);
+    void processPlayerInputStates(const int playerId);
     void processAction(const Action& action);
 
    public:

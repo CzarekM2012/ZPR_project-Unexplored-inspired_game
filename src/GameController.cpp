@@ -43,94 +43,61 @@ void GameController::prepareGame() {
     world->SetContactListener(&listener);
 
     // state.add(std::unique_ptr<Player>(new Player()));
-    Player* player = new Player();
-    player->setPrimaryColor(sf::Color::Red);
-    state.add(player);
-    player->createPhysicalObject(world, 10, 10);
-    players[0] = player;
 
-    player = new Player();
-    player->setPrimaryColor(sf::Color::Green);
-    state.add(player);
-    player->createPhysicalObject(world, 170, 10);
-    players[1] = player;
-
-    player = new Player();
-    player->setPrimaryColor(sf::Color::Blue);
-    state.add(player);
-    player->createPhysicalObject(world, 10, 90);
-    players[2] = player;
-
-    player = new Player();
-    state.add(player);
-    player->setPrimaryColor(sf::Color::Magenta);
-    player->createPhysicalObject(world, 170, 90);
-    players[3] = player;
-
+    std::array<std::tuple<sf::Color, float, float>, InputHandler::PLAYER_COUNT_MAX> players_parameters = {
+        std::make_tuple(sf::Color::Red, 10, 10),
+        std::make_tuple(sf::Color::Green, 170, 10),
+        std::make_tuple(sf::Color::Blue, 10, 90),
+        std::make_tuple(sf::Color::Magenta, 170, 90)};
+    std::transform(players_parameters.begin(), players_parameters.end(), players.begin(), [&](const auto& params) {
+        auto player = new Player();
+        player->setPrimaryColor(std::get<0>(params));
+        state.add(player);
+        player->createPhysicalObject(world, std::get<1>(params), std::get<2>(params));
+        return player;
+    });
     // dynamic_cast<Player*>(state.getLast())->createPhysicalObject(world, 10, 10);
 
-    PhysicalObject* object = new Box();
-    state.add(object);
-    object->createPhysicalObject(world, 80, 38);
-
-    object = new Box();
-    state.add(object);
-    object->createPhysicalObject(world, 74, 50);
-
-    object = new Box();
-    state.add(object);
-    object->createPhysicalObject(world, 82, 63);
+    std::array<std::tuple<float, float>, 3> boxes_parameters = {
+        std::make_tuple(80, 38),
+        std::make_tuple(74, 50),
+        std::make_tuple(82, 63)};
+    std::for_each(boxes_parameters.begin(), boxes_parameters.end(), [&](auto& params) {
+        auto box = new Box();
+        state.add(box);
+        box->createPhysicalObject(world, std::get<0>(params), std::get<1>(params));
+    });
 
     // state.add(new Box())->createPhysicalObject(world, 80, 38);
     // state.add(new Box())->createPhysicalObject(world, 74, 50);
     // state.add(new Box())->createPhysicalObject(world, 82, 63);
 
     // Add some walls
-    Wall* wall = new Wall();
-    state.add(wall);
-    wall->setSize(200, 4);
-    wall->createPhysicalObject(world, 100, 0);
-
-    wall = new Wall();
-    state.add(wall);
-    wall->setSize(200, 4);
-    wall->createPhysicalObject(world, 100, 107.5);
-
-    wall = new Wall();
-    state.add(wall);
-    wall->setSize(200, 4);
-    wall->createPhysicalObject(world, 1, 50, 90);
-
-    wall = new Wall();
-    state.add(wall);
-    wall->setSize(200, 4);
-    wall->createPhysicalObject(world, 191.5, 50, 90);
-
-    wall = new Wall();
-    state.add(wall);
-    wall->setSize(40, 4);
-    wall->createPhysicalObject(world, 95, 50, 90);
+    std::array<std::tuple<float, float, float, float, float>, 5> walls_parameters = {
+        std::make_tuple(200, 4, 100, 0, 0),
+        std::make_tuple(200, 4, 100, 107.5, 0),
+        std::make_tuple(200, 4, 1, 50, 90),
+        std::make_tuple(200, 4, 191.5, 50, 90),
+        std::make_tuple(40, 4, 95, 50, 90)};
+    std::for_each(walls_parameters.begin(), walls_parameters.end(), [&](auto& params) {
+        auto wall = new Wall();
+        state.add(wall);
+        wall->setSize(std::get<0>(params), std::get<1>(params));
+        wall->createPhysicalObject(world, std::get<2>(params), std::get<3>(params), std::get<4>(params));
+    });
 
     // Test some stuff
-    object = new Sword();
-    state.add(object);
-    object->createPhysicalObject(world, 10, 30);
-    object->setCollision(false);
-
-    object = new Sword();
-    state.add(object);
-    object->createPhysicalObject(world, 25, 36);
-    object->setCollision(false);
-
-    object = new Shield();
-    state.add(object);
-    object->createPhysicalObject(world, 16, 30);
-    object->setCollision(false);
-
-    object = new Shield();
-    state.add(object);
-    object->createPhysicalObject(world, 16, 45);
-    object->setCollision(false);
+    std::array<std::tuple<PhysicalObject*, float, float>, 4> equimpents_parameters = {
+        std::make_tuple(new Sword(), 10, 30),
+        std::make_tuple(new Sword(), 25, 36),
+        std::make_tuple(new Shield(), 16, 30),
+        std::make_tuple(new Shield(), 16, 45)};
+    std::for_each(equimpents_parameters.begin(), equimpents_parameters.end(), [&](auto& params) {
+        auto object = std::get<0>(params);
+        state.add(object);
+        object->createPhysicalObject(world, std::get<1>(params), std::get<2>(params));
+        object->setCollision(false);
+    });
 
     // b2PolygonShape * shape = new b2PolygonShape();
 
@@ -177,7 +144,7 @@ void GameController::run() {
         }
 
         // (player movement direction and look angles)
-        for (int i = 0; i < InputHandler::PLAYER_COUNT_MAX; ++i)
+        for (unsigned int i = 0; i < players.size(); ++i)
             processPlayerInputStates(i);
 
         Action action;
@@ -244,8 +211,8 @@ void GameController::run() {
     running = false;
 }
 
-void GameController::processPlayerInputStates(int playerId) {
-    auto player = players[playerId];
+void GameController::processPlayerInputStates(const int playerId) {
+    auto player = players.at(playerId);
     if (!player)
         return;
 
@@ -298,27 +265,16 @@ void GameController::processAction(const Action& action) {
     std::cout << "Action from player " << action.playerId << std::endl;
 
     Item* foundItem = nullptr;
-    Box* box;
     switch (action.type) {
         case Action::Type::DEBUG:
             std::cout << "Received DEBUG Action!" << std::endl;
             drawableCopyMutex.lock();
-            box = new Box();
-            state.add(box);
-            box->createPhysicalObject(world, 80, 10);
-            box->damage(99);
-            box = new Box();
-            state.add(box);
-            box->createPhysicalObject(world, 80, 10);
-            box->damage(99);
-            box = new Box();
-            state.add(box);
-            box->createPhysicalObject(world, 80, 10);
-            box->damage(99);
-            box = new Box();
-            state.add(box);
-            box->createPhysicalObject(world, 80, 10);
-            box->damage(99);
+            for (int i = 0; i < 4; ++i) {
+                auto box = new Box();
+                state.add(box);
+                box->createPhysicalObject(world, 80, 10);
+                box->damage(99);
+            }
             drawableCopyMutex.unlock();
             break;
 
@@ -383,10 +339,7 @@ void GameController::restartGame() {
     drawableCopyMutex.lock();
     state.objects.clear();
     drawableCopyMutex.unlock();
-    players[0] = nullptr;
-    players[1] = nullptr;
-    players[2] = nullptr;
-    players[3] = nullptr;
+    players.fill(nullptr);
     delete world;
     prepareGame();
     std::cout << "Restarting finished" << std::endl;
