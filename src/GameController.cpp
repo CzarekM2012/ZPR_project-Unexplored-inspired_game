@@ -216,17 +216,18 @@ void GameController::processPlayerInputStates(const int playerId) {
     if (!player)
         return;
 
+    auto playerInput = InputHandler::inputStateTab.at(playerId);
     auto bodyPtr = player->getBodyPtr();
-    bodyPtr->ApplyLinearImpulseToCenter(
-        b2Vec2(InputHandler::inputStateTab[playerId][InputHandler::INPUT_MOVE_X] * FORCE_MOVE,
-               InputHandler::inputStateTab[playerId][InputHandler::INPUT_MOVE_Y] * FORCE_MOVE),
-        true);
+
+    auto movementVector = std::get<InputHandler::INPUT_MOVEMENT>(playerInput);
+    movementVector *= FORCE_MOVE;
+    bodyPtr->ApplyLinearImpulseToCenter(movementVector, true);
 
     float angleDeg = player->getAngleDeg();
-    float lookAngle = InputHandler::inputStateTab[playerId][InputHandler::INPUT_LOOK_ANGLE];
+    float lookAngle = std::get<InputHandler::INPUT_LOOK_ANGLE>(playerInput);
     float diff = abs(angleDeg - lookAngle);
 
-    int force = FORCE_LOOK;
+    auto force = FORCE_LOOK;
     if (diff > 180.0f) {
         diff = 360.0f - diff;
         force = -force;
