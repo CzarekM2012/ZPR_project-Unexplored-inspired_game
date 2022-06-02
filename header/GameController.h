@@ -30,7 +30,7 @@ class GameController {
 
    public:
     b2World* world;
-    static bool stop;
+    volatile static bool stop;
     bool running = false;
 
     GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q);

@@ -32,6 +32,7 @@ class PhysicalObject {
     bool toDestroy = false;  ///< should be destroyed by GameController
 
     PhysicalObject(){};
+    virtual ~PhysicalObject(){};
 
     b2Body* createPhysicalObject(b2World* world, float x, float y, float angle = 0);  ///< creates a box2d object and a view to render it. Params like shape or primaryColor are taken from virtual functions or set in constructors
 

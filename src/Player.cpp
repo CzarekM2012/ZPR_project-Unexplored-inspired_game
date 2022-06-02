@@ -14,6 +14,22 @@ Player::Player() {
     jointDef.localAnchorA.Set(0, 0);
 }
 
+Player::~Player() {
+    // Very similar to drop...Hand, just doesn't destroy joint (it's probably destroyed earlier)
+    if (itemLH) {
+        itemLH->setOwner(nullptr);
+        itemLH->setCollision(false);
+        itemLH->resetCooldown();
+        itemLH = nullptr;
+    }
+    if (itemRH) {
+        itemRH->setOwner(nullptr);
+        itemRH->setCollision(false);
+        itemRH->resetCooldown();
+        itemRH = nullptr;
+    }
+}
+
 void Player::moveItems() {
     if (itemLH && itemLH->isBeingUsed()) {
         itemFront = nullptr;

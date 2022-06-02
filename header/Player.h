@@ -19,6 +19,7 @@ class Player : public Entity {
 
    public:
     Player();
+    ~Player();
 
     b2RevoluteJoint* getJointLeft() { return jointLH; }
     Item* getItemLH() { return itemLH; }

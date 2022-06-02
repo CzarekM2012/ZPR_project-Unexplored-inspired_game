@@ -28,7 +28,7 @@ class MyContactListener : public b2ContactListener {
     }
 };
 
-bool GameController::stop;
+volatile bool GameController::stop;
 MyContactListener listener;
 
 #define UNUSED(x) (void)(x)  ///< For now to disable "unused parameter" error
@@ -87,17 +87,54 @@ void GameController::prepareGame() {
     });
 
     // Test some stuff
-    std::array<std::tuple<PhysicalObject*, float, float>, 4> equimpents_parameters = {
-        std::make_tuple(new Sword(), 10, 30),
-        std::make_tuple(new Sword(), 25, 36),
-        std::make_tuple(new Shield(), 16, 30),
-        std::make_tuple(new Shield(), 16, 45)};
+    std::array<std::tuple<PhysicalObject*, float, float>, 8> equimpents_parameters = {
+        std::make_tuple(new Sword(), 10, 10),
+        std::make_tuple(new Sword(), 170, 10),
+        std::make_tuple(new Sword(), 10, 90),
+        std::make_tuple(new Sword(), 170, 90),
+
+        std::make_tuple(new Shield(), 10, 10),
+        std::make_tuple(new Shield(), 170, 10),
+        std::make_tuple(new Shield(), 10, 90),
+        std::make_tuple(new Shield(), 170, 90)};
     std::for_each(equimpents_parameters.begin(), equimpents_parameters.end(), [&](auto& params) {
         auto object = std::get<0>(params);
         state.add(object);
         object->createPhysicalObject(world, std::get<1>(params), std::get<2>(params));
         object->setCollision(false);
     });
+
+    players[0]->equipLeftHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[0])));
+    players[0]->equipRightHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[4])));
+
+    players[1]->equipLeftHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[1])));
+    players[1]->equipRightHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[5])));
+
+    players[2]->equipLeftHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[2])));
+    players[2]->equipRightHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[6])));
+
+    players[3]->equipLeftHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[3])));
+    players[3]->equipRightHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[7])));
+
+    // object = new Sword();
+    // state.add(object);
+    // object->createPhysicalObject(world, 10, 30);
+    // object->setCollision(false);
+
+    // object = new Sword();
+    // state.add(object);
+    // object->createPhysicalObject(world, 25, 36);
+    // object->setCollision(false);
+
+    // object = new Shield();
+    // state.add(object);
+    // object->createPhysicalObject(world, 16, 30);
+    // object->setCollision(false);
+
+    // object = new Shield();
+    // state.add(object);
+    // object->createPhysicalObject(world, 16, 45);
+    // object->setCollision(false);
 
     // b2PolygonShape * shape = new b2PolygonShape();
 
