@@ -1,9 +1,11 @@
 #pragma once
 
+#include <box2d/box2d.h>
 #include <SFML/Window/Event.hpp>
 #include <memory>
 #include "Action.h"
 #include "readerwriterqueue.h"
+
 
 /// Passes player input to the GameController through states and Action queue
 class InputHandler {
