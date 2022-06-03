@@ -39,61 +39,61 @@ void GameController::prepareGame() {
     world = new b2World(b2Vec2(0, 0));
     world->SetContactListener(&listener);
 
-    std::array<std::tuple<int, sf::Color, float, float>, InputHandler::PLAYER_COUNT_MAX> players_parameters = {
-        std::make_tuple(1, sf::Color::Red, 10, 10),
-        std::make_tuple(2, sf::Color::Green, 170, 10),
-        std::make_tuple(3, sf::Color::Blue, 10, 90),
-        std::make_tuple(4, sf::Color::Magenta, 170, 90)};
+    std::array<std::tuple<int, sf::Color, b2Vec2>, InputHandler::PLAYER_COUNT_MAX> players_parameters = {
+        std::make_tuple(1, sf::Color::Red, b2Vec2(10, 10)),
+        std::make_tuple(2, sf::Color::Green, b2Vec2(170, 10)),
+        std::make_tuple(3, sf::Color::Blue, b2Vec2(10, 90)),
+        std::make_tuple(4, sf::Color::Magenta, b2Vec2(170, 90))};
     std::transform(players_parameters.begin(), players_parameters.end(), players.begin(), [&](const auto& params) {
         auto player = new Player();
         player->setPrimaryColor(std::get<1>(params));
         state.add(player);
-        player->createPhysicalObject(world, std::get<2>(params), std::get<3>(params));
+        player->createPhysicalObject(world, std::get<2>(params));
         player->setCollisionGroup(std::get<0>(params));
         return player;
     });
 
-    std::array<std::tuple<float, float>, 3> boxes_parameters = {
-        std::make_tuple(80, 38),
-        std::make_tuple(74, 50),
-        std::make_tuple(82, 63)};
+    std::array<std::tuple<b2Vec2>, 3> boxes_parameters = {
+        std::make_tuple(b2Vec2(80, 38)),
+        std::make_tuple(b2Vec2(74, 50)),
+        std::make_tuple(b2Vec2(82, 63))};
     std::for_each(boxes_parameters.begin(), boxes_parameters.end(), [&](auto& params) {
         auto box = new Box();
         state.add(box);
-        box->createPhysicalObject(world, std::get<0>(params), std::get<1>(params));
+        box->createPhysicalObject(world, std::get<0>(params));
     });
 
     // Add some walls
-    std::array<std::tuple<float, float, float, float, float>, 5> walls_parameters = {
-        std::make_tuple(200, 4, 100, 0, 0),
-        std::make_tuple(200, 4, 100, 107.5, 0),
-        std::make_tuple(200, 4, 1, 50, 90),
-        std::make_tuple(200, 4, 191.5, 50, 90),
-        std::make_tuple(40, 4, 95, 50, 90)};
+    std::array<std::tuple<float, float, b2Vec2, Angle>, 5> walls_parameters = {
+        std::make_tuple(200, 4, b2Vec2(100, 0), Angle()),
+        std::make_tuple(200, 4, b2Vec2(100, 107.5), Angle()),
+        std::make_tuple(200, 4, b2Vec2(1, 50), Angle(90)),
+        std::make_tuple(200, 4, b2Vec2(191.5, 50), Angle(90)),
+        std::make_tuple(40, 4, b2Vec2(95, 50), Angle(90))};
     std::for_each(walls_parameters.begin(), walls_parameters.end(), [&](auto& params) {
         auto wall = new Wall();
         state.add(wall);
         wall->setSize(std::get<0>(params), std::get<1>(params));
-        wall->createPhysicalObject(world, std::get<2>(params), std::get<3>(params), std::get<4>(params));
+        wall->createPhysicalObject(world, std::get<2>(params), std::get<3>(params));
     });
 
     // Test some stuff
-    std::array<std::tuple<PhysicalObject*, float, float>, 9> equimpents_parameters = {
-        std::make_tuple(new Sword(), 10, 10),
-        std::make_tuple(new Sword(), 170, 10),
-        std::make_tuple(new Sword(), 10, 90),
-        std::make_tuple(new Sword(), 170, 90),
+    std::array<std::tuple<PhysicalObject*, b2Vec2>, 9> equimpents_parameters = {
+        std::make_tuple(new Sword(), b2Vec2(10, 10)),
+        std::make_tuple(new Sword(), b2Vec2(170, 10)),
+        std::make_tuple(new Sword(), b2Vec2(10, 90)),
+        std::make_tuple(new Sword(), b2Vec2(170, 90)),
 
-        std::make_tuple(new Shield(), 10, 10),
-        std::make_tuple(new Shield(), 170, 10),
-        std::make_tuple(new Shield(), 10, 90),
-        std::make_tuple(new Shield(), 170, 90),
+        std::make_tuple(new Shield(), b2Vec2(10, 10)),
+        std::make_tuple(new Shield(), b2Vec2(170, 10)),
+        std::make_tuple(new Shield(), b2Vec2(10, 90)),
+        std::make_tuple(new Shield(), b2Vec2(170, 90)),
 
-        std::make_tuple(new Axe(), 10, 10)};
+        std::make_tuple(new Axe(), b2Vec2(10, 10))};
     std::for_each(equimpents_parameters.begin(), equimpents_parameters.end(), [&](auto& params) {
         auto object = std::get<0>(params);
         state.add(object);
-        object->createPhysicalObject(world, std::get<1>(params), std::get<2>(params));
+        object->createPhysicalObject(world, std::get<1>(params));
         object->setCollision(false);
     });
 
@@ -245,7 +245,7 @@ void GameController::processAction(const Action& action) {
             for (int i = 0; i < 4; ++i) {
                 auto box = new Box();
                 state.add(box);
-                box->createPhysicalObject(world, 80, 10);
+                box->createPhysicalObject(world, b2Vec2(80, 10));
                 box->damage(99);
             }
             drawableCopyMutex.unlock();

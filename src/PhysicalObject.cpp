@@ -1,16 +1,14 @@
 #include "PhysicalObject.h"
 #include <iostream>
 
-b2Body* PhysicalObject::createPhysicalObject(b2World* world, float x, float y, float angleDeg) {
-    b2BodyDef* bodyDef = new b2BodyDef();
-    bodyDef->position.Set(x, y);
-    bodyDef->angle = Angle(angleDeg).get(Angle::unit::RAD);
-    if (isStatic())
-        bodyDef->type = b2_staticBody;
-    else
-        bodyDef->type = b2_dynamicBody;
+b2BodyDef PhysicalObject::bodyDef = b2BodyDef();
 
-    body = world->CreateBody(bodyDef);
+b2Body* PhysicalObject::createPhysicalObject(b2World* world, b2Vec2 position, Angle angle) {
+    bodyDef.position = position;
+    bodyDef.angle = angle.get(Angle::unit::RAD);
+    bodyDef.type = isStatic() ? b2_staticBody : b2_dynamicBody;
+
+    body = world->CreateBody(&bodyDef);
     body->SetLinearDamping(getDamping());
     body->SetAngularDamping(getDamping());
 

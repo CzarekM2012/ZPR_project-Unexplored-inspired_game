@@ -12,6 +12,8 @@
 
 /// An object in game world paired with Box2D body. Base of the class hierarchy
 class PhysicalObject {
+    static b2BodyDef bodyDef;
+
    protected:
     // Body params
     bool dynamic = true;     ///< If the object should move at all, params like Density or Friction don't matter if the object is static
@@ -32,8 +34,8 @@ class PhysicalObject {
     PhysicalObject(){};
     virtual ~PhysicalObject(){};
 
-    b2Body* createPhysicalObject(b2World* world, float x, float y, float angle = 0);  ///< creates a box2d object and a view to render it. Params like shape or primaryColor are taken from virtual functions or set in constructors
-    b2Body* getBodyPtr() const { return body; };
+    b2Body* createPhysicalObject(b2World* world, b2Vec2 position, Angle angle = Angle());  ///< creates a box2d object and a view to render it. Params like shape or primaryColor are taken from virtual functions or set in constructors
+    b2Body* getBodyPtr() const { return body; }
 
     void clearFixtures();
     void createOwnFixtures();  ///< Create fixtures based on this object's shapes. In case of players, item fixtures are created elsewhere
