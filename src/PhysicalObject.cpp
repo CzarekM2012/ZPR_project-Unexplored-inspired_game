@@ -2,6 +2,7 @@
 #include <iostream>
 
 b2BodyDef PhysicalObject::bodyDef = b2BodyDef();
+b2FixtureDef PhysicalObject::fixtureDef = b2FixtureDef();
 
 b2Body* PhysicalObject::createPhysicalObject(b2World* world, b2Vec2 position, Angle angle) {
     bodyDef.position = position;
@@ -26,18 +27,10 @@ void PhysicalObject::createOwnFixtures() {
         createFixture(shape);
 }
 
-void PhysicalObject::createFixture(const b2PolygonShape& shape, PhysicalObject* owner) {
-    if (owner == nullptr)
-        owner = this;
-
-    b2FixtureDef fixtureDef;
-    fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(owner);
-
-    if (owner->isStatic())
-        fixtureDef.density = 0;
-    else
-        fixtureDef.density = owner->getDensity();
-    fixtureDef.friction = owner->getFriction();
+void PhysicalObject::createFixture(const b2PolygonShape& shape) {
+    fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
+    fixtureDef.density = isStatic() ? 0 : getDensity();
+    fixtureDef.friction = getFriction();
 
     fixtureDef.shape = &shape;
     body->CreateFixture(&fixtureDef);

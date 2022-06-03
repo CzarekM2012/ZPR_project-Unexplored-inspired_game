@@ -13,6 +13,7 @@
 /// An object in game world paired with Box2D body. Base of the class hierarchy
 class PhysicalObject {
     static b2BodyDef bodyDef;
+    static b2FixtureDef fixtureDef;
 
    protected:
     // Body params
@@ -39,7 +40,7 @@ class PhysicalObject {
 
     void clearFixtures();
     void createOwnFixtures();  ///< Create fixtures based on this object's shapes. In case of players, item fixtures are created elsewhere
-    void createFixture(const b2PolygonShape& shape, PhysicalObject* owner = nullptr);
+    void createFixture(const b2PolygonShape& shape);
     void generateViews();        ///< Create rendered view objects for each body fixture
     virtual void synchronize();  ///< Synchronize rendered view position and rotation with physical object representation
 
