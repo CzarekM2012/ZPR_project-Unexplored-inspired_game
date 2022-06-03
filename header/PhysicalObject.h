@@ -4,6 +4,7 @@
 #include <math.h>
 #include <SFML/Graphics.hpp>
 #include <memory>
+#include "Angle.h"
 
 #define UNUSED(x) (void)(x)  ///< For now to disable "unused parameter" error
 
@@ -12,9 +13,6 @@ class PhysicalObject {
    protected:
     const int M_TO_PX = 5;  // box2d meter to SFML pixels size convertion ratio
     const float PX_TO_M = 1.0 / M_TO_PX;
-
-    const float R_TO_DEG = 180 / b2_pi;  // Radians
-    const float DEG_TO_R = b2_pi / 180;
 
     // Body params
     bool dynamic = true;     ///< If the object should move at all, params like Density or Friction don't matter if the object is static
@@ -101,10 +99,9 @@ class PhysicalObject {
     float getFriction() const { return friction; }
     float getLength() const;
 
-    float getAngleDeg() {
-        float ang = fmod((body->GetAngle() * R_TO_DEG) - 180, 360.0f);
-        return ang < 0 ? ang + 180.0f : ang - 180.0f;
-    }  // Returns angle in degrees in range (-180, 180)
+    Angle getAngle() const {
+        return Angle(body->GetAngle(), Angle::unit::RAD);
+    }
 
     void setDynamic(bool value) { dynamic = value; }
     void setDensity(float value) { density = value; }

@@ -31,7 +31,7 @@ class Entity : public PhysicalObject {
     void synchronize() {
         float bodyPositionX = body->GetPosition().x * M_TO_PX;
         float bodyPositionY = body->GetPosition().y * M_TO_PX;
-        float bodyRotate = getAngleDeg();
+        float bodyRotate = getAngle().get();
 
         for (auto& view : views) {
             view.setPosition(bodyPositionX, bodyPositionY);

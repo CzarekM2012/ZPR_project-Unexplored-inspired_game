@@ -14,7 +14,7 @@ class GameController {
     const float FORCE_MOVE = 50;
     const float FORCE_LOOK = 250;
     const float FORCE_LOOK_MIN = 5;
-    const float LOOK_ACC_DEG = 1;
+    const float LOOK_ACC_DEG = 0.5f;
 
     const float PICKUP_RANGE = 10;
     const std::chrono::duration<int64_t, std::milli> TIME_STEP = std::chrono::duration<int64_t, std::milli>(10);  ///< How much time (ms) should pass between each physics step() call

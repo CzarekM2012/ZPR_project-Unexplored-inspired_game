@@ -4,7 +4,7 @@
 #include <iostream>
 #include "InputHandler.h"
 
-std::array<std::tuple<b2Vec2, float>, InputHandler::PLAYER_COUNT_MAX> InputHandler::inputStateTab;
+std::array<std::tuple<b2Vec2, Angle>, InputHandler::PLAYER_COUNT_MAX> InputHandler::inputStateTab;
 
 bool InputHandler::isAnyJoystickConnected() {
     for (unsigned int i = 0; i < PLAYER_COUNT_MAX; ++i) {
@@ -23,14 +23,15 @@ void InputHandler::handleJoystickStates() {
         movement = normalizeMovement(movement);
 
         // Look angle
-        float targetAngle = std::get<INPUT_LOOK_ANGLE>(inputStateTab.at(controllerId));
+        Angle targetAngle = std::get<INPUT_LOOK_ANGLE>(inputStateTab.at(controllerId));
         b2Vec2 targetAngleInput(sf::Joystick::getAxisPosition(controllerId, sf::Joystick::U),
                                 sf::Joystick::getAxisPosition(controllerId, sf::Joystick::V));
         targetAngleInput *= (1 / SFML_AXIS_INPUT_SCALE);
 
-        if (targetAngleInput.Length() > AXIS_DEADZONE)
-            targetAngle = atan2(targetAngleInput.y, targetAngleInput.x) / b2_pi * 180 - 90;
-        targetAngle = translateAngle(targetAngle);
+        if (targetAngleInput.Length() > AXIS_DEADZONE) {
+            targetAngle = Angle(atan2(targetAngleInput.y, targetAngleInput.x), Angle::unit::RAD) -
+                          Angle(Angle::RIGHT_ANGLE_DEG);  // translate angle to its equivalent in game world
+        }
 
         inputStateTab[controllerId] = std::make_tuple(movement, targetAngle);
     }
@@ -53,14 +54,13 @@ void InputHandler::handleKeyboardState() {
         movement.x = AXIS_MOVE_KEYBOARD;
     movement = normalizeMovement(movement);
 
-    float targetAngle = std::get<INPUT_LOOK_ANGLE>(inputStateTab.at(0));
+    Angle targetAngle = std::get<INPUT_LOOK_ANGLE>(inputStateTab.at(0));
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) &&
         !sf::Keyboard::isKeyPressed(sf::Keyboard::E))
-        targetAngle -= ANGLE_STEP_KEYBOARD;
+        targetAngle -= Angle(ANGLE_STEP_KEYBOARD);
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::E) &&
              !sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-        targetAngle += ANGLE_STEP_KEYBOARD;
-    targetAngle = translateAngle(targetAngle);
+        targetAngle += Angle(ANGLE_STEP_KEYBOARD);
 
     inputStateTab[0] = std::make_tuple(movement, targetAngle);
 }
@@ -73,13 +73,6 @@ b2Vec2 InputHandler::normalizeMovement(b2Vec2 movement) {
     else if (movement.Length() > UNIT_VECTOR_LENGTH * 2 / 3)  // TODO: Makeshift, replace with decent scaling
         movement.Normalize();
     return movement;
-}
-
-float InputHandler::translateAngle(float angle) {
-    /// Translate angle to its equivalent in (-180.0, 180.0] range
-    auto rotations = std::round(angle / FULL_ANGLE);
-    angle -= rotations * FULL_ANGLE;
-    return angle;
 }
 
 InputHandler::InputHandler(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q)

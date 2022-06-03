@@ -4,6 +4,7 @@
 #include <SFML/Window/Event.hpp>
 #include <memory>
 #include "Action.h"
+#include "Angle.h"
 #include "readerwriterqueue.h"
 
 
@@ -14,7 +15,6 @@ class InputHandler {
     static constexpr float SFML_AXIS_INPUT_SCALE = 100;
     static constexpr float AXIS_DEADZONE = 0.2;
 
-    static constexpr float FULL_ANGLE = 360.f;
     const float UNIT_VECTOR_LENGTH = sqrt(2.f);
 
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q;
@@ -23,7 +23,6 @@ class InputHandler {
     void handleJoystickStates();
     void handleKeyboardState();
     b2Vec2 normalizeMovement(b2Vec2 movement);
-    float translateAngle(float angle);
 
    public:
     static const int PLAYER_COUNT_MAX = 4;
@@ -47,7 +46,7 @@ class InputHandler {
 
     // This is set by InputHandler in every pass, and then checked by GameController each tick
     // contrary to Actions, that are sent into message queue only once, when they appear
-    static std::array<std::tuple<b2Vec2, float>, PLAYER_COUNT_MAX> inputStateTab;
+    static std::array<std::tuple<b2Vec2, Angle>, PLAYER_COUNT_MAX> inputStateTab;
 
     InputHandler(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q);
 

@@ -46,7 +46,7 @@ void Player::moveItems() {
     }
 
     if (itemLH && jointLH) {
-        float angleDiff = -(jointLH->GetJointAngle() + targetAngleLH * DEG_TO_R);
+        float angleDiff = -(jointLH->GetJointAngle() + Angle(targetAngleLH).get(Angle::unit::RAD));
 
         if (itemFront == itemLH)
             angleDiff = -jointLH->GetJointAngle();
@@ -54,7 +54,7 @@ void Player::moveItems() {
         jointLH->SetMotorSpeed(angleDiff);
     }
     if (itemRH && jointRH) {
-        float angleDiff = -(jointRH->GetJointAngle() - targetAngleRH * DEG_TO_R);
+        float angleDiff = -(jointRH->GetJointAngle() - Angle(targetAngleRH).get(Angle::unit::RAD));
 
         if (itemFront == itemRH)
             angleDiff = -jointRH->GetJointAngle();
@@ -105,7 +105,7 @@ void Player::equipLeftHand(Item* const item) {
     // Box2d anlges are form (-inf, inf), instead of (-pi, pi>
     // angle is set based on angles of 2 bodies, which can be several rotations apart
     // this formula compansates for them
-    jointDef.referenceAngle = DEG_TO_R - round((body->GetAngle() - item->getBodyPtr()->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
+    jointDef.referenceAngle = -round((body->GetAngle() - item->getBodyPtr()->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
 
     jointLH = dynamic_cast<b2RevoluteJoint*>(body->GetWorld()->CreateJoint(&jointDef));
 
@@ -139,7 +139,7 @@ void Player::equipRightHand(Item* const item) {
     // Box2d anlges are form (-inf, inf), instead of (-pi, pi>
     // angle is set based on angles of 2 bodies, which can be several rotations apart
     // this formula compansates for them
-    jointDef.referenceAngle = DEG_TO_R - round((body->GetAngle() - item->getBodyPtr()->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
+    jointDef.referenceAngle = -round((body->GetAngle() - item->getBodyPtr()->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
 
     jointRH = dynamic_cast<b2RevoluteJoint*>(body->GetWorld()->CreateJoint(&jointDef));
 

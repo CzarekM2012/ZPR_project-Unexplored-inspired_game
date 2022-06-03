@@ -148,7 +148,7 @@ class Item : public PhysicalObject {
     void synchronize() {
         float bodyPositionX = body->GetPosition().x * M_TO_PX;
         float bodyPositionY = body->GetPosition().y * M_TO_PX;
-        float bodyRotate = getAngleDeg();
+        float bodyRotate = getAngle().get();
 
         auto colors = getBaseColors();
         for (unsigned int i = 0; i < views.size(); ++i) {
