@@ -9,6 +9,7 @@
 
 using namespace std::chrono_literals;
 
+/// A simple listener to capture Box2D collisions. Calls both colliding objects' onContact() function
 class MyContactListener : public b2ContactListener {
     void BeginContact(b2Contact* contact) {
         auto data = contact->GetFixtureA()->GetUserData();
@@ -23,15 +24,11 @@ class MyContactListener : public b2ContactListener {
         }
     }
 
-    void EndContact(b2Contact* contact) {
-        UNUSED(contact);
-    }
+    void EndContact(b2Contact* /*contact*/) {}
 };
 
 volatile bool GameController::stop;
 MyContactListener listener;
-
-#define UNUSED(x) (void)(x)  ///< For now to disable "unused parameter" error
 
 GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q)
     : action_q(q) {}
@@ -41,8 +38,6 @@ void GameController::prepareGame() {
 
     world = new b2World(b2Vec2(0, 0));
     world->SetContactListener(&listener);
-
-    // state.add(std::unique_ptr<Player>(new Player()));
 
     std::array<std::tuple<int, sf::Color, float, float>, InputHandler::PLAYER_COUNT_MAX> players_parameters = {
         std::make_tuple(1, sf::Color::Red, 10, 10),
@@ -57,7 +52,6 @@ void GameController::prepareGame() {
         player->setCollisionGroup(std::get<0>(params));
         return player;
     });
-    // dynamic_cast<Player*>(state.getLast())->createPhysicalObject(world, 10, 10);
 
     std::array<std::tuple<float, float>, 3> boxes_parameters = {
         std::make_tuple(80, 38),
@@ -68,10 +62,6 @@ void GameController::prepareGame() {
         state.add(box);
         box->createPhysicalObject(world, std::get<0>(params), std::get<1>(params));
     });
-
-    // state.add(new Box())->createPhysicalObject(world, 80, 38);
-    // state.add(new Box())->createPhysicalObject(world, 74, 50);
-    // state.add(new Box())->createPhysicalObject(world, 82, 63);
 
     // Add some walls
     std::array<std::tuple<float, float, float, float, float>, 5> walls_parameters = {
@@ -119,59 +109,10 @@ void GameController::prepareGame() {
     players[3]->equipLeftHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[3])));
     players[3]->equipRightHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[7])));
 
-    // object = new Sword();
-    // state.add(object);
-    // object->createPhysicalObject(world, 10, 30);
-    // object->setCollision(false);
-
-    // object = new Sword();
-    // state.add(object);
-    // object->createPhysicalObject(world, 25, 36);
-    // object->setCollision(false);
-
-    // object = new Shield();
-    // state.add(object);
-    // object->createPhysicalObject(world, 16, 30);
-    // object->setCollision(false);
-
-    // object = new Shield();
-    // state.add(object);
-    // object->createPhysicalObject(world, 16, 45);
-    // object->setCollision(false);
-
-    // b2PolygonShape * shape = new b2PolygonShape();
-
-    // b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7),
-    // b2Vec2(5, 5), b2Vec2(5, -5)}; shape->Set(pentagon, 5);
-    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 10,
-    // 10, true, shape, sf::Color::Green)));
-
-    // shape->SetAsBox(5, 5);
-    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 80,
-    // 38, true, shape, sf::Color::Yellow)));
-    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 74,
-    // 50, true, shape, sf::Color::Yellow)));
-    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 82,
-    // 63, true, shape, sf::Color::Yellow)));
-
-    // // Walls
-    // shape->SetAsBox(100, 2);
-    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 100,
-    // 0, false, shape, sf::Color(20, 20, 20))));
-    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 100,
-    // 107.5, false, shape, sf::Color(20, 20, 20)))); shape->SetAsBox(2, 60);
-    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world, 0,
-    // 50, false, shape, sf::Color(20, 20, 20))));
-    // state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world,
-    // 191.5, 50, false, shape, sf::Color(20, 20, 20)))); shape->SetAsBox(2,
-    // 20); state.add(std::shared_ptr<PhysicalObject>(new PhysicalObject(world,
-    // 95, 50, false, shape, sf::Color(20, 20, 20))));
-
     stop = false;
 }
 
 void GameController::run() {
-    running = true;
     auto lastTime = std::chrono::steady_clock::now();
     // int fps = 0;
     // auto lastSecond = std::chrono::steady_clock::now();
@@ -236,7 +177,7 @@ void GameController::run() {
 
         // Wait for the next tick
         // std::cout << "Duration = " << TIME_STEP.count() << ", Time to wait = " << (TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime)).count() << " Time spent: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime).count() << std::endl;
-        // std::this_thread::sleep_for(TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime));  // TODO: Add time control
+        // std::this_thread::sleep_for(TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime));
         while (TIME_STEP > std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastTime))  // TODO: Replace this with some form of non-active waiting
             ;
         lastTime = std::chrono::steady_clock::now();
@@ -248,7 +189,6 @@ void GameController::run() {
         //     fps = 0;
         // }
     }
-    running = false;
 }
 
 void GameController::processPlayerInputStates(const int playerId) {
@@ -381,7 +321,7 @@ void GameController::restartGame() {
 Item* GameController::getFirstPickableItem(Player* player) const {
     // TODO: Replace loop with something like:
     // std::copy_if(state.objects.begin(), state.objects.end(), foundObjects.begin(),
-    //    [&player](std::shared_ptr<PhysicalObject> object){return (object->getBodyPtr()->GetPosition() - player->getBodyPtr()->GetPosition()).Length() < 10 && std::dynamic_pointer_cast<Item>(object);}); //TODO: change '10' to sth like "PICKUP_RANGE"
+    //    [&player](std::shared_ptr<PhysicalObject> object){return (object->getBodyPtr()->GetPosition() - player->getBodyPtr()->GetPosition()).Length() < 10 && std::dynamic_pointer_cast<Item>(object);});
     // player->equipLeftHand(std::dynamic_pointer_cast<Item>(*foundObjects.begin()));
 
     auto playerBody = player->getBodyPtr();

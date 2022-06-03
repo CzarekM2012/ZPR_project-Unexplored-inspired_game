@@ -7,16 +7,14 @@
 
 /// Draws state of game, synchronized every frame
 class Renderer {
-   private:
     sf::RenderWindow* window;
-    std::vector<sf::ConvexShape> lastDrawn;
+    std::vector<sf::ConvexShape> lastDrawn;  ///< A copy of last drawn object views, used in case they can't be retrieved next time
 
    public:
-    Renderer(){};
     Renderer(sf::RenderWindow* render_window)
         : window(render_window){};
 
-    void render(std::vector<sf::ConvexShape> shapes);
+    void render(std::vector<sf::ConvexShape> shapes);  ///< Draw all given shapes
 };
 
 #endif  // RENDERER_H

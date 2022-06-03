@@ -5,22 +5,17 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+
 #include "PhysicalObject.h"
 
-/// A simple vector of PhysicalObject. Represents whole state of the game
+/// A simple vector of PhysicalObject unique pointers. Represents whole state of the game
 class State {
    public:
     std::vector<std::unique_ptr<PhysicalObject>> objects;
 
     State(){};
-
-    // State(const State& state) {
-    //     for (auto&& object : state.objects)
-    //         objects.push_back(std::unique_ptr<PhysicalObject>(new PhysicalObject(*object)));
-    // }
     State(const State& state) = delete;
     State& operator=(const State&) = delete;
-    // ~State() = default;
 
     PhysicalObject* add(std::unique_ptr<PhysicalObject> objectPtr) {
         objects.push_back(std::move(objectPtr));
@@ -42,7 +37,7 @@ class State {
 
     PhysicalObject* get(unsigned int index) const {
         return objects.size() > index ? objects[index].get() : nullptr;
-    }  // TODO: Rewrite as an overloaded operator []
+    }
     PhysicalObject* getLast() {
         return objects.empty() ? nullptr : objects[objects.size() - 1].get();
     };

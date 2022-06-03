@@ -40,7 +40,7 @@ void InputHandler::handleJoystickStates() {
 void InputHandler::handleKeyboardState() {
     b2Vec2 movement(0, 0);
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) &&
-        !sf::Keyboard::isKeyPressed(sf::Keyboard::S))  // TODO: Simplify this mess
+        !sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         movement.y = -AXIS_MOVE_KEYBOARD;
     else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) &&
              !sf::Keyboard::isKeyPressed(sf::Keyboard::W))
@@ -76,14 +76,8 @@ b2Vec2 InputHandler::normalizeMovement(b2Vec2 movement) {
 }
 
 InputHandler::InputHandler(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q)
-    : action_q(q) {
-    // TODO: Check if necessary
-    // for (int i = 0; i < PLAYER_COUNT_MAX; ++i)
-    //    for (int j = 0; j < STATE_CONTROLS_PER_PLAYER; ++j)
-    //        inputStateTab[i][j] = 0;
-}
+    : action_q(q) {}
 
-#define UNUSED(x) (void)(x)  // For now to disable "unused parameter" error
 void InputHandler::handleStates() {
     if (isAnyJoystickConnected())
         handleJoystickStates();

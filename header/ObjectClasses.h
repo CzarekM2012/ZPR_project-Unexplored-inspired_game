@@ -12,8 +12,6 @@
 #include "PhysicalObject.h"
 #include "Player.h"
 
-#define UNUSED(x) (void)(x)  // For now to disable "unused parameter" error
-
 /// An object with a shape of a rectangle, has adjustible width and height
 class RectangleObject : public Entity {
    protected:

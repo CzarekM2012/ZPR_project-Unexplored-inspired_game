@@ -22,11 +22,8 @@ class Player : public Entity {
     Player();
     ~Player();
 
-    b2RevoluteJoint* getJointLeft() { return jointLH; }
-    Item* getItemLH() { return itemLH; }
-
-    void moveItems();
-    void tickItemTimers();
+    void moveItems();       ///< Adjust item angles
+    void tickItemTimers();  ///< Lower cooldown and trigger action for current tick
 
     void setItemAngle(Item* item, float angle);
     void resetItemAngle(Item* item);
