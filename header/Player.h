@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLAYER_H
+#define PLAYER_H
 
 #include "Entity.h"
 
@@ -42,3 +43,5 @@ class Player : public Entity {
 
     virtual std::vector<b2PolygonShape> getBaseShapes();
 };
+
+#endif  // PLAYER_H

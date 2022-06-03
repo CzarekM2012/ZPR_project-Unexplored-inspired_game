@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PHYSICAL_OBJECT_H
+#define PHYSICAL_OBJECT_H
 
 #include <box2d/box2d.h>
 #include <math.h>
@@ -130,3 +131,5 @@ class PhysicalObject {
         UNUSED(other);
     }
 };
+
+#endif  // PHYSICAL_OBJECT_H

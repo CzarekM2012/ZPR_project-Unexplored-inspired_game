@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ENTITY_H
+#define ENTITY_H
 
 #include "PhysicalObject.h"
 
@@ -49,3 +50,5 @@ class Entity : public PhysicalObject {
         views.back().setFillColor(color);
     }
 };
+
+#endif  // ENTITY_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAME_CONTROLLER_H
+#define GAME_CONTROLLER_H
 
 #include <chrono>
 #include <mutex>
@@ -46,3 +47,5 @@ class GameController {
 
     void signalStop() { this->stop = true; };
 };
+
+#endif  // GAME_CONTROLER_H

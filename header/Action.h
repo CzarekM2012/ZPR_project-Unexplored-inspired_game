@@ -1,3 +1,5 @@
+#ifndef ACTION_H
+#define ACTION_H
 /// A simple object to pass information between InputHandler and GameController
 struct Action {
     enum Type {
@@ -17,3 +19,5 @@ struct Action {
     int playerId = -1;
     Type type = NONE;
 };
+
+#endif  // ACTION_H

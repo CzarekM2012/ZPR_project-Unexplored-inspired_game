@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INPUT_HANDLER_H
+#define INPUT_HANDLER_H
 
 #include <box2d/box2d.h>
 #include <SFML/Window/Event.hpp>
@@ -6,7 +7,6 @@
 #include "Action.h"
 #include "Angle.h"
 #include "readerwriterqueue.h"
-
 
 /// Passes player input to the GameController through states and Action queue
 class InputHandler {
@@ -53,3 +53,5 @@ class InputHandler {
     void handleEvent(sf::Event event);
     void handleStates();
 };
+
+#endif  // INPUT_HANDLER_H
