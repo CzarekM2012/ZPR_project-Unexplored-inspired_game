@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RENDERER_H
+#define RENDERER_H
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
@@ -17,3 +18,5 @@ class Renderer {
 
     void render(std::vector<sf::ConvexShape> shapes);
 };
+
+#endif  // RENDERER_H

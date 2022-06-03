@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STATE_H
+#define STATE_H
 
 #include <algorithm>
 #include <iostream>
@@ -47,3 +48,5 @@ class State {
     };
     int getObjectCount() const { return objects.size(); };
 };
+
+#endif  // STATE_H

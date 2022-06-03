@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OBJECT_CLASSES_H
+#define OBJECT_CLASSES_H
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
@@ -296,3 +297,5 @@ class Shield : public Item {
 // 	    setColor(color);
 //     };
 // };
+
+#endif  // OBJECT_CLASSES_H
