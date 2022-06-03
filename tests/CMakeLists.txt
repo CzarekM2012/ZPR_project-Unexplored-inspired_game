@@ -8,7 +8,9 @@ endif()
 
 add_executable(tests
     main.cpp
+    Angle.cpp
     test.cpp
+    ${SRCS_DIR}/Angle.cpp
     ${SRCS_DIR}/GameController.cpp
     ${SRCS_DIR}/InputHandler.cpp
     ${SRCS_DIR}/PhysicalObject.cpp
