@@ -4,7 +4,7 @@
 b2Body* PhysicalObject::createPhysicalObject(b2World* world, float x, float y, float angleDeg) {
     b2BodyDef* bodyDef = new b2BodyDef();
     bodyDef->position.Set(x, y);
-    bodyDef->angle = angleDeg * DEG_TO_R;
+    bodyDef->angle = Angle(angleDeg).get(Angle::unit::RAD);
     if (isStatic())
         bodyDef->type = b2_staticBody;
     else
@@ -90,7 +90,7 @@ void PhysicalObject::clearFixtures() {
 void PhysicalObject::synchronize() {
     float bodyPositionX = body->GetPosition().x * M_TO_PX;
     float bodyPositionY = body->GetPosition().y * M_TO_PX;
-    float bodyRotate = getAngleDeg();
+    float bodyRotate = getAngle().get();
 
     for (auto& view : views) {
         view.setPosition(bodyPositionX, bodyPositionY);
