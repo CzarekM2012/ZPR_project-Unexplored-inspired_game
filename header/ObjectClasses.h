@@ -184,8 +184,8 @@ class Sword : public Weapon {
    public:
     void useTick(int tick) {
         switch (tick) {
-            case 33:
-                std::cout << "WIP Sword action" << std::endl;
+            case TICKS_PER_SECOND:
+                std::cout << "Sword action" << std::endl;
                 if (auto player = dynamic_cast<Player*>(owner)) {
                     player->setItemAngle(this, 0);
                 }
@@ -228,6 +228,72 @@ class Sword : public Weapon {
     }
 };
 
+class Axe : public Weapon {
+   public:
+    Axe() {
+        damage = 10;
+        primaryColor = sf::Color(180, 180, 180);
+        holdInFrontWhenPossible = false;
+        prepareAngle = 135;
+    };
+
+   public:
+    void useTick(int tick) {
+        switch (tick) {
+            case 1:
+
+                // case TICKS_PER_SECOND:
+                //     if (auto player = dynamic_cast<Player*>(owner)) {
+                //         player->setItemAngle(this, 90);
+                //     }
+                //     break;
+
+            case TICKS_PER_SECOND:
+                std::cout << "Axe action" << std::endl;
+                if (auto player = dynamic_cast<Player*>(owner)) {
+                    player->setItemAngle(this, -135);
+                }
+                break;
+        }
+
+        if (tick > TICKS_PER_SECOND / 2) {
+            auto ownerBody = owner->getBodyPtr();
+            float angle = ownerBody->GetAngle();
+            int force = 50;
+            b2Vec2 vec = b2Vec2(-force * sin(angle), force * cos(angle));
+            ownerBody->ApplyLinearImpulseToCenter(vec, true);
+        }
+        // ownerBody->SetLinearDamping(0);
+    }
+
+    virtual std::vector<b2PolygonShape> getBaseShapes() {
+        std::vector<b2PolygonShape> shapeVec;
+        b2PolygonShape shape;
+
+        b2Vec2 triangle[] = {b2Vec2(0, 3), b2Vec2(-7, 8), b2Vec2(7, 8)};
+        shape.Set(triangle, 3);
+        shapeVec.push_back(shape);
+
+        shape.SetAsBox(0.5, 6, b2Vec2(0, 3), 0);
+        shapeVec.push_back(shape);
+
+        return shapeVec;
+    }
+
+    void onContact(PhysicalObject* const other) {
+        auto target = dynamic_cast<Entity*>(other);
+        if (target) {
+            if (!isOnCooldown()) {
+                if (isBeingUsed()) {
+                    target->damage(40);
+                    setCooldown(cooldownCollision);
+                }
+            }
+            // std::cout << "Current HP: " << target->getHp() << "/" << target->getMaxHp() << std::endl;
+        }
+    }
+};
+
 /// A basic shield to test game mechanics
 class Shield : public Item {
    protected:
@@ -238,23 +304,24 @@ class Shield : public Item {
         defense = 7;
         primaryColor = sf::Color(180, 180, 180);
         cooldownAction = 0;
+        actionTimeTotal = 1;
     }
 
-    void useTick(int tick) {
-        switch (tick) {
-            case 33:
-                std::cout << "WIP Shield action" << std::endl;
-                if (auto player = dynamic_cast<Player*>(owner)) {
-                    player->getBodyPtr()->SetLinearDamping(0.99);  // TODO: Replace with a slowdown that works, maybe for all items while a button is held
-                }
-                break;
-            case 1:
-                if (auto player = dynamic_cast<Player*>(owner)) {
-                    player->getBodyPtr()->SetLinearDamping(0.9);
-                }
-                break;
-        }
-    }
+    // void useTick(int tick) {
+    //     switch (tick) {
+    //         case TICKS_PER_SECOND:
+    //             std::cout << "Shield action" << std::endl;
+    //             if (auto player = dynamic_cast<Player*>(owner)) {
+    //                 player->getBodyPtr()->SetLinearDamping(0.99);  // TODO: Replace with a slowdown that works, maybe for all items while a button is held
+    //             }
+    //             break;
+    //         case 1:
+    //             if (auto player = dynamic_cast<Player*>(owner)) {
+    //                 player->getBodyPtr()->SetLinearDamping(0.9);
+    //             }
+    //             break;
+    //     }
+    // }
 
     virtual std::vector<b2PolygonShape> getBaseShapes() {
         std::vector<b2PolygonShape> shapeVec;
@@ -264,6 +331,16 @@ class Shield : public Item {
 
         shapeVec.push_back(shape);
         return shapeVec;
+    }
+
+    void onContact(PhysicalObject* const other) {
+        if (auto item = dynamic_cast<Item*>(other)) {
+            if (!isOnCooldown()) {
+                item->setCooldown(item->cooldownCollision);
+                setCooldown(cooldownCollision);
+            }
+            // std::cout << "Current HP: " << target->getHp() << "/" << target->getMaxHp() << std::endl;
+        }
     }
 };
 

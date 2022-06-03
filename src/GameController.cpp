@@ -44,16 +44,17 @@ void GameController::prepareGame() {
 
     // state.add(std::unique_ptr<Player>(new Player()));
 
-    std::array<std::tuple<sf::Color, float, float>, InputHandler::PLAYER_COUNT_MAX> players_parameters = {
-        std::make_tuple(sf::Color::Red, 10, 10),
-        std::make_tuple(sf::Color::Green, 170, 10),
-        std::make_tuple(sf::Color::Blue, 10, 90),
-        std::make_tuple(sf::Color::Magenta, 170, 90)};
+    std::array<std::tuple<int, sf::Color, float, float>, InputHandler::PLAYER_COUNT_MAX> players_parameters = {
+        std::make_tuple(1, sf::Color::Red, 10, 10),
+        std::make_tuple(2, sf::Color::Green, 170, 10),
+        std::make_tuple(3, sf::Color::Blue, 10, 90),
+        std::make_tuple(4, sf::Color::Magenta, 170, 90)};
     std::transform(players_parameters.begin(), players_parameters.end(), players.begin(), [&](const auto& params) {
         auto player = new Player();
-        player->setPrimaryColor(std::get<0>(params));
+        player->setPrimaryColor(std::get<1>(params));
         state.add(player);
-        player->createPhysicalObject(world, std::get<1>(params), std::get<2>(params));
+        player->createPhysicalObject(world, std::get<2>(params), std::get<3>(params));
+        player->setCollisionGroup(std::get<0>(params));
         return player;
     });
     // dynamic_cast<Player*>(state.getLast())->createPhysicalObject(world, 10, 10);
@@ -87,7 +88,7 @@ void GameController::prepareGame() {
     });
 
     // Test some stuff
-    std::array<std::tuple<PhysicalObject*, float, float>, 8> equimpents_parameters = {
+    std::array<std::tuple<PhysicalObject*, float, float>, 9> equimpents_parameters = {
         std::make_tuple(new Sword(), 10, 10),
         std::make_tuple(new Sword(), 170, 10),
         std::make_tuple(new Sword(), 10, 90),
@@ -96,7 +97,9 @@ void GameController::prepareGame() {
         std::make_tuple(new Shield(), 10, 10),
         std::make_tuple(new Shield(), 170, 10),
         std::make_tuple(new Shield(), 10, 90),
-        std::make_tuple(new Shield(), 170, 90)};
+        std::make_tuple(new Shield(), 170, 90),
+
+        std::make_tuple(new Axe(), 10, 10)};
     std::for_each(equimpents_parameters.begin(), equimpents_parameters.end(), [&](auto& params) {
         auto object = std::get<0>(params);
         state.add(object);

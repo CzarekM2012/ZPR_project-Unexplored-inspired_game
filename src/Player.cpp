@@ -39,6 +39,8 @@ void Player::moveItems() {
         itemFront = itemLH;
     } else if (itemRH && itemRH->holdInFrontWhenPossible && !itemRH->isOnCooldown()) {
         itemFront = itemRH;
+    } else if (itemLH && itemLH->holdInFrontWhenPossible) {
+        itemFront = itemLH;  // E.g. both are on cooldown
     } else {
         itemFront = nullptr;
     }
@@ -93,6 +95,7 @@ void Player::equipLeftHand(Item* const item) {
 
     itemLH = item;
     item->setOwner(this);
+    item->setCollisionGroup(collisionGroup);  // Must be called before setting cooldown, because it also turns collision on to update it
     item->setCooldown(std::max(item->cooldownCollision, item->cooldownAction));
 
     jointDef.bodyA = body;
@@ -126,6 +129,7 @@ void Player::equipRightHand(Item* const item) {
 
     itemRH = item;
     item->setOwner(this);
+    item->setCollisionGroup(collisionGroup);
     item->setCooldown(std::max(item->cooldownCollision, item->cooldownAction));
 
     jointDef.bodyA = body;
@@ -166,12 +170,12 @@ void Player::triggerActionRight() {
 }
 
 void Player::prepareItemLeft() {
-    if (itemLH)
+    if (itemLH && itemLH->canBeUsed())
         targetAngleLH = itemLH->prepareAngle;
 }
 
 void Player::prepareItemRight() {
-    if (itemRH)
+    if (itemRH && itemRH->canBeUsed())
         targetAngleRH = itemRH->prepareAngle;
 }
 

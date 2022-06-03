@@ -17,10 +17,11 @@ class PhysicalObject {
     const float DEG_TO_R = b2_pi / 180;
 
     // Body params
-    bool dynamic = true;    ///< If the object should move at all, params like Density or Friction don't matter if the object is static
-    float density = 1.0f;   ///< Density (multiplied by fixture areas) determines object's mass
-    float damping = 0.9f;   ///< How much force object should loose with time. Used to simulate friction against the floor
-    float friction = 0.3f;  ///< Friction on contact with other objects, not the floor
+    bool dynamic = true;     ///< If the object should move at all, params like Density or Friction don't matter if the object is static
+    float density = 1.0f;    ///< Density (multiplied by fixture areas) determines object's mass
+    float damping = 0.9f;    ///< How much force object should loose with time. Used to simulate friction against the floor
+    float friction = 0.3f;   ///< Friction on contact with other objects, not the floor
+    int collisionGroup = 0;  ///< Collisions are set to occur between everything that does not belong to the same group and between every object in group 0
 
     b2Body* body;                        ///< basic pointer, b2World takes care of bodies
     std::vector<b2PolygonShape> shapes;  ///< shapes of fixtures
@@ -109,11 +110,19 @@ class PhysicalObject {
     void setDensity(float value) { density = value; }
     void setDamping(float value) { damping = value; }
     void setFriction(float value) { friction = value; }
+    void setCollisionGroup(int value) {
+        collisionGroup = value;
+        setCollision(true);
+    }
 
     void setCollision(bool on) {
         auto fixtureList = body->GetFixtureList();
-        b2Filter collisionFilter;  // Default values are ~group 1, collide with every group
-        if (!on)
+        b2Filter collisionFilter;  // Default values are ~group 0, collide with every group
+        if (on) {
+            if (collisionGroup != 0) {
+                collisionFilter.groupIndex = -collisionGroup;  // Negative groupIndex means that objects from this group should not collide with each other
+            }
+        } else
             collisionFilter.maskBits = 0;  // Don't accept collisions with anything
 
         for (; fixtureList != nullptr; fixtureList = fixtureList->GetNext())
