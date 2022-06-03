@@ -41,7 +41,7 @@ class Player : public Entity {
     void triggerActionLeft();
     void triggerActionRight();
 
-    virtual std::vector<b2PolygonShape> getBaseShapes();
+    virtual std::vector<b2PolygonShape> getBaseShapes() const;
 };
 
 #endif  // PLAYER_H

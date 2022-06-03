@@ -6,7 +6,7 @@
  - top-down view
  - static camera, limited interface
  - simple, polygon-based character and object models (and matching hitboxes)
- - mainly melee with some ranged (and maybe magical) weapons
+ - melee weapons and shields
  - items provide players with custom actions like lunge or throw
  - requires controllers
 

@@ -55,6 +55,6 @@ SCENARIO("One value retrieved from object can be converted to another with good 
     }
 }
 
-SCENARIO("Passed values are mapped to their equivalents in (-180, 180][deg] ((-PI, PI][rad]) range") {
-    NEGLIGIBLE_COMPUTATIONAL_ERROR = 1.f / 60 / 60;
-}
+// SCENARIO("Passed values are mapped to their equivalents in (-180, 180][deg] ((-PI, PI][rad]) range") {
+//     NEGLIGIBLE_COMPUTATIONAL_ERROR = 1.f / 60 / 60;
+// }

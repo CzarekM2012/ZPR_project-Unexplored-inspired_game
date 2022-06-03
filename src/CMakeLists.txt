@@ -4,6 +4,9 @@ add_executable(${PROJECT_NAME}
     GameController.cpp
     InputHandler.cpp
     PhysicalObject.cpp
+    ObjectClasses.cpp
+    Item.cpp
+    Entity.cpp
     Player.cpp
     Renderer.cpp
     main.cpp)

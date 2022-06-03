@@ -66,11 +66,11 @@ void Player::moveItems() {
 void Player::tickItemTimers() {
     if (itemLH) {
         itemLH->useTick();
-        itemLH->lowerCooldown(1);
+        itemLH->lowerCooldown();
     }
     if (itemRH) {
         itemRH->useTick();
-        itemRH->lowerCooldown(1);
+        itemRH->lowerCooldown();
     }
 }
 
@@ -179,7 +179,7 @@ void Player::prepareItemRight() {
         targetAngleRH = itemRH->prepareAngle;
 }
 
-std::vector<b2PolygonShape> Player::getBaseShapes() {
+std::vector<b2PolygonShape> Player::getBaseShapes() const {
     std::vector<b2PolygonShape> shapeVec;
     b2PolygonShape shape;
 

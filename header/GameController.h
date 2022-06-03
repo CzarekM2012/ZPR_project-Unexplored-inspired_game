@@ -6,6 +6,7 @@
 
 #include "readerwriterqueue.h"
 
+#include "Constants.h"
 #include "InputHandler.h"
 #include "ObjectClasses.h"
 #include "State.h"
@@ -18,7 +19,7 @@ class GameController {
     const float LOOK_ACC_DEG = 0.5f;
 
     const float PICKUP_RANGE = 10;
-    const std::chrono::duration<int64_t, std::milli> TIME_STEP = std::chrono::duration<int64_t, std::milli>(10);  ///< How much time (ms) should pass between each physics step() call
+    const std::chrono::duration<int64_t, std::nano> TIME_STEP = std::chrono::duration<int64_t, std::nano>(1000000000 / TICKS_PER_SECOND);  ///< How much time (ms) should pass between each physics step() call
 
     State state;
     std::array<Player*, InputHandler::PLAYER_COUNT_MAX> players;

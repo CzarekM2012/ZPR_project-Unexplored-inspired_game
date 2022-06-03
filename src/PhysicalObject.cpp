@@ -23,8 +23,7 @@ void PhysicalObject::createOwnFixtures() {
     b2FixtureDef fixtureDef;
     fixtureDef.friction = getFriction();
     fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
-    // std::cout << this << " " << fixtureDef.userData.pointer << " " << reinterpret_cast<PhysicalObject*>(fixtureDef.userData.pointer) << std::endl;
-    //  std::cout << shapes.size() << std::endl;
+
     for (b2PolygonShape shape : shapes)
         createFixture(shape);
 }
@@ -56,36 +55,6 @@ void PhysicalObject::clearFixtures() {
         body->DestroyFixture(lastFixture);
     }
 }
-
-// auto owner = reinterpret_cast<PhysicalObject*>(body->GetUserData());
-
-// b2Body * PhysicalObject::createPhysicalObject(b2World* world, float x, float
-// y) {
-
-// 	auto bodyDef = new b2BodyDef();
-//     bodyDef->position.Set(x, y);
-//     //dynamic
-// 	bodyDef->type = b2_dynamicBody;
-//     //static
-// 	bodyDef->type = b2_staticBody;
-
-// 	body = world->CreateBody(bodyDef);
-//     //dynamic
-//     body->SetLinearDamping(DAMPING);
-//     body->SetAngularDamping(DAMPING);
-
-// 	auto fixtureDef = new b2FixtureDef();
-// 	fixtureDef->shape = shape;
-//     //dynamic
-//     fixtureDef->density = 1.0f;
-// 	fixtureDef->friction = 0.3f;
-// 	this->body->CreateFixture(fixtureDef);
-//     //static
-// 	this->body->CreateFixture(shape, 0);
-
-// 	view = std::make_unique<sf::ConvexShape>(*generateView(body));
-// 	setColor(color);
-// }
 
 void PhysicalObject::synchronize() {
     float bodyPositionX = body->GetPosition().x * M_TO_PX;
@@ -129,6 +98,19 @@ void PhysicalObject::generateViews() {
     }
 }
 
+void PhysicalObject::reset() {
+    resetShapes();
+    clearFixtures();
+    createOwnFixtures();
+    resetColors();
+    generateViews();
+}
+
+void PhysicalObject::destroyBody() {  ///< Cannot be triggered from collision callbacks to avoid collision with box2d step()
+    body->GetWorld()->DestroyBody(body);
+    views.clear();
+}
+
 float PhysicalObject::getLength() const {
     float max = 0, min = 0;
     for (auto shape : shapes) {
@@ -142,4 +124,51 @@ float PhysicalObject::getLength() const {
         }
     }
     return max - min;
+}
+
+void PhysicalObject::setPrimaryColor(sf::Color color) {
+    primaryColor = color;
+    resetColors();
+}
+
+void PhysicalObject::resetColors() {
+    viewColors.clear();
+    auto baseColors = getBaseColors();
+    viewColors.insert(viewColors.end(), baseColors.begin(), baseColors.end());
+}
+
+std::vector<sf::Color> PhysicalObject::getBaseColors() const {
+    std::vector<sf::Color> colors;
+    // colors.push_back(sf::Color::Magenta);
+    for (unsigned int i = 0; i < shapes.size(); ++i)  // By default set primaryColor of all fixtures to base primaryColor
+        colors.push_back(primaryColor);
+    return colors;
+}
+
+std::vector<b2PolygonShape> PhysicalObject::getBaseShapes() const {
+    std::vector<b2PolygonShape> shapeVec;
+    b2PolygonShape shape;
+
+    shape.SetAsBox(5, 5);
+    shapeVec.push_back(shape);
+    return shapeVec;
+}
+
+void PhysicalObject::setCollision(bool on) {
+    auto fixtureList = body->GetFixtureList();
+    b2Filter collisionFilter;  // Default values are ~group 0, collide with every group
+    if (on) {
+        if (collisionGroup != 0) {
+            collisionFilter.groupIndex = -collisionGroup;  // Negative groupIndex means that objects from this group should not collide with each other
+        }
+    } else
+        collisionFilter.maskBits = 0;  // Don't accept collisions with anything
+
+    for (; fixtureList != nullptr; fixtureList = fixtureList->GetNext())
+        fixtureList->SetFilterData(collisionFilter);
+}
+
+void PhysicalObject::setCollisionGroup(int value) {
+    collisionGroup = value;
+    setCollision(true);
 }

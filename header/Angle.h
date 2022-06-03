@@ -4,9 +4,11 @@
 #include <math.h>
 
 /// Class for consistent interpretation of angles.
-/// All passed values will be mapped to the range (-180, 180][deg] ((-PI, PI][rad]).
-/// Appropriate static function allows passing value interpreted as [deg] or [rad].
-/// Appropriate method allows retrieval of mapped value as [deg] or [rad].
+/*!
+All passed values will be mapped to the range (-180, 180][deg] ((-PI, PI][rad]).
+Appropriate static function allows passing value interpreted as [deg] or [rad].
+Appropriate method allows retrieval of mapped value as [deg] or [rad].
+*/
 class Angle {
    public:
     static constexpr auto FULL_ANGLE_DEG = 360.f;

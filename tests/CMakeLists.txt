@@ -14,6 +14,9 @@ add_executable(tests
     ${SRCS_DIR}/GameController.cpp
     ${SRCS_DIR}/InputHandler.cpp
     ${SRCS_DIR}/PhysicalObject.cpp
+    ${SRCS_DIR}/ObjectClasses.cpp
+    ${SRCS_DIR}/Item.cpp
+    ${SRCS_DIR}/Entity.cpp
     ${SRCS_DIR}/Renderer.cpp
     ${SRCS_DIR}/Player.cpp)
     
