@@ -48,7 +48,7 @@ void GameController::prepareGame() {
         auto player = new Player();
         player->setPrimaryColor(std::get<1>(params));
         state.add(player);
-        player->createPhysicalObject(world, std::get<2>(params));
+        player->createBody(world, std::get<2>(params));
         player->setCollisionGroup(std::get<0>(params));
         return player;
     });
@@ -60,7 +60,7 @@ void GameController::prepareGame() {
     std::for_each(boxes_parameters.begin(), boxes_parameters.end(), [&](auto& params) {
         auto box = new Box();
         state.add(box);
-        box->createPhysicalObject(world, std::get<0>(params));
+        box->createBody(world, std::get<0>(params));
     });
 
     // Add some walls
@@ -74,7 +74,7 @@ void GameController::prepareGame() {
         auto wall = new Wall();
         state.add(wall);
         wall->setSize(std::get<0>(params), std::get<1>(params));
-        wall->createPhysicalObject(world, std::get<2>(params), std::get<3>(params));
+        wall->createBody(world, std::get<2>(params), std::get<3>(params));
     });
 
     // Test some stuff
@@ -93,21 +93,21 @@ void GameController::prepareGame() {
     std::for_each(equimpents_parameters.begin(), equimpents_parameters.end(), [&](auto& params) {
         auto object = std::get<0>(params);
         state.add(object);
-        object->createPhysicalObject(world, std::get<1>(params));
+        object->createBody(world, std::get<1>(params));
         object->setCollision(false);
     });
 
-    players[0]->equipLeftHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[0])));
-    players[0]->equipRightHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[4])));
+    players[0]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[0])), Player::EqSlot::LEFT_HAND);
+    players[0]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[4])), Player::EqSlot::RIGHT_HAND);
 
-    players[1]->equipLeftHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[1])));
-    players[1]->equipRightHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[5])));
+    players[1]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[1])), Player::EqSlot::LEFT_HAND);
+    players[1]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[5])), Player::EqSlot::RIGHT_HAND);
 
-    players[2]->equipLeftHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[2])));
-    players[2]->equipRightHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[6])));
+    players[2]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[2])), Player::EqSlot::LEFT_HAND);
+    players[2]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[6])), Player::EqSlot::RIGHT_HAND);
 
-    players[3]->equipLeftHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[3])));
-    players[3]->equipRightHand(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[7])));
+    players[3]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[3])), Player::EqSlot::LEFT_HAND);
+    players[3]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[7])), Player::EqSlot::RIGHT_HAND);
 
     stop = false;
 }
@@ -245,7 +245,7 @@ void GameController::processAction(const Action& action) {
             for (int i = 0; i < 4; ++i) {
                 auto box = new Box();
                 state.add(box);
-                box->createPhysicalObject(world, b2Vec2(80, 10));
+                box->createBody(world, b2Vec2(80, 10));
                 box->damage(99);
             }
             drawableCopyMutex.unlock();
@@ -261,12 +261,12 @@ void GameController::processAction(const Action& action) {
 
             foundItem = getFirstPickableItem(player);
             if (foundItem != nullptr)
-                player->equipLeftHand(foundItem);
+                player->equip(foundItem, Player::EqSlot::LEFT_HAND);
             break;
 
         case Action::Type::DROP_LEFT:
             std::cout << "Received DROP_LEFT Action!" << std::endl;
-            player->dropLeftHand();
+            player->drop(Player::EqSlot::LEFT_HAND);
             break;
 
         case Action::Type::PICK_RIGHT:
@@ -274,32 +274,32 @@ void GameController::processAction(const Action& action) {
 
             foundItem = getFirstPickableItem(player);
             if (foundItem != nullptr)
-                player->equipRightHand(foundItem);
+                player->equip(foundItem, Player::EqSlot::RIGHT_HAND);
             break;
 
         case Action::Type::DROP_RIGHT:
             std::cout << "Received DROP_RIGHT Action!" << std::endl;
-            player->dropRightHand();
+            player->drop(Player::EqSlot::RIGHT_HAND);
             break;
 
         case Action::Type::ACT_PREP_LEFT:
             std::cout << "Received ACT_PREP_LEFT Action!" << std::endl;
-            player->prepareItemLeft();
+            player->prepareItem(Player::EqSlot::LEFT_HAND);
             break;
 
         case Action::Type::ACT_PREP_RIGHT:
             std::cout << "Received ACT_PREP_RIGHT Action!" << std::endl;
-            player->prepareItemRight();
+            player->prepareItem(Player::EqSlot::RIGHT_HAND);
             break;
 
         case Action::Type::ACT_LEFT:
             std::cout << "Received ACT_LEFT Action!" << std::endl;
-            player->triggerActionLeft();
+            player->triggerAction(Player::EqSlot::LEFT_HAND);
             break;
 
         case Action::Type::ACT_RIGHT:
             std::cout << "Received ACT_RIGHT Action!" << std::endl;
-            player->triggerActionRight();
+            player->triggerAction(Player::EqSlot::RIGHT_HAND);
             break;
 
         default:

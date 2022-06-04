@@ -1,5 +1,10 @@
 #include "Player.h"
+#include <algorithm>
 #include "ObjectClasses.h"
+
+const std::unordered_map<Player::EqSlot, Angle> Player::defaultHoldAngles = {
+    {LEFT_HAND, Angle(ANGLE_SIDE)},
+    {RIGHT_HAND, Angle(ANGLE_SIDE)}};  /// Should not have EqSlot::NONE key
 
 /// Controlled by the player. Most complex than most entities
 Player::Player() {
@@ -12,25 +17,26 @@ Player::Player() {
     jointDef.motorSpeed = 0;  // regulated later in GameController to adjust angle
     jointDef.maxMotorTorque = 1;
     jointDef.localAnchorA.Set(0, 0);
+
+    std::for_each(defaultHoldAngles.begin(), defaultHoldAngles.end(), [&](auto const& smth) {
+        equipment[smth.first] = std::make_tuple(nullptr, nullptr, smth.second);
+    });
 }
 
 Player::~Player() {
-    // Very similar to drop...Hand, just doesn't destroy joint (it's probably destroyed earlier)
-    if (itemLH) {
-        itemLH->setOwner(nullptr);
-        itemLH->setCollision(false);
-        itemLH->resetCooldown();
-        itemLH = nullptr;
-    }
-    if (itemRH) {
-        itemRH->setOwner(nullptr);
-        itemRH->setCollision(false);
-        itemRH->resetCooldown();
-        itemRH = nullptr;
-    }
+    // Very similar to drop...Hand, just doesn't destroy joint (it's destroyed together with body it is attached to)
+    std::for_each(equipment.begin(), equipment.end(), [](const auto& pair) {
+        auto item = std::get<SLOT_ITEM>(pair.second);
+        if (item) {
+            item->setOwner(nullptr);
+            item->setCollision(false);
+            item->resetCooldown();
+        }
+    });
 }
 
 void Player::moveItems() {
+    Item *itemLH = std::get<SLOT_ITEM>(equipment.at(LEFT_HAND)), *itemRH = std::get<SLOT_ITEM>(equipment.at(RIGHT_HAND));
     if (itemLH && itemLH->isBeingUsed()) {
         itemFront = nullptr;
     } else if (itemRH && itemRH->isBeingUsed()) {
@@ -45,59 +51,68 @@ void Player::moveItems() {
         itemFront = nullptr;
     }
 
-    if (itemLH && jointLH) {
-        float angleDiff = -(jointLH->GetJointAngle() + Angle(targetAngleLH).get(Angle::unit::RAD));
+    std::for_each(equipment.begin(), equipment.end(), [&](const auto& pair) {
+        auto slot = pair.second;
+        auto item = std::get<SLOT_ITEM>(slot);
+        auto joint = std::get<SLOT_JOINT>(slot);
+        if (item && joint) {
+            auto angle = std::get<SLOT_ANGLE>(slot);
+            float angleDiff = -(joint->GetJointAngle() + angle.get(Angle::unit::RAD));
 
-        if (itemFront == itemLH)
-            angleDiff = -jointLH->GetJointAngle();
+            if (itemFront == item)
+                angleDiff = -joint->GetJointAngle();
 
-        jointLH->SetMotorSpeed(angleDiff);
-    }
-    if (itemRH && jointRH) {
-        float angleDiff = -(jointRH->GetJointAngle() - Angle(targetAngleRH).get(Angle::unit::RAD));
-
-        if (itemFront == itemRH)
-            angleDiff = -jointRH->GetJointAngle();
-
-        jointRH->SetMotorSpeed(angleDiff);
-    }
+            joint->SetMotorSpeed(angleDiff);
+        }
+    });
 }
 
 void Player::tickItemTimers() {
-    if (itemLH) {
-        itemLH->useTick();
-        itemLH->lowerCooldown();
-    }
-    if (itemRH) {
-        itemRH->useTick();
-        itemRH->lowerCooldown();
-    }
+    std::for_each(equipment.begin(), equipment.end(), [](const auto& pair) {
+        auto item = std::get<SLOT_ITEM>(pair.second);
+        if (item) {
+            item->useTick();
+            item->lowerCooldown();
+        }
+    });
 }
 
-void Player::setItemAngle(Item* item, float angle) {
-    if (item == itemLH)
-        targetAngleLH = angle;
-    if (item == itemRH)
-        targetAngleRH = angle;
+Player::EqSlot Player::findKeyWithItem(const Item* item) const {
+    // with small number of equipment slots, linear search is good enough
+    for (auto iter = equipment.begin(); iter != equipment.end(); ++iter) {
+        if (std::get<SLOT_ITEM>(iter->second) == item) {
+            return iter->first;
+        }
+    }
+    return EqSlot::NONE;
+}
+
+void Player::setItemAngle(Item* item, Angle angle) {
+    auto slotId = findKeyWithItem(item);  // key for slot where the item is or NONE
+    equipment.at(slotId) = std::make_tuple(item, std::get<SLOT_JOINT>(equipment.at(slotId)), angle);
 }
 
 void Player::resetItemAngle(Item* item) {
-    if (item == itemLH)
-        targetAngleLH = ANGLE_SIDE;
-
-    if (item == itemRH)
-        targetAngleRH = ANGLE_SIDE;
+    auto slotId = findKeyWithItem(item);  // key for slot where the item is or NONE
+    equipment.at(slotId) = std::make_tuple(item, std::get<SLOT_JOINT>(equipment.at(slotId)), defaultHoldAngles.at(slotId));
 }
 
-void Player::equipLeftHand(Item* const item) {
-    if (itemLH != nullptr)
-        dropLeftHand();
+void Player::equip(Item* const item, EqSlot slotId) {
+    auto slot = equipment.at(slotId);
+    if (std::get<SLOT_ITEM>(slot))
+        drop(slotId);
 
-    itemLH = item;
     item->setOwner(this);
     item->setCollisionGroup(collisionGroup);  // Must be called before setting cooldown, because it also turns collision on to update it
     item->setCooldown(std::max(item->cooldownCollision, item->cooldownAction));
 
+    adjustJointDefToItem(item);
+    auto joint = dynamic_cast<b2RevoluteJoint*>(body->GetWorld()->CreateJoint(&jointDef));
+
+    equipment.at(slotId) = std::make_tuple(item, joint, defaultHoldAngles.at(slotId));
+}
+
+void Player::adjustJointDefToItem(const Item* item) {
     jointDef.bodyA = body;
     jointDef.bodyB = item->getBodyPtr();
     jointDef.localAnchorB.Set(0, -DIST_HELD - (item->getLength() / 2 - item->getBodyPtr()->GetLocalCenter().y));  // This way items can be rotated around the player
@@ -106,77 +121,35 @@ void Player::equipLeftHand(Item* const item) {
     // angle is set based on angles of 2 bodies, which can be several rotations apart
     // this formula compansates for them
     jointDef.referenceAngle = -round((body->GetAngle() - item->getBodyPtr()->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
-
-    jointLH = dynamic_cast<b2RevoluteJoint*>(body->GetWorld()->CreateJoint(&jointDef));
-
-    resetItemAngle(item);
 }
 
-void Player::dropLeftHand() {
-    if (itemLH == nullptr)
+void Player::drop(EqSlot slotId) {
+    auto slot = equipment.at(slotId);
+    auto item = std::get<SLOT_ITEM>(slot);
+    if (!item)
         return;
 
-    itemLH->setOwner(nullptr);
-    itemLH->setCollision(false);
-    itemLH->resetCooldown();
-    itemLH = nullptr;
-    body->GetWorld()->DestroyJoint(jointLH);
+    item->setOwner(nullptr);
+    item->setCollision(false);
+    item->resetCooldown();
+
+    auto joint = std::get<SLOT_JOINT>(slot);
+    body->GetWorld()->DestroyJoint(joint);
+
+    equipment.at(slotId) = std::make_tuple(nullptr, nullptr, defaultHoldAngles.at(slotId));
 }
 
-void Player::equipRightHand(Item* const item) {
-    if (itemRH != nullptr)
-        dropRightHand();
-
-    itemRH = item;
-    item->setOwner(this);
-    item->setCollisionGroup(collisionGroup);
-    item->setCooldown(std::max(item->cooldownCollision, item->cooldownAction));
-
-    jointDef.bodyA = body;
-    jointDef.bodyB = item->getBodyPtr();
-    jointDef.localAnchorB.Set(0, -DIST_HELD - (item->getLength() / 2 - item->getBodyPtr()->GetLocalCenter().y));  // This way items can be rotated around the player
-
-    // Box2d anlges are form (-inf, inf), instead of (-pi, pi>
-    // angle is set based on angles of 2 bodies, which can be several rotations apart
-    // this formula compansates for them
-    jointDef.referenceAngle = -round((body->GetAngle() - item->getBodyPtr()->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
-
-    jointRH = dynamic_cast<b2RevoluteJoint*>(body->GetWorld()->CreateJoint(&jointDef));
-
-    resetItemAngle(item);
+void Player::triggerAction(EqSlot slotId) {
+    auto item = std::get<SLOT_ITEM>(equipment.at(slotId));
+    if (item)
+        item->useTrigger();
 }
 
-void Player::dropRightHand() {
-    if (itemRH == nullptr)
-        return;
-
-    itemRH->setOwner(nullptr);
-    itemRH->setCollision(false);
-    itemRH->resetCooldown();
-    itemRH = nullptr;
-    body->GetWorld()->DestroyJoint(jointRH);
-}
-
-void Player::triggerActionLeft() {
-    if (itemLH) {
-        itemLH->useTrigger();
-    }
-}
-
-void Player::triggerActionRight() {
-    if (itemRH) {
-        itemRH->useTrigger();
-    }
-}
-
-void Player::prepareItemLeft() {
-    if (itemLH && itemLH->canBeUsed())
-        targetAngleLH = itemLH->prepareAngle;
-}
-
-void Player::prepareItemRight() {
-    if (itemRH && itemRH->canBeUsed())
-        targetAngleRH = itemRH->prepareAngle;
+void Player::prepareItem(EqSlot slotId) {
+    auto slot = equipment.at(slotId);
+    auto item = std::get<SLOT_ITEM>(slot);
+    if (item && item->canBeUsed())
+        equipment.at(slotId) = std::make_tuple(item, std::get<SLOT_JOINT>(slot), Angle(item->prepareAngle));
 }
 
 std::vector<b2PolygonShape> Player::getBaseShapes() const {

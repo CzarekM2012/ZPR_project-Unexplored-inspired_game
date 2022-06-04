@@ -19,7 +19,7 @@ class RectangleObject : public Entity {
     float height;
 
    public:
-    /// Adjusts width and height, should be called before createPhysicalObject()
+    /// Adjusts width and height, should be called before createBody()
     void setSize(float width, float height);
     virtual std::vector<b2PolygonShape> getBaseShapes() const;
 };

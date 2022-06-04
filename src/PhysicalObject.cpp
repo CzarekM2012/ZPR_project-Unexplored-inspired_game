@@ -4,7 +4,7 @@
 b2BodyDef PhysicalObject::bodyDef = b2BodyDef();
 b2FixtureDef PhysicalObject::fixtureDef = b2FixtureDef();
 
-b2Body* PhysicalObject::createPhysicalObject(b2World* world, b2Vec2 position, Angle angle) {
+b2Body* PhysicalObject::createBody(b2World* world, b2Vec2 position, Angle angle) {
     bodyDef.position = position;
     bodyDef.angle = angle.get(Angle::unit::RAD);
     bodyDef.type = isStatic() ? b2_staticBody : b2_dynamicBody;
