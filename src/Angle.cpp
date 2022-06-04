@@ -33,6 +33,10 @@ Angle Angle::operator-(const Angle& other) {
     return Angle(value - other.value);
 }
 
+Angle Angle::operator-() {
+    return Angle(-value);
+}
+
 Angle& Angle::operator+=(const Angle& other) {
     value += other.value;
     map();

@@ -24,7 +24,7 @@ Player::Player() {
 }
 
 Player::~Player() {
-    // Very similar to drop...Hand, just doesn't destroy joint (it's destroyed together with body it is attached to)
+    // Very similar to drop, just doesn't destroy joint (it's destroyed together with body it is attached to)
     std::for_each(equipment.begin(), equipment.end(), [](const auto& pair) {
         auto item = std::get<SLOT_ITEM>(pair.second);
         if (item) {
@@ -57,6 +57,8 @@ void Player::moveItems() {
         auto joint = std::get<SLOT_JOINT>(slot);
         if (item && joint) {
             auto angle = std::get<SLOT_ANGLE>(slot);
+            if (pair.first == RIGHT_HAND)  // Reverse all right hand angles
+                angle = -angle;
             float angleDiff = -(joint->GetJointAngle() + angle.get(Angle::unit::RAD));
 
             if (itemFront == item)
