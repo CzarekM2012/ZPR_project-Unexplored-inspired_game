@@ -146,6 +146,8 @@ std::vector<b2PolygonShape> PhysicalObject::getBaseShapes() const {
 }
 
 void PhysicalObject::setCollision(bool on) {
+    if (!body)
+        return;
     auto fixtureList = body->GetFixtureList();
     b2Filter collisionFilter;  // Default values are ~group 0, collide with every group
     if (on) {

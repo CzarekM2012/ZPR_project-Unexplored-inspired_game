@@ -15,14 +15,13 @@ class InputHandler {
     static constexpr float SFML_AXIS_INPUT_SCALE = 100;
     static constexpr float AXIS_DEADZONE = 0.2;
 
-    const float UNIT_VECTOR_LENGTH = sqrt(2.f);
+    static constexpr float UNIT_VECTOR_LENGTH = sqrt(2.f);
 
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q;  ///< Event queue for sending commands to GameController
 
     bool isAnyJoystickConnected();
     void handleJoystickStates();
     void handleKeyboardState();
-    b2Vec2 normalizeMovement(b2Vec2 movement);
 
    public:
     static const int PLAYER_COUNT_MAX = 4;
@@ -46,6 +45,8 @@ class InputHandler {
 
     /// This is set by InputHandler in every pass, and then checked by GameController each tick; contrary to Actions, that are sent into message queue only once, when they appear
     static std::array<std::tuple<b2Vec2, Angle>, PLAYER_COUNT_MAX> inputStateTab;
+
+    static b2Vec2 normalizeMovement(b2Vec2 movement);
 
     InputHandler(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q);
 

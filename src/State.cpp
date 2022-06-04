@@ -1,7 +1,5 @@
 #include "State.h"
 
-/// A simple vector of PhysicalObject unique pointers. Represents whole state of the game
-
 PhysicalObject* State::add(std::unique_ptr<PhysicalObject> objectPtr) {
     objects.push_back(std::move(objectPtr));
     return objects[objects.size() - 1].get();

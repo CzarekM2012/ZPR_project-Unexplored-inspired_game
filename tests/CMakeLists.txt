@@ -3,7 +3,7 @@ set(TESTS_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/Catch2 ${EXTERNAL_BINARY_DIR}/Catch2)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new -lgcov --coverage)
+    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new -O0 -lgcov --coverage)
 endif()
 
 add_executable(tests
