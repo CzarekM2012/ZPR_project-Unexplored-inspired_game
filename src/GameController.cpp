@@ -33,6 +33,11 @@ MyContactListener listener;
 GameController::GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q)
     : action_q(q) {}
 
+GameController::~GameController() {
+    if (world)
+        delete world;
+}
+
 void GameController::prepareGame() {
     const std::lock_guard<std::mutex> guard(drawableCopyMutex);
 
@@ -77,7 +82,7 @@ void GameController::prepareGame() {
         wall->createBody(world, std::get<2>(params), std::get<3>(params));
     });
 
-    // Test some stuff
+    // Add equipment
     std::array<std::tuple<PhysicalObject*, b2Vec2>, 9> equimpents_parameters = {
         std::make_tuple(new Sword(), b2Vec2(10, 10)),
         std::make_tuple(new Sword(), b2Vec2(170, 10)),
@@ -146,19 +151,23 @@ void GameController::run() {
         }
 
         for (auto object : toRemove) {
-            std::cout << "Destroying object" << std::endl;
-            object->destroyBody();
-            std::cout << "Removing object from Physical object list" << std::endl;
-            state.remove(object);
-
             int alive = 0;
             for (int i = 0; i < InputHandler::PLAYER_COUNT_MAX; ++i) {
-                if (players[i] == object)
+                if (players[i] == object) {
+                    players[i]->drop(Player::EqSlot::LEFT_HAND);
+                    players[i]->drop(Player::EqSlot::RIGHT_HAND);
                     players[i] = nullptr;
+                }
 
                 if (players[i])
                     ++alive;
             }
+
+            std::cout << "Destroying object" << std::endl;
+            object->destroyBody();
+            std::cout << "Removing object from Physical object list" << std::endl;
+
+            state.remove(object);
 
             if (alive <= 1) {
                 drawableCopyMutex.unlock();

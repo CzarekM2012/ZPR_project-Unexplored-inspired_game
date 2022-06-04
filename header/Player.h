@@ -39,7 +39,6 @@ class Player : public Entity {
 
    public:
     Player();
-    ~Player();
 
     void moveItems();       ///< Adjust item angles
     void tickItemTimers();  ///< Lower cooldown and trigger action for current tick

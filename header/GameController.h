@@ -29,11 +29,11 @@ class GameController {
     void processAction(const Action& action);
 
    public:
-    b2World* world;             ///< Box2D World. All physical object representations are stored in and managed by this object. Deleting it also removes all other Box2D objects
+    b2World* world = nullptr;   ///< Box2D World. All physical object representations are stored in and managed by this object. Deleting it also removes all other Box2D objects
     volatile static bool stop;  ///< Checked each run() loop, changing this to true effectively stops the game logic thread
 
     GameController(std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > q);
-    ~GameController() { delete world; };
+    ~GameController();
 
     void prepareGame();  ///< Creates and populates world with objects, assigns players
     void restartGame();  ///< Destroys current world and calls prepareGame()

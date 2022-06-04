@@ -23,18 +23,6 @@ Player::Player() {
     });
 }
 
-Player::~Player() {
-    // Very similar to drop, just doesn't destroy joint (it's destroyed together with body it is attached to)
-    std::for_each(equipment.begin(), equipment.end(), [](const auto& pair) {
-        auto item = std::get<SLOT_ITEM>(pair.second);
-        if (item) {
-            item->setOwner(nullptr);
-            item->setCollision(false);
-            item->resetCooldown();
-        }
-    });
-}
-
 void Player::moveItems() {
     Item *itemLH = std::get<SLOT_ITEM>(equipment.at(LEFT_HAND)), *itemRH = std::get<SLOT_ITEM>(equipment.at(RIGHT_HAND));
     if (itemLH && itemLH->isBeingUsed()) {
