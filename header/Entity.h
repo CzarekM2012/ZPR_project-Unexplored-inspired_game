@@ -12,6 +12,7 @@ class Entity : public PhysicalObject {
 
    public:
     bool isInvulnerable() const { return invulnerable; }
+    void setInvulnerable(bool value) { invulnerable = value; }
 
     int getHp() { return hp; }
     int getMaxHp() { return maxHp; }

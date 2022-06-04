@@ -3,12 +3,13 @@ set(TESTS_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_subdirectory(${EXTERNAL_SOURCE_DIR}/Catch2 ${EXTERNAL_BINARY_DIR}/Catch2)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new)
+    add_compile_options(-Wall -Wextra -pedantic -Werror -faligned-new -lgcov --coverage)
 endif()
 
 add_executable(tests
     main.cpp
     Angle.cpp
+    Entity.cpp
     test.cpp
     ${SRCS_DIR}/Angle.cpp
     ${SRCS_DIR}/GameController.cpp
@@ -27,6 +28,7 @@ target_include_directories(tests PRIVATE
     ${HEADER_DIR})
 
 target_link_libraries(tests PRIVATE
+    gcov
     sfml-graphics
     sfml-audio
     sfml-window
