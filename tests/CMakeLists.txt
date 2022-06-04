@@ -8,10 +8,18 @@ endif()
 
 add_executable(tests
     main.cpp
+    test.cpp
     Angle.cpp
     Entity.cpp
-    test.cpp
+    GameController.cpp
+    InputHandler.cpp
+    Item.cpp
+    ObjectClasses.cpp
+    PhysicalObject.cpp
+    Player.cpp
+    Renderer.cpp
     ${SRCS_DIR}/Angle.cpp
+    ${SRCS_DIR}/State.cpp
     ${SRCS_DIR}/GameController.cpp
     ${SRCS_DIR}/InputHandler.cpp
     ${SRCS_DIR}/PhysicalObject.cpp

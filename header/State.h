@@ -17,30 +17,12 @@ class State {
     State(const State& state) = delete;
     State& operator=(const State&) = delete;
 
-    PhysicalObject* add(std::unique_ptr<PhysicalObject> objectPtr) {
-        objects.push_back(std::move(objectPtr));
-        return objects[objects.size() - 1].get();
-    };
+    PhysicalObject* add(std::unique_ptr<PhysicalObject> objectPtr);
+    PhysicalObject* add(PhysicalObject* objectPtr);
+    void remove(PhysicalObject* objectPtr);
 
-    PhysicalObject* add(PhysicalObject* objectPtr) {
-        objects.push_back(std::unique_ptr<PhysicalObject>(objectPtr));
-        return objects[objects.size() - 1].get();
-    };
-
-    void remove(PhysicalObject* objectPtr) {
-        auto it = find_if(objects.begin(), objects.end(), [&](std::unique_ptr<PhysicalObject>& object) { return object.get() == objectPtr; });
-        if (it != objects.end()) {
-            it->reset();
-            objects.erase(it);
-        }
-    }
-
-    PhysicalObject* get(unsigned int index) const {
-        return objects.size() > index ? objects[index].get() : nullptr;
-    }
-    PhysicalObject* getLast() {
-        return objects.empty() ? nullptr : objects[objects.size() - 1].get();
-    };
+    PhysicalObject* get(unsigned int index) const;
+    PhysicalObject* getLast();
     int getObjectCount() const { return objects.size(); };
 };
 
