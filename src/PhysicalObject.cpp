@@ -113,7 +113,6 @@ void PhysicalObject::resetColors() {
 
 std::vector<sf::Color> PhysicalObject::getBaseColors() const {
     std::vector<sf::Color> colors;
-    // colors.push_back(sf::Color::Magenta);
     for (unsigned int i = 0; i < shapes.size(); ++i)  // By default set primaryColor of all fixtures to base primaryColor
         colors.push_back(primaryColor);
     return colors;

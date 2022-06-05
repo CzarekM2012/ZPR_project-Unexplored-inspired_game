@@ -65,12 +65,14 @@ void InputHandler::handleKeyboardState() {
     inputStateTab[0] = std::make_tuple(movement, targetAngle);
 }
 
+/*!
+Returns 0 vector if movement is to movement vector is too short.
+returns movement vector normalized to unit vector, if it is too long.
+*/
 b2Vec2 InputHandler::normalizeMovement(b2Vec2 movement) {
-    // Returns 0 vector if movement is to movement vector is too short.
-    // returns movement vector normalized to unit vector, if it is too long.
     if (movement.Length() < AXIS_DEADZONE)
         movement.SetZero();
-    else if (movement.Length() > UNIT_VECTOR_LENGTH * 2 / 3)  // TODO: Makeshift, replace with decent scaling
+    else if (movement.Length() > UNIT_VECTOR_LENGTH * 2 / 3)
         movement.Normalize();
     return movement;
 }
@@ -104,12 +106,8 @@ void InputHandler::handleEvent(sf::Event event) {
                 action.type = Action::Type::SWITCH_HANDS;
                 break;
 
-            case JoystickButton::L3:
-                action.type = Action::Type::DROP_LEFT;
-                break;
-
-            case JoystickButton::R3:
-                action.type = Action::Type::DROP_RIGHT;
+            case JoystickButton::A:
+                action.type = Action::Type::DROP;
                 break;
 
             case JoystickButton::LB:
@@ -151,15 +149,15 @@ void InputHandler::handleEvent(sf::Event event) {
                 break;
 
             case sf::Keyboard::Num2:
-                action.type = Action::Type::DROP_LEFT;
-                break;
-
-            case sf::Keyboard::Num3:
                 action.type = Action::Type::PICK_RIGHT;
                 break;
 
+            case sf::Keyboard::Num3:
+                action.type = Action::Type::SWITCH_HANDS;
+                break;
+
             case sf::Keyboard::Num4:
-                action.type = Action::Type::DROP_RIGHT;
+                action.type = Action::Type::DROP;
                 break;
 
             case sf::Keyboard::Num5:

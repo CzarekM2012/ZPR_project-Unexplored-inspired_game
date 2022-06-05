@@ -7,7 +7,7 @@
 
 SCENARIO("Event handling") {
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q(new moodycamel::ReaderWriterQueue<Action>(10));
-    InputHandler InputHandler(action_q);
+    InputHandler inputHandler(action_q);
 
     GIVEN("There is an event to handle") {
         sf::Event event;
@@ -17,7 +17,7 @@ SCENARIO("Event handling") {
             event.joystickButton.joystickId = 1;
             event.joystickButton.button = InputHandler::JoystickButton::X;
 
-            InputHandler.handleEvent(event);
+            inputHandler.handleEvent(event);
             THEN("A correct action should be sent") {
                 Action action;
                 REQUIRE(action_q->try_dequeue(action));

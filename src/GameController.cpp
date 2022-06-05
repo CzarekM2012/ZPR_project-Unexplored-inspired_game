@@ -24,8 +24,6 @@ class MyContactListener : public b2ContactListener {
             objectB->onContact(objectA);
         }
     }
-
-    // void EndContact(b2Contact* /*contact*/) {}
 };
 
 volatile bool GameController::stop;
@@ -73,7 +71,7 @@ void GameController::prepareGame() {
         return player;
     });
 
-    // Add more equipment
+    // Add equipment lying on the ground
     std::array<std::tuple<PhysicalObject*, b2Vec2>, 4> equimpents_parameters = {
         std::make_tuple(new Axe(), b2Vec2(86, 47)),
         std::make_tuple(new Axe(), b2Vec2(104, 47)),
@@ -121,8 +119,6 @@ void GameController::prepareGame() {
 
 void GameController::run() {
     auto lastTime = std::chrono::steady_clock::now();
-    // int fps = 0;
-    // auto lastSecond = std::chrono::steady_clock::now();
 
     while (!stop) {
         if (state.getObjectCount() == 0) {
@@ -131,7 +127,7 @@ void GameController::run() {
             continue;
         }
 
-        // (player movement direction and look angles)
+        // Player movement direction and look angles
         for (unsigned int i = 0; i < players.size(); ++i)
             processPlayerInputStates(i);
 
@@ -153,7 +149,7 @@ void GameController::run() {
 
         for (auto object : toRemove) {
             const auto playerIter = std::find(players.begin(), players.end(), object);
-            if (playerIter != players.end()) {  // object was found in players
+            if (playerIter != players.end()) {
                 auto& player = *playerIter;
                 player->dropAll();
                 player = nullptr;
@@ -178,23 +174,11 @@ void GameController::run() {
             object->synchronize();
         }
 
-        // std::this_thread::sleep_for(10ms); // For synchronization testing
-
         drawableCopyMutex.unlock();
-
-        // Wait for the next tick
-
-        // std::this_thread::sleep_for(TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime));
-        while (TIME_STEP > std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastTime))  // Non-active waiting methods we tried weren't precise enough to avoid animation stuttering
+        // Non-active waiting methods we tried weren't precise enough to avoid animation stuttering
+        while (TIME_STEP > std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastTime))
             ;
         lastTime = std::chrono::steady_clock::now();
-        // fps += 1;
-
-        // if (std::chrono::duration_cast<std::chrono::seconds>(lastTime - lastSecond).count() >= 1) {
-        //     lastSecond = std::chrono::steady_clock::now();
-
-        //     fps = 0;
-        // }
     }
 }
 
@@ -225,11 +209,6 @@ void GameController::processPlayerInputStates(const int playerId) {
 
     player->moveItems();
     player->tickItemTimers();
-
-    // else
-
-    // InputHandler::inputStateTab[0][InputHandler::INPUT_LOOK_ANGLE] << "
-    // Force: " << force << std::endl;
 }
 
 void GameController::processAction(const Action& action) {
@@ -265,9 +244,9 @@ void GameController::processAction(const Action& action) {
             break;
         }
 
-        case Action::Type::DROP_LEFT:
+        case Action::Type::DROP:
 
-            player->drop(Player::EqSlotId::LEFT_HAND);
+            player->dropAll();
             break;
 
         case Action::Type::PICK_RIGHT: {
@@ -276,11 +255,6 @@ void GameController::processAction(const Action& action) {
                 player->equip(foundItem, Player::EqSlotId::RIGHT_HAND);
             break;
         }
-
-        case Action::Type::DROP_RIGHT:
-
-            player->drop(Player::EqSlotId::RIGHT_HAND);
-            break;
 
         case Action::Type::ACT_PREP_LEFT:
 

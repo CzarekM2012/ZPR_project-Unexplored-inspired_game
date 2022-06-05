@@ -10,7 +10,7 @@ Player::EqSlot::EqSlot(Item* sItem = nullptr, b2RevoluteJoint* sJoint = nullptr,
     : item(sItem), joint(sJoint), angle(sAngle) {
 }
 
-/// Controlled by the player. Most complex than most entities
+/// Controlled by the player. More complex than most entities
 Player::Player() {
     maxHp = 100;
     hp = 100;
