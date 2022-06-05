@@ -35,7 +35,6 @@ const int ACTION_Q_SIZE = 10;
 int main() {
     std::cout << "Started" << std::endl;
 
-    // sf::RenderWindow window(sf::VideoMode(1920, 1080), "ZPR Game");
     sf::RenderWindow window(sf::VideoMode(960, 540), "ZPR Game");
     Renderer renderer(&window);
 
@@ -49,22 +48,14 @@ int main() {
     while (window.isOpen()) {
         sf::Event event;
 
-        // if (!gameController.running) {
-        //     gameController.prepareGame();
-        //     gameLogicThread = new std::thread(&GameController::run, &gameController);
-        //     while (!gameController.running)
-        //         std::this_thread::sleep_for(1ms);
-        // }
-
         if (window.pollEvent(event)) {
             inputHandler.handleEvent(event);
-            if (event.type == sf::Event::Closed) {  // Event doesn't by itself tell if something has happened, need to check pollEvent return
+            if (event.type == sf::Event::Closed) {  // Event doesn't tell by itself if something had happened, need to check pollEvent return
                 window.close();
             }
         }
         inputHandler.handleStates();
         renderer.render(gameController.getDrawablesCopy());
-        // std::this_thread::sleep_for(10ms);
     }
     std::cout << "Window closed" << std::endl;
 

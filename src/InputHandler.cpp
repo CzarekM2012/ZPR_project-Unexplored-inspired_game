@@ -65,12 +65,14 @@ void InputHandler::handleKeyboardState() {
     inputStateTab[0] = std::make_tuple(movement, targetAngle);
 }
 
+/*!
+Returns 0 vector if movement is to movement vector is too short.
+returns movement vector normalized to unit vector, if it is too long.
+*/
 b2Vec2 InputHandler::normalizeMovement(b2Vec2 movement) {
-    // Returns 0 vector if movement is to movement vector is too short.
-    // returns movement vector normalized to unit vector, if it is too long.
     if (movement.Length() < AXIS_DEADZONE)
         movement.SetZero();
-    else if (movement.Length() > UNIT_VECTOR_LENGTH * 2 / 3)  // TODO: Makeshift, replace with decent scaling
+    else if (movement.Length() > UNIT_VECTOR_LENGTH * 2 / 3)
         movement.Normalize();
     return movement;
 }
