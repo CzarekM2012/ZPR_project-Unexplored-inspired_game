@@ -38,14 +38,8 @@ class Wall : public RectangleObject {
     Wall(int w, int h);
 };
 
-/// Weapons can be used to deal damage to entities
-class Weapon : public Item {
-   protected:
-    int damage;
-};
-
 /// Sword is held automatically in front. Player can stab on contact and charge on use.
-class Sword : public Weapon {
+class Sword : public Item {
    public:
     Sword();
 
@@ -55,12 +49,22 @@ class Sword : public Weapon {
 };
 
 /// Axe can be swinged on use. Deals severe damage but only when swinging.
-class Axe : public Weapon {
+class Axe : public Item {
    public:
     Axe();
     void useTick(int tick);
     virtual std::vector<b2PolygonShape> getBaseShapes() const;
     void onContact(PhysicalObject* const other);
+};
+
+/// Dagger is also held in front. Player can stab on contact or use it to make a throw.
+class Dagger : public Item {
+   public:
+    Dagger();
+
+    void useTick(int tick);  ///< Throw the dagger
+    virtual std::vector<b2PolygonShape> getBaseShapes() const;
+    void onContact(PhysicalObject* const other);  ///< Deal damage on contact, more when thrown
 };
 
 /// Defensive item, puts colliding weapons on cooldown

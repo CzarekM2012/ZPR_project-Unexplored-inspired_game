@@ -17,7 +17,6 @@ class GameController {
     const float FORCE_LOOK = 250;
     const float FORCE_LOOK_MIN = 5;
     const float LOOK_ACC_DEG = 0.5f;
-    const float PICKUP_RANGE = 10;
     const std::chrono::duration<int64_t, std::nano> TIME_STEP = std::chrono::duration<int64_t, std::nano>(1000000000 / TICKS_PER_SECOND);  ///< How much time should pass between each physics step() call
 
     State state;                                                       ///< State of the game. Here pointers to all objects' data are stored

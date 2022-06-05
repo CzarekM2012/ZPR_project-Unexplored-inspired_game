@@ -26,7 +26,7 @@ Player::Player() {
 }
 
 void Player::moveItems() {
-    Item *itemLH = equipment.at(LEFT_HAND).item, *itemRH = equipment.at(RIGHT_HAND).item;
+    Item *itemLH = equipment[LEFT_HAND].item, *itemRH = equipment[RIGHT_HAND].item;
     if (itemLH && itemLH->isBeingUsed()) {
         itemFront = nullptr;
     } else if (itemRH && itemRH->isBeingUsed()) {
@@ -41,9 +41,20 @@ void Player::moveItems() {
         itemFront = nullptr;
     }
 
-    std::for_each(equipment.begin(), equipment.end(), [&](const auto& pair) {
+    std::for_each(equipment.begin(), equipment.end(), [&](const std::pair<EqSlotId, EqSlot>& pair) {
         auto slot = pair.second;
         if (slot.item && slot.joint) {
+            // If item is too far or rotates too much -> set on cooldown to allow it to return
+            if (body) {
+                if (auto itemBody = slot.item->getBodyPtr()) {
+                    b2Vec2 pos = itemBody->GetPosition() - body->GetPosition();
+                    if (pos.x * pos.x + pos.y * pos.y > DROP_RANGE_SQ || abs(slot.joint->GetJointAngle()) > b2_pi) {
+                        std::cout << "TEST: " << pos.x * pos.x + pos.y * pos.y << " " << slot.joint->GetJointAngle() << std::endl;
+                        slot.item->setCooldown(slot.item->cooldownCollision);
+                    }
+                }
+            }
+
             if (pair.first == RIGHT_HAND)  // Reverse all right hand angles
                 slot.angle = -slot.angle;
             float angleDiff = -(slot.joint->GetJointAngle() + slot.angle.get(Angle::unit::RAD));
@@ -79,7 +90,7 @@ Player::EqSlotId Player::findKeyWithItem(const Item* item) const {
 void Player::setItemAngle(Item* item, Angle angle) {
     try {
         auto slotId = findKeyWithItem(item);
-        equipment.at(slotId).angle = angle;
+        equipment[slotId].angle = angle;
     } catch (const std::out_of_range&) {
     }
 }
@@ -137,13 +148,13 @@ void Player::drop(EqSlotId slotId) {
 }
 
 void Player::triggerAction(EqSlotId slotId) {
-    auto item = equipment.at(slotId).item;
+    auto item = equipment[slotId].item;
     if (item)
         item->useTrigger();
 }
 
 void Player::prepareItem(EqSlotId slotId) {
-    auto slot = equipment[slotId];
+    auto& slot = equipment[slotId];
     if (slot.item && slot.item->canBeUsed())
         slot.angle = Angle(slot.item->prepareAngle);
 }

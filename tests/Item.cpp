@@ -57,14 +57,14 @@ SCENARIO("Action tests") {
                 REQUIRE(!item.canBeUsed());
             }
 
-            // THEN("Action time can be lowered correctly") {
-            //     for (int i = 0; i < item.getActionTimeTotal(); ++i) {
-            //         REQUIRE(item.isBeingUsed());
-            //         item.useTick();
-            //     }
-            //     REQUIRE(item.getActionTimeLeft() == 0);
-            //     REQUIRE(item.isOnCooldown());
-            // }
+            THEN("Action time can be lowered correctly") {
+                for (int i = 0; i < item.getActionTimeTotal(); ++i) {
+                    REQUIRE(item.isBeingUsed());
+                    item.useTick();
+                }
+                REQUIRE(item.getActionTimeLeft() == 0);
+                REQUIRE(item.isOnCooldown());
+            }
 
             THEN("Cooldown can be reset") {
                 item.resetCooldown();

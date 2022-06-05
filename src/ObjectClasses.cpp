@@ -42,7 +42,6 @@ Wall::Wall(int w, int h)
 }
 
 Sword::Sword() {
-    damage = 10;
     primaryColor = sf::Color(180, 180, 180);
     holdInFrontWhenPossible = true;
 }
@@ -58,7 +57,7 @@ void Sword::useTick(int tick) {
     }
     auto ownerBody = owner->getBodyPtr();
     float angle = ownerBody->GetAngle();
-    int force = 100;
+    float force = 100;
     b2Vec2 vec = b2Vec2(-force * sin(angle), force * cos(angle));
     ownerBody->ApplyLinearImpulseToCenter(vec, true);
 }
@@ -91,7 +90,6 @@ void Sword::onContact(PhysicalObject* const other) {
 }
 
 Axe::Axe() {
-    damage = 10;
     primaryColor = sf::Color(180, 180, 180);
     holdInFrontWhenPossible = false;
     prepareAngle = 135;
@@ -138,9 +136,72 @@ void Axe::onContact(PhysicalObject* const other) {
     }
 }
 
+Dagger::Dagger() {
+    actionTimeTotal = TICKS_PER_SECOND;
+    cooldownCollision = TICKS_PER_SECOND / 2;
+    cooldownAction = TICKS_PER_SECOND;
+    primaryColor = sf::Color(180, 180, 180);
+    holdInFrontWhenPossible = true;
+}
+
+void Dagger::useTick(int tick) {
+    std::cout << actionTimeLeft << std::endl;
+    switch (tick) {
+        case TICKS_PER_SECOND:
+            std::cout << "Dagger action" << std::endl;
+            if (auto player = dynamic_cast<Player*>(owner)) {
+                player->drop(this);
+                setCollision(true);
+                body->SetLinearDamping(0.01);
+            }
+            break;
+    }
+
+    if (body) {
+        float angle = body->GetAngle();
+        float force = 100;
+        b2Vec2 vec = b2Vec2(-force * sin(angle), force * cos(angle));
+        body->ApplyLinearImpulseToCenter(vec, true);
+    }
+}
+
+std::vector<b2PolygonShape> Dagger::getBaseShapes() const {
+    std::vector<b2PolygonShape> shapeVec;
+    b2PolygonShape shape;
+
+    b2Vec2 triangle[] = {b2Vec2(-3, 2), b2Vec2(0, 8), b2Vec2(3, 2)};
+    shape.Set(triangle, 3);
+    shapeVec.push_back(shape);
+
+    shape.SetAsBox(0.5, 1, b2Vec2(0, 1), 0);
+    shapeVec.push_back(shape);
+
+    return shapeVec;
+}
+
+void Dagger::onContact(PhysicalObject* const other) {
+    auto target = dynamic_cast<Entity*>(other);
+    if (target) {
+        if (!isOnCooldown()) {
+            if (isBeingUsed())
+                target->damage(10);
+            else
+                target->damage(5);
+        }
+        setCooldown(cooldownCollision);
+    }
+
+    if (isBeingUsed()) {  // Is airborne
+        std::cout << "Dagger action end" << std::endl;
+        actionTimeLeft = 0;
+        resetCooldown();
+        body->SetLinearDamping(damping);
+    }
+}
+
 Shield::Shield() {
     primaryColor = sf::Color(180, 180, 180);
-    cooldownCollision = 1.5 * TICKS_PER_SECOND;
+    cooldownCollision = TICKS_PER_SECOND;
     cooldownAction = 0;
     actionTimeTotal = 1;
 }
