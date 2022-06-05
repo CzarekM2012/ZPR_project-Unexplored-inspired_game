@@ -2,6 +2,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <algorithm>
+#include <array>
+#include <vector>
 
 #include "Angle.h"
 
@@ -61,6 +63,58 @@ SCENARIO("One value retrieved from object can be converted to another with good 
     }
 }
 
-// SCENARIO("Passed values are mapped to their equivalents in (-180, 180][deg] ((-PI, PI][rad]) range") {
-//     NEGLIGIBLE_COMPUTATIONAL_ERROR = 1.f / 60 / 60;
-// }
+SCENARIO("Passed values are mapped to their equivalents in (-180, 180][deg] ((-PI, PI][rad]) range") {
+    float FULL_ANGLE = 360.f;
+    WHEN("Angles are created with values from outside the range") {
+        std::vector<std::array<float, 2>> values = {
+            {-65340.f, 180.f},
+            {-6574.f, -94.f},
+            {687540.f, -60.f},
+            {987413.f, -67.f},
+            {434560.f, 40.f},
+            {-180.f, 180.f}};
+        THEN("Values retrieved from them fall in range and are equivalent to constructor arguments") {
+            std::for_each(values.begin(), values.end(), [&](const auto& arr) {
+                REQUIRE(Angle(arr[0]).get() == arr[1]);
+                REQUIRE(fmod(arr[0] - Angle(arr[1]).get(), FULL_ANGLE) == 0);
+            });
+        }
+    }
+}
+
+SCENARIO("Values of angles that are result of operations on angles fall in (-180, 180][deg] ((-PI, PI][rad]) range") {
+    WHEN("Angles are added") {
+        std::vector<std::array<float, 3>> values = {
+            {150, 31, -179},
+            {-60, -120, 180},
+            {31, 34, 65},
+            {129, -367, 122},
+            {129, -7, 122},
+            {-18, -42, -60}};
+        THEN("Values retrieved from them fall in range") {
+            std::for_each(values.begin(), values.end(), [&](const auto& arr) {
+                Angle first = Angle(arr[0]), second = Angle(arr[1]);
+                REQUIRE((first + second).get() == arr[2]);
+                first += second;
+                REQUIRE(first.get() == arr[2]);
+            });
+        }
+    }
+    WHEN("Angles are substracted") {
+        std::vector<std::array<float, 3>> values = {
+            {-150, 30, 180},
+            {60, -120, 180},
+            {31, 34, -3},
+            {129, -367, 136},
+            {129, -7, 136},
+            {-12, -42, 30}};
+        THEN("Values retrieved from them fall in range") {
+            std::for_each(values.begin(), values.end(), [&](const auto& arr) {
+                Angle first = Angle(arr[0]), second = Angle(arr[1]);
+                REQUIRE((first - second).get() == arr[2]);
+                first -= second;
+                REQUIRE(first.get() == arr[2]);
+            });
+        }
+    }
+}
