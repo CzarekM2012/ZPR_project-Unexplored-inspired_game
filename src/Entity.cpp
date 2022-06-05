@@ -18,7 +18,7 @@ void Entity::synchronize() {
     auto colors = getBaseColors();
     auto color = colors[0];
     float scale = static_cast<float>(hp) / maxHp;
-    // std::cout << scale << std::endl;
+
     color.r *= scale;
     color.g *= scale;
     color.b *= scale;

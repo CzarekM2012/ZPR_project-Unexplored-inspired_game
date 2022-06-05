@@ -1,7 +1,7 @@
 #include <SFML/Window/Event.hpp>
 
 #include <box2d/box2d.h>
-#include <iostream>
+
 #include "InputHandler.h"
 
 std::array<std::tuple<b2Vec2, Angle>, InputHandler::PLAYER_COUNT_MAX> InputHandler::inputStateTab;

@@ -2,7 +2,7 @@
 #define STATE_H
 
 #include <algorithm>
-#include <iostream>
+
 #include <memory>
 #include <vector>
 

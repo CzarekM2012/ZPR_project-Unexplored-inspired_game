@@ -4,7 +4,6 @@
 #include "InputHandler.h"
 #include "Renderer.h"
 
-#include <iostream>
 #include <thread>
 
 using namespace std::chrono_literals;

@@ -25,7 +25,7 @@ class MyContactListener : public b2ContactListener {
         }
     }
 
-    void EndContact(b2Contact* /*contact*/) {}
+    // void EndContact(b2Contact* /*contact*/) {}
 };
 
 volatile bool GameController::stop;
@@ -127,7 +127,7 @@ void GameController::run() {
     while (!stop) {
         if (state.getObjectCount() == 0) {
             std::this_thread::sleep_for(1ms);
-            std::cout << "State is Empty!" << std::endl;
+
             continue;
         }
 
@@ -147,7 +147,6 @@ void GameController::run() {
         std::vector<PhysicalObject*> toRemove;
         for (auto&& object : state.objects) {
             if (object->toDestroy) {
-                std::cout << "Adding object to remove list" << std::endl;
                 toRemove.push_back(object.get());
             }
         }
@@ -164,9 +163,7 @@ void GameController::run() {
                 return player != nullptr;
             });
 
-            std::cout << "Destroying object" << std::endl;
             object->destroyBody();
-            std::cout << "Removing object from Physical object list" << std::endl;
 
             state.remove(object);
 
@@ -186,7 +183,7 @@ void GameController::run() {
         drawableCopyMutex.unlock();
 
         // Wait for the next tick
-        // std::cout << "Duration = " << TIME_STEP.count() << ", Time to wait = " << (TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime)).count() << " Time spent: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime).count() << std::endl;
+
         // std::this_thread::sleep_for(TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime));
         while (TIME_STEP > std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastTime))  // Non-active waiting methods we tried weren't precise enough to avoid animation stuttering
             ;
@@ -195,7 +192,7 @@ void GameController::run() {
 
         // if (std::chrono::duration_cast<std::chrono::seconds>(lastTime - lastSecond).count() >= 1) {
         //     lastSecond = std::chrono::steady_clock::now();
-        //     std::cout << "FPS: " << fps << std::endl;
+
         //     fps = 0;
         // }
     }
@@ -230,8 +227,7 @@ void GameController::processPlayerInputStates(const int playerId) {
     player->tickItemTimers();
 
     // else
-    //     std:: cout << "No rotation force needed" << std::endl;
-    // std:: cout << "Angle: " << player->getAngleDeg() << " Requested: " <<
+
     // InputHandler::inputStateTab[0][InputHandler::INPUT_LOOK_ANGLE] << "
     // Force: " << force << std::endl;
 }
@@ -245,11 +241,8 @@ void GameController::processAction(const Action& action) {
     if (!player && action.type != Action::Type::DEBUG && action.type != Action::Type::RESTART)
         return;
 
-    std::cout << "Action from player " << action.playerId << std::endl;
-
     switch (action.type) {
         case Action::Type::DEBUG: {
-            std::cout << "Received DEBUG Action!" << std::endl;
             const std::lock_guard<std::mutex> drawCopyLock(drawableCopyMutex);
             for (int i = 0; i < 4; ++i) {
                 auto box = new Box();
@@ -261,13 +254,11 @@ void GameController::processAction(const Action& action) {
         }
 
         case Action::Type::RESTART:
-            std::cout << "Received RESTART Action!" << std::endl;
+
             restartGame();
             break;
 
         case Action::Type::PICK_LEFT: {
-            std::cout << "Received PICKUP_LEFT Action!" << std::endl;
-
             const auto foundItem = getFirstPickableItem(player);
             if (foundItem != nullptr)
                 player->equip(foundItem, Player::EqSlotId::LEFT_HAND);
@@ -275,13 +266,11 @@ void GameController::processAction(const Action& action) {
         }
 
         case Action::Type::DROP_LEFT:
-            std::cout << "Received DROP_LEFT Action!" << std::endl;
+
             player->drop(Player::EqSlotId::LEFT_HAND);
             break;
 
         case Action::Type::PICK_RIGHT: {
-            std::cout << "Received PICKUP_RIGHT Action!" << std::endl;
-
             const auto foundItem = getFirstPickableItem(player);
             if (foundItem != nullptr)
                 player->equip(foundItem, Player::EqSlotId::RIGHT_HAND);
@@ -289,32 +278,32 @@ void GameController::processAction(const Action& action) {
         }
 
         case Action::Type::DROP_RIGHT:
-            std::cout << "Received DROP_RIGHT Action!" << std::endl;
+
             player->drop(Player::EqSlotId::RIGHT_HAND);
             break;
 
         case Action::Type::ACT_PREP_LEFT:
-            std::cout << "Received ACT_PREP_LEFT Action!" << std::endl;
+
             player->prepareItem(Player::EqSlotId::LEFT_HAND);
             break;
 
         case Action::Type::ACT_PREP_RIGHT:
-            std::cout << "Received ACT_PREP_RIGHT Action!" << std::endl;
+
             player->prepareItem(Player::EqSlotId::RIGHT_HAND);
             break;
 
         case Action::Type::ACT_LEFT:
-            std::cout << "Received ACT_LEFT Action!" << std::endl;
+
             player->triggerAction(Player::EqSlotId::LEFT_HAND);
             break;
 
         case Action::Type::ACT_RIGHT:
-            std::cout << "Received ACT_RIGHT Action!" << std::endl;
+
             player->triggerAction(Player::EqSlotId::RIGHT_HAND);
             break;
 
         case Action::Type::SWITCH_HANDS:
-            std::cout << "Received SWITCH_HANDS Action!" << std::endl;
+
             player->switchHands();
             break;
 
@@ -367,7 +356,6 @@ Item* GameController::getFirstPickableItem(Player* player) const {
 std::vector<sf::ConvexShape> GameController::getDrawablesCopy() {
     std::vector<sf::ConvexShape> drawables;
     if (!drawableCopyMutex.try_lock()) {
-        // std::cout << "Lock failed!" << std::endl;
         return drawables;
     }
 

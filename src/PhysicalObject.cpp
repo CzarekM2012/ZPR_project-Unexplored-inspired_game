@@ -1,5 +1,4 @@
 #include "PhysicalObject.h"
-#include <iostream>
 
 b2BodyDef PhysicalObject::bodyDef = b2BodyDef();
 b2FixtureDef PhysicalObject::fixtureDef = b2FixtureDef();
@@ -37,11 +36,10 @@ void PhysicalObject::createFixture(const b2PolygonShape& shape) {
 }
 
 void PhysicalObject::clearFixtures() {
-    b2Fixture* lastFixture;
     if (body->GetFixtureList() == nullptr)
         return;
     for (auto fixtureList = body->GetFixtureList(); fixtureList != nullptr;) {
-        lastFixture = fixtureList;
+        auto lastFixture = fixtureList;
         fixtureList = fixtureList->GetNext();
         body->DestroyFixture(lastFixture);
     }

@@ -1,7 +1,6 @@
 #ifndef OBJECT_CLASSES_H
 #define OBJECT_CLASSES_H
 
-#include <iostream>
 #include <memory>
 
 #include <box2d/box2d.h>

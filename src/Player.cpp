@@ -2,8 +2,6 @@
 #include <algorithm>
 #include "ObjectClasses.h"
 
-#include <iostream>
-
 const std::unordered_map<Player::EqSlotId, Angle> Player::defaultHoldAngles = {
     {Player::EqSlotId::LEFT_HAND, Angle(ANGLE_SIDE)},
     {Player::EqSlotId::RIGHT_HAND, Angle(ANGLE_SIDE)}};
@@ -48,8 +46,7 @@ void Player::moveItems() {
             if (body) {
                 if (auto itemBody = slot.item->getBodyPtr()) {
                     b2Vec2 pos = itemBody->GetPosition() - body->GetPosition();
-                    if (pos.x * pos.x + pos.y * pos.y > DROP_RANGE_SQ || abs(slot.joint->GetJointAngle()) > b2_pi) {
-                        std::cout << "TEST: " << pos.x * pos.x + pos.y * pos.y << " " << slot.joint->GetJointAngle() << std::endl;
+                    if (pos.LengthSquared() > DROP_RANGE_SQ || abs(slot.joint->GetJointAngle()) > b2_pi) {
                         slot.item->setCooldown(slot.item->cooldownCollision);
                     }
                 }

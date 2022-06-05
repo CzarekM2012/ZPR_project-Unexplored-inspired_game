@@ -49,7 +49,7 @@ Sword::Sword() {
 void Sword::useTick(int tick) {
     switch (tick) {
         case TICKS_PER_SECOND:
-            std::cout << "Sword action" << std::endl;
+
             if (auto player = dynamic_cast<Player*>(owner)) {
                 player->setItemAngle(this, 0);
             }
@@ -98,7 +98,7 @@ Axe::Axe() {
 void Axe::useTick(int tick) {
     switch (tick) {
         case TICKS_PER_SECOND:
-            std::cout << "Axe action" << std::endl;
+
             if (auto player = dynamic_cast<Player*>(owner)) {
                 player->setItemAngle(this, -135);
             }
@@ -149,10 +149,9 @@ Dagger::Dagger() {
 }
 
 void Dagger::useTick(int tick) {
-    std::cout << actionTimeLeft << std::endl;
     switch (tick) {
         case TICKS_PER_SECOND:
-            std::cout << "Dagger action" << std::endl;
+
             if (auto player = dynamic_cast<Player*>(owner)) {
                 player->drop(this);
                 setCollision(true);
@@ -196,7 +195,7 @@ void Dagger::onContact(PhysicalObject* const other) {
     }
 
     if (isBeingUsed()) {  // Is airborne
-        std::cout << "Dagger action end" << std::endl;
+
         actionTimeLeft = 0;
         resetCooldown();
         body->SetLinearDamping(damping);
