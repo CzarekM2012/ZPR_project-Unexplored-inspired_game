@@ -27,16 +27,16 @@ SCENARIO("Custom game") {
     std::shared_ptr<moodycamel::ReaderWriterQueue<Action> > action_q(new moodycamel::ReaderWriterQueue<Action>(10));
     GameController gameController(action_q);
     auto state = gameController.getState();
-    auto world = new b2World(b2Vec2(0, 0));
+    std::unique_ptr<b2World> world(new b2World(b2Vec2(0, 0)));
 
     GIVEN("There is a player and a sword") {
         auto player = new Player();
         state->add(player);
-        player->createBody(world, b2Vec2(0, 0));
+        player->createBody(world.get(), b2Vec2(0, 0));
 
         auto sword = new Sword();
         state->add(sword);
-        sword->createBody(world, b2Vec2(0, 0));
+        sword->createBody(world.get(), b2Vec2(0, 0));
 
         WHEN("") {
             THEN("Player can pickup the sword") {
