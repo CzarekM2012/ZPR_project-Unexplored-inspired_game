@@ -78,8 +78,8 @@ Player::EqSlotId Player::findKeyWithItem(const Item* item) const {
 
 void Player::setItemAngle(Item* item, Angle angle) {
     try {
-        auto slotId = findKeyWithItem(item);
-        equipment.at(slotId).angle = angle;
+        const auto slotId = findKeyWithItem(item);
+        equipment[slotId].angle = angle;
     } catch (const std::out_of_range&) {
     }
 }
@@ -89,8 +89,11 @@ Angle Player::getDefaultAngle(const EqSlotId& slotId) const {
 }
 
 void Player::resetItemAngle(Item* item) {
-    auto slotId = findKeyWithItem(item);  // key for slot where the item is or NONE
-    equipment[slotId].angle = getDefaultAngle(slotId);
+    try {
+        const auto slotId = findKeyWithItem(item);
+        equipment[slotId].angle = getDefaultAngle(slotId);
+    } catch (const std::out_of_range&) {
+    }
 }
 
 void Player::equip(Item* const item, EqSlotId slotId) {
