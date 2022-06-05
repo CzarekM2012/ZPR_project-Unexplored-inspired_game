@@ -44,6 +44,11 @@ target_link_libraries(tests PRIVATE
     readerwriterqueue
     Catch2::Catch2)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    target_link_libraries(tests PRIVATE
+        pthread)
+endif()
+
 add_dependencies(tests
     sfml-graphics
     sfml-audio
