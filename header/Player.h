@@ -51,6 +51,7 @@ class Player : public Entity {
 
     void equip(Item* const item, EqSlotId);
     void drop(EqSlotId);
+    void switchHands();
 
     void prepareItem(EqSlotId);
     void triggerAction(EqSlotId);

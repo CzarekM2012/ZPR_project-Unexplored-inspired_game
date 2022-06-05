@@ -100,6 +100,10 @@ void InputHandler::handleEvent(sf::Event event) {
                 action.type = Action::Type::PICK_RIGHT;
                 break;
 
+            case JoystickButton::Y:
+                action.type = Action::Type::SWITCH_HANDS;
+                break;
+
             case JoystickButton::L3:
                 action.type = Action::Type::DROP_LEFT;
                 break;
@@ -164,6 +168,10 @@ void InputHandler::handleEvent(sf::Event event) {
 
             case sf::Keyboard::Num6:
                 action.type = Action::Type::ACT_PREP_RIGHT;
+                break;
+
+            case sf::Keyboard::Num7:
+                action.type = Action::Type::SWITCH_HANDS;
                 break;
 
             default:

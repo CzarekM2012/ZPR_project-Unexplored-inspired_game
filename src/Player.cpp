@@ -94,6 +94,8 @@ void Player::resetItemAngle(Item* item) {
 }
 
 void Player::equip(Item* const item, EqSlotId slotId) {
+    if (!item)
+        return;
     auto& slot = equipment[slotId];
     if (slot.item) {
         drop(slotId);
@@ -134,6 +136,14 @@ void Player::drop(EqSlotId slotId) {
     body->GetWorld()->DestroyJoint(slot.joint);
 
     slot = EqSlot();
+}
+
+void Player::switchHands() {
+    const auto leftItem = equipment[EqSlotId::LEFT_HAND].item, rightItem = equipment[EqSlotId::RIGHT_HAND].item;
+    drop(EqSlotId::LEFT_HAND);
+    drop(EqSlotId::RIGHT_HAND);
+    equip(leftItem, EqSlotId::RIGHT_HAND);
+    equip(rightItem, EqSlotId::LEFT_HAND);
 }
 
 void Player::triggerAction(EqSlotId slotId) {
