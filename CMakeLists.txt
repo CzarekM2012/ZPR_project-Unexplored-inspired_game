@@ -46,5 +46,8 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     add_compile_options(-Wall -Wextra -pedantic -faligned-new)
 endif()
 
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+
 add_subdirectory(${SRCS_DIR})
 add_subdirectory(${TESTS_DIR})
