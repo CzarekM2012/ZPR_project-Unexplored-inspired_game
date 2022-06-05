@@ -109,22 +109,24 @@ void Player::equip(Item* const item, EqSlotId slotId) {
     item->setCooldown(std::max(item->cooldownCollision, item->cooldownAction));
     slot.item = item;
 
+    auto world = body->GetWorld();
     adjustJointDefToItem(item);
-    slot.joint = dynamic_cast<b2RevoluteJoint*>(body->GetWorld()->CreateJoint(&jointDef));
+    slot.joint = dynamic_cast<b2RevoluteJoint*>(world->CreateJoint(&jointDef));
 
     slot.angle = getDefaultAngle(slotId);
 }
 
 void Player::adjustJointDefToItem(const Item* item) {
     jointDef.bodyA = body;
-    jointDef.bodyB = item->getBodyPtr();
-    jointDef.localAnchorB.Set(0, -DIST_HELD - (item->getLength() / 2 - item->getBodyPtr()->GetLocalCenter().y));  // This way items can be rotated around the player
+    auto itemBody = item->getBodyPtr();
+    jointDef.bodyB = itemBody;
+    jointDef.localAnchorB.Set(0, -DIST_HELD - (item->getLength() / 2 - itemBody->GetLocalCenter().y));  // This way items can be rotated around the player
 
     // Box2d angles are form (-inf, inf), instead of (-pi, pi>.
     // If referenceAngle was set to 0, item would rotate around joint until angles of bodies of item and player got equal
     // to compensate for all rotations they made in reference to each other
-    // In order to avoid that referenceAngle is set to <number_of_rotations>*FULL_ANGLE
-    jointDef.referenceAngle = -round((body->GetAngle() - item->getBodyPtr()->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
+    // In order to avoid that referenceAngle is set to -<number_of_rotations>*FULL_ANGLE
+    jointDef.referenceAngle = -round((body->GetAngle() - itemBody->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
 }
 
 void Player::drop(EqSlotId slotId) {
