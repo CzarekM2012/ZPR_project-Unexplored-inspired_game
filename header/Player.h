@@ -31,14 +31,12 @@ class Player : public Entity {
     static constexpr float ANGLE_SIDE = 45;
     static constexpr float DIST_HELD = 7;
 
-   private:
+    Item* itemFront = nullptr;    ///< Either left or right, should be held in front
+    b2RevoluteJointDef jointDef;  ///< Joint definition for hand slots. Used to create joints each time an item is picked up
+
     EqSlotId findKeyWithItem(const Item*) const;
     Angle getDefaultAngle(const EqSlotId&) const;
     void adjustJointDefToItem(const Item*);
-
-   protected:
-    Item* itemFront = nullptr;    ///< Either left or right, should be held in front
-    b2RevoluteJointDef jointDef;  ///< Joint definition for hand slots. Used to create joints each time an item is picked up
 
    public:
     Player();
@@ -51,6 +49,7 @@ class Player : public Entity {
 
     void equip(Item* const item, EqSlotId);
     void drop(EqSlotId);
+    void drop(Item* item) { drop(findKeyWithItem(item)); };
     void switchHands();
 
     void prepareItem(EqSlotId);

@@ -14,10 +14,9 @@ add_executable(tests
     GameController.cpp
     InputHandler.cpp
     Item.cpp
-    ObjectClasses.cpp
     PhysicalObject.cpp
     Player.cpp
-    Renderer.cpp
+    State.cpp
     ${SRCS_DIR}/Angle.cpp
     ${SRCS_DIR}/State.cpp
     ${SRCS_DIR}/GameController.cpp

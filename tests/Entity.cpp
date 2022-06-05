@@ -24,12 +24,6 @@ SCENARIO("Entities can be damaged and destroyed") {
             THEN("Entity signals that it should be destroyed") {
                 REQUIRE(entity.toDestroy);
             }
-
-            // FULL_GAME
-            // THEN("Color of its first polygon should be set to black") {
-            //     entity.synchronize();
-            //     REQUIRE(entity.getViews()[0].getFillColor() == sf::Color::Black);
-            // }
         }
 
         WHEN("Damaged entity is invulnerable") {

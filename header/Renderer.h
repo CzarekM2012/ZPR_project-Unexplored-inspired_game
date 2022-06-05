@@ -7,6 +7,8 @@
 
 /// Draws state of game, synchronized every frame
 class Renderer {
+    const sf::Color COLOR_BACKGROUND = sf::Color(100, 100, 100);
+
     sf::RenderWindow* window;
     std::vector<sf::ConvexShape> lastDrawn;  ///< A copy of last drawn object views, used in case they can't be retrieved next time
 

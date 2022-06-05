@@ -44,31 +44,64 @@ void GameController::prepareGame() {
     world = new b2World(b2Vec2(0, 0));
     world->SetContactListener(&listener);
 
-    std::array<std::tuple<int, sf::Color, b2Vec2>, InputHandler::PLAYER_COUNT_MAX> players_parameters = {
-        std::make_tuple(1, sf::Color::Red, b2Vec2(10, 10)),
-        std::make_tuple(2, sf::Color::Green, b2Vec2(170, 10)),
-        std::make_tuple(3, sf::Color::Blue, b2Vec2(10, 90)),
-        std::make_tuple(4, sf::Color::Magenta, b2Vec2(170, 90))};
+    std::array<std::tuple<int, sf::Color, b2Vec2, Angle>, InputHandler::PLAYER_COUNT_MAX> players_parameters = {
+        std::make_tuple(1, sf::Color::Red, b2Vec2(20, 15), Angle(-45)),
+        std::make_tuple(2, sf::Color::Green, b2Vec2(170, 15), Angle(45)),
+        std::make_tuple(3, sf::Color::Blue, b2Vec2(20, 85), Angle(-135)),
+        std::make_tuple(4, sf::Color::Magenta, b2Vec2(170, 85), Angle(135))};
     std::transform(players_parameters.begin(), players_parameters.end(), players.begin(), [&](const auto& params) {
         auto player = new Player();
         player->setPrimaryColor(std::get<1>(params));
         state.add(player);
-        player->createBody(world, std::get<2>(params));
+        player->createBody(world, std::get<2>(params), std::get<3>(params));
         player->setCollisionGroup(std::get<0>(params));
+
+        // Starting equipment
+        auto mainWeapon = new Sword();
+        state.add(mainWeapon);
+        mainWeapon->createBody(world, std::get<2>(params), std::get<3>(params));
+        mainWeapon->setCollision(false);
+
+        auto secondWeapon = new Shield();
+        state.add(secondWeapon);
+        secondWeapon->createBody(world, std::get<2>(params), std::get<3>(params));
+        secondWeapon->setCollision(false);
+
+        player->equip(mainWeapon, Player::EqSlotId::LEFT_HAND);
+        player->equip(secondWeapon, Player::EqSlotId::RIGHT_HAND);
         return player;
     });
 
-    std::array<std::tuple<b2Vec2>, 3> boxes_parameters = {
+    // Add more equipment
+    std::array<std::tuple<PhysicalObject*, b2Vec2>, 4> equimpents_parameters = {
+        std::make_tuple(new Axe(), b2Vec2(86, 47)),
+        std::make_tuple(new Axe(), b2Vec2(104, 47)),
+        std::make_tuple(new Dagger(), b2Vec2(20, 50)),
+        std::make_tuple(new Dagger(), b2Vec2(170, 50))};
+    std::for_each(equimpents_parameters.begin(), equimpents_parameters.end(), [&](auto& params) {
+        auto object = std::get<0>(params);
+        state.add(object);
+        object->createBody(world, std::get<1>(params));
+        object->setCollision(false);
+    });
+
+    // Add boxes
+    std::array<std::tuple<b2Vec2>, 8> boxes_parameters = {
         std::make_tuple(b2Vec2(80, 38)),
         std::make_tuple(b2Vec2(74, 50)),
-        std::make_tuple(b2Vec2(82, 63))};
+        std::make_tuple(b2Vec2(82, 63)),
+        std::make_tuple(b2Vec2(110, 38)),
+        std::make_tuple(b2Vec2(116, 50)),
+        std::make_tuple(b2Vec2(108, 63)),
+        std::make_tuple(b2Vec2(20, 50)),
+        std::make_tuple(b2Vec2(170, 50))};
     std::for_each(boxes_parameters.begin(), boxes_parameters.end(), [&](auto& params) {
         auto box = new Box();
         state.add(box);
         box->createBody(world, std::get<0>(params));
     });
 
-    // Add some walls
+    // Add walls
     std::array<std::tuple<float, float, b2Vec2, Angle>, 5> walls_parameters = {
         std::make_tuple(200, 4, b2Vec2(100, 0), Angle()),
         std::make_tuple(200, 4, b2Vec2(100, 107.5), Angle()),
@@ -81,38 +114,6 @@ void GameController::prepareGame() {
         wall->setSize(std::get<0>(params), std::get<1>(params));
         wall->createBody(world, std::get<2>(params), std::get<3>(params));
     });
-
-    // Add equipment
-    std::array<std::tuple<PhysicalObject*, b2Vec2>, 9> equimpents_parameters = {
-        std::make_tuple(new Sword(), b2Vec2(10, 10)),
-        std::make_tuple(new Sword(), b2Vec2(170, 10)),
-        std::make_tuple(new Sword(), b2Vec2(10, 90)),
-        std::make_tuple(new Sword(), b2Vec2(170, 90)),
-
-        std::make_tuple(new Shield(), b2Vec2(10, 10)),
-        std::make_tuple(new Shield(), b2Vec2(170, 10)),
-        std::make_tuple(new Shield(), b2Vec2(10, 90)),
-        std::make_tuple(new Shield(), b2Vec2(170, 90)),
-
-        std::make_tuple(new Axe(), b2Vec2(10, 10))};
-    std::for_each(equimpents_parameters.begin(), equimpents_parameters.end(), [&](auto& params) {
-        auto object = std::get<0>(params);
-        state.add(object);
-        object->createBody(world, std::get<1>(params));
-        object->setCollision(false);
-    });
-
-    players[0]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[0])), Player::EqSlotId::LEFT_HAND);
-    players[0]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[4])), Player::EqSlotId::RIGHT_HAND);
-
-    players[1]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[1])), Player::EqSlotId::LEFT_HAND);
-    players[1]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[5])), Player::EqSlotId::RIGHT_HAND);
-
-    players[2]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[2])), Player::EqSlotId::LEFT_HAND);
-    players[2]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[6])), Player::EqSlotId::RIGHT_HAND);
-
-    players[3]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[3])), Player::EqSlotId::LEFT_HAND);
-    players[3]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[7])), Player::EqSlotId::RIGHT_HAND);
 
     stop = false;
 }

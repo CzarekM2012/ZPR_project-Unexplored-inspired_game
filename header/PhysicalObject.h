@@ -23,7 +23,7 @@ class PhysicalObject {
     float friction = 0.3f;   ///< Friction on contact with other objects, not the floor
     int collisionGroup = 0;  ///< Collisions are set to occur between everything that does not belong to the same group and between every object in group 0
 
-    b2Body* body;                        ///< Basic pointer, b2World takes care of bodies
+    b2Body* body = nullptr;              ///< Basic pointer, b2World takes care of bodies
     std::vector<b2PolygonShape> shapes;  ///< Shapes of fixtures
     std::vector<sf::ConvexShape> views;  ///< Objects displayed by the renderer
     std::vector<sf::Color> viewColors;   ///< Displayed objects' colors
