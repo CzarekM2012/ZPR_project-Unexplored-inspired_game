@@ -102,17 +102,17 @@ void GameController::prepareGame() {
         object->setCollision(false);
     });
 
-    players[0]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[0])), Player::EqSlot::LEFT_HAND);
-    players[0]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[4])), Player::EqSlot::RIGHT_HAND);
+    players[0]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[0])), Player::EqSlotId::LEFT_HAND);
+    players[0]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[4])), Player::EqSlotId::RIGHT_HAND);
 
-    players[1]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[1])), Player::EqSlot::LEFT_HAND);
-    players[1]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[5])), Player::EqSlot::RIGHT_HAND);
+    players[1]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[1])), Player::EqSlotId::LEFT_HAND);
+    players[1]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[5])), Player::EqSlotId::RIGHT_HAND);
 
-    players[2]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[2])), Player::EqSlot::LEFT_HAND);
-    players[2]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[6])), Player::EqSlot::RIGHT_HAND);
+    players[2]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[2])), Player::EqSlotId::LEFT_HAND);
+    players[2]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[6])), Player::EqSlotId::RIGHT_HAND);
 
-    players[3]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[3])), Player::EqSlot::LEFT_HAND);
-    players[3]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[7])), Player::EqSlot::RIGHT_HAND);
+    players[3]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[3])), Player::EqSlotId::LEFT_HAND);
+    players[3]->equip(dynamic_cast<Item*>(std::get<0>(equimpents_parameters[7])), Player::EqSlotId::RIGHT_HAND);
 
     stop = false;
 }
@@ -154,8 +154,8 @@ void GameController::run() {
             int alive = 0;
             for (int i = 0; i < InputHandler::PLAYER_COUNT_MAX; ++i) {
                 if (players[i] == object) {
-                    players[i]->drop(Player::EqSlot::LEFT_HAND);
-                    players[i]->drop(Player::EqSlot::RIGHT_HAND);
+                    players[i]->drop(Player::EqSlotId::LEFT_HAND);
+                    players[i]->drop(Player::EqSlotId::RIGHT_HAND);
                     players[i] = nullptr;
                 }
 
@@ -270,12 +270,12 @@ void GameController::processAction(const Action& action) {
 
             foundItem = getFirstPickableItem(player);
             if (foundItem != nullptr)
-                player->equip(foundItem, Player::EqSlot::LEFT_HAND);
+                player->equip(foundItem, Player::EqSlotId::LEFT_HAND);
             break;
 
         case Action::Type::DROP_LEFT:
             std::cout << "Received DROP_LEFT Action!" << std::endl;
-            player->drop(Player::EqSlot::LEFT_HAND);
+            player->drop(Player::EqSlotId::LEFT_HAND);
             break;
 
         case Action::Type::PICK_RIGHT:
@@ -283,32 +283,32 @@ void GameController::processAction(const Action& action) {
 
             foundItem = getFirstPickableItem(player);
             if (foundItem != nullptr)
-                player->equip(foundItem, Player::EqSlot::RIGHT_HAND);
+                player->equip(foundItem, Player::EqSlotId::RIGHT_HAND);
             break;
 
         case Action::Type::DROP_RIGHT:
             std::cout << "Received DROP_RIGHT Action!" << std::endl;
-            player->drop(Player::EqSlot::RIGHT_HAND);
+            player->drop(Player::EqSlotId::RIGHT_HAND);
             break;
 
         case Action::Type::ACT_PREP_LEFT:
             std::cout << "Received ACT_PREP_LEFT Action!" << std::endl;
-            player->prepareItem(Player::EqSlot::LEFT_HAND);
+            player->prepareItem(Player::EqSlotId::LEFT_HAND);
             break;
 
         case Action::Type::ACT_PREP_RIGHT:
             std::cout << "Received ACT_PREP_RIGHT Action!" << std::endl;
-            player->prepareItem(Player::EqSlot::RIGHT_HAND);
+            player->prepareItem(Player::EqSlotId::RIGHT_HAND);
             break;
 
         case Action::Type::ACT_LEFT:
             std::cout << "Received ACT_LEFT Action!" << std::endl;
-            player->triggerAction(Player::EqSlot::LEFT_HAND);
+            player->triggerAction(Player::EqSlotId::LEFT_HAND);
             break;
 
         case Action::Type::ACT_RIGHT:
             std::cout << "Received ACT_RIGHT Action!" << std::endl;
-            player->triggerAction(Player::EqSlot::RIGHT_HAND);
+            player->triggerAction(Player::EqSlotId::RIGHT_HAND);
             break;
 
         default:

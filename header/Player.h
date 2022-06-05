@@ -1,39 +1,42 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <tuple>
+#include <box2d/box2d.h>
 #include <unordered_map>
 #include "Entity.h"
+#include "Item.h"
 
 class Item;
-
 /// Controlled by the player. Most complex than most entities
 class Player : public Entity {
    public:
-    enum EqSlot {
-        NONE,
+    enum EqSlotId {
         LEFT_HAND,
         RIGHT_HAND
     };
 
+    struct EqSlot {
+        Item* item;
+        b2RevoluteJoint* joint;
+        Angle angle;
+
+        EqSlot(Item*, b2RevoluteJoint*, Angle);
+    };
+    static const std::unordered_map<EqSlotId, Angle> defaultHoldAngles;
+
    protected:
+    std::unordered_map<EqSlotId, EqSlot> equipment;  // contents are based on defaultHoldAngles
+
     static constexpr float ANGLE_FRONT = 0;
     static constexpr float ANGLE_SIDE = 45;
     static constexpr float DIST_HELD = 7;
 
    private:
-    EqSlot findKeyWithItem(const Item*) const;
+    EqSlotId findKeyWithItem(const Item*) const;
+    Angle getDefaultAngle(const EqSlotId&) const;
     void adjustJointDefToItem(const Item*);
 
-    static const int SLOT_ITEM = 0;
-    static const int SLOT_JOINT = 1;
-    static const int SLOT_ANGLE = 2;
-
-    static const std::unordered_map<EqSlot, Angle> defaultHoldAngles;
-
    protected:
-    std::unordered_map<Player::EqSlot, std::tuple<Item*, b2RevoluteJoint*, Angle>> equipment;  // contents are based on defaultHoldAngles
-
     Item* itemFront = nullptr;    ///< Either left or right, should be held in front
     b2RevoluteJointDef jointDef;  ///< Joint definition for hand slots. Used to create joints each time an item is picked up
 
@@ -46,11 +49,11 @@ class Player : public Entity {
     void setItemAngle(Item* item, Angle angle);
     void resetItemAngle(Item* item);
 
-    void equip(Item* const item, EqSlot);
-    void drop(EqSlot);
+    void equip(Item* const item, EqSlotId);
+    void drop(EqSlotId);
 
-    void prepareItem(EqSlot);
-    void triggerAction(EqSlot);
+    void prepareItem(EqSlotId);
+    void triggerAction(EqSlotId);
 
     virtual std::vector<b2PolygonShape> getBaseShapes() const;
 };
