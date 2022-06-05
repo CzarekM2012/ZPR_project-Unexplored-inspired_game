@@ -15,7 +15,7 @@ SCENARIO("Event handling") {
         WHEN("X was pressed on Joystick 1") {
             event.type = sf::Event::JoystickButtonPressed;
             event.joystickButton.joystickId = 1;
-            event.joystickButton.button = InputHandler::JOYSTICK_BUTTON_X;
+            event.joystickButton.button = InputHandler::JoystickButton::X;
 
             InputHandler.handleEvent(event);
             THEN("A correct action should be sent") {
