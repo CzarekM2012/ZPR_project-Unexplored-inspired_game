@@ -25,8 +25,7 @@ class Player : public Entity {
     static const std::unordered_map<EqSlotId, Angle> defaultHoldAngles;
 
    protected:
-    std::unordered_map<EqSlotId, EqSlot> equipment;  // contents are based on defaultHoldAngles
-
+    std::unordered_map<EqSlotId, EqSlot> equipment;
     static constexpr float ANGLE_FRONT = 0;
     static constexpr float ANGLE_SIDE = 45;
     static constexpr float DIST_HELD = 7;
@@ -49,7 +48,8 @@ class Player : public Entity {
 
     void equip(Item* const item, EqSlotId);
     void drop(EqSlotId);
-    void drop(Item* item) { drop(findKeyWithItem(item)); };
+    void drop(Item* item);
+    void dropAll();
     void switchHands();
 
     void prepareItem(EqSlotId);

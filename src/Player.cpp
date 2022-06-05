@@ -155,6 +155,20 @@ void Player::drop(EqSlotId slotId) {
     slot = EqSlot();
 }
 
+void Player::drop(Item* item) {
+    try {
+        const auto slotId = findKeyWithItem(item);
+        drop(slotId);
+    } catch (const std::out_of_range&) {
+    }
+}
+
+void Player::dropAll() {
+    std::for_each(equipment.begin(), equipment.end(), [&](const auto& pair) {
+        drop(pair.first);
+    });
+}
+
 void Player::switchHands() {
     const auto leftItem = equipment[EqSlotId::LEFT_HAND].item, rightItem = equipment[EqSlotId::RIGHT_HAND].item;
     drop(EqSlotId::LEFT_HAND);
