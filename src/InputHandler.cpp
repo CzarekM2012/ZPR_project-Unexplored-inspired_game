@@ -92,27 +92,31 @@ void InputHandler::handleEvent(sf::Event event) {
     if (event.type == sf::Event::JoystickButtonPressed) {
         action.playerId = event.joystickButton.joystickId;
         switch (event.joystickButton.button) {
-            case JOYSTICK_BUTTON_X:
+            case JoystickButton::X:
                 action.type = Action::Type::PICK_LEFT;
                 break;
 
-            case JOYSTICK_BUTTON_Y:
-                action.type = Action::Type::DROP_LEFT;
-                break;
-
-            case JOYSTICK_BUTTON_A:
+            case JoystickButton::B:
                 action.type = Action::Type::PICK_RIGHT;
                 break;
 
-            case JOYSTICK_BUTTON_B:
+            case JoystickButton::Y:
+                action.type = Action::Type::SWITCH_HANDS;
+                break;
+
+            case JoystickButton::L3:
+                action.type = Action::Type::DROP_LEFT;
+                break;
+
+            case JoystickButton::R3:
                 action.type = Action::Type::DROP_RIGHT;
                 break;
 
-            case JOYSTICK_BUTTON_LB:
+            case JoystickButton::LB:
                 action.type = Action::Type::ACT_PREP_LEFT;
                 break;
 
-            case JOYSTICK_BUTTON_RB:
+            case JoystickButton::RB:
                 action.type = Action::Type::ACT_PREP_RIGHT;
                 break;
         }
@@ -121,11 +125,11 @@ void InputHandler::handleEvent(sf::Event event) {
     if (event.type == sf::Event::JoystickButtonReleased) {
         action.playerId = event.joystickButton.joystickId;
         switch (event.joystickButton.button) {
-            case JOYSTICK_BUTTON_LB:
+            case JoystickButton::LB:
                 action.type = Action::Type::ACT_LEFT;
                 break;
 
-            case JOYSTICK_BUTTON_RB:
+            case JoystickButton::RB:
                 action.type = Action::Type::ACT_RIGHT;
                 break;
         }
@@ -164,6 +168,10 @@ void InputHandler::handleEvent(sf::Event event) {
 
             case sf::Keyboard::Num6:
                 action.type = Action::Type::ACT_PREP_RIGHT;
+                break;
+
+            case sf::Keyboard::Num7:
+                action.type = Action::Type::SWITCH_HANDS;
                 break;
 
             default:

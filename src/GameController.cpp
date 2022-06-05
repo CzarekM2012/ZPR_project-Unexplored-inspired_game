@@ -312,6 +312,11 @@ void GameController::processAction(const Action& action) {
             player->triggerAction(Player::EqSlotId::RIGHT_HAND);
             break;
 
+        case Action::Type::SWITCH_HANDS:
+            std::cout << "Received SWITCH_HANDS Action!" << std::endl;
+            player->switchHands();
+            break;
+
         default:
             break;
     }

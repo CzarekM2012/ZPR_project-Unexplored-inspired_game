@@ -89,7 +89,7 @@ Player::EqSlotId Player::findKeyWithItem(const Item* item) const {
 
 void Player::setItemAngle(Item* item, Angle angle) {
     try {
-        auto slotId = findKeyWithItem(item);
+        const auto slotId = findKeyWithItem(item);
         equipment[slotId].angle = angle;
     } catch (const std::out_of_range&) {
     }
@@ -100,12 +100,17 @@ Angle Player::getDefaultAngle(const EqSlotId& slotId) const {
 }
 
 void Player::resetItemAngle(Item* item) {
-    auto slotId = findKeyWithItem(item);  // key for slot where the item is or NONE
-    equipment[slotId].angle = getDefaultAngle(slotId);
+    try {
+        const auto slotId = findKeyWithItem(item);
+        equipment[slotId].angle = getDefaultAngle(slotId);
+    } catch (const std::out_of_range&) {
+    }
 }
 
 void Player::equip(Item* const item, EqSlotId slotId) {
-    EqSlot& slot = equipment[slotId];
+    if (!item)
+        return;
+    auto& slot = equipment[slotId];
     if (slot.item) {
         drop(slotId);
     }
@@ -115,26 +120,29 @@ void Player::equip(Item* const item, EqSlotId slotId) {
     item->setCooldown(std::max(item->cooldownCollision, item->cooldownAction));
     slot.item = item;
 
+    auto world = body->GetWorld();
     adjustJointDefToItem(item);
-    slot.joint = dynamic_cast<b2RevoluteJoint*>(body->GetWorld()->CreateJoint(&jointDef));
+    slot.joint = dynamic_cast<b2RevoluteJoint*>(world->CreateJoint(&jointDef));
 
     slot.angle = getDefaultAngle(slotId);
 }
 
 void Player::adjustJointDefToItem(const Item* item) {
     jointDef.bodyA = body;
-    jointDef.bodyB = item->getBodyPtr();
-    jointDef.localAnchorB.Set(0, -DIST_HELD - (item->getLength() / 2 - item->getBodyPtr()->GetLocalCenter().y));  // This way items can be rotated around the player
+    auto itemBody = item->getBodyPtr();
+    jointDef.bodyB = itemBody;
+    jointDef.localAnchorB.Set(0, -DIST_HELD);  // This way items can be rotated around the player
 
     // Box2d angles are form (-inf, inf), instead of (-pi, pi>.
     // If referenceAngle was set to 0, item would rotate around joint until angles of bodies of item and player got equal
     // to compensate for all rotations they made in reference to each other
-    // In order to avoid that referenceAngle is set to <number_of_rotations>*FULL_ANGLE
-    jointDef.referenceAngle = -round((body->GetAngle() - item->getBodyPtr()->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
+    // In order to avoid that referenceAngle is set to -<number_of_rotations>*FULL_ANGLE
+    const float FULL_ANGLE = 2 * b2_pi;
+    jointDef.referenceAngle = -round((body->GetAngle() - itemBody->GetAngle()) / FULL_ANGLE) * FULL_ANGLE;
 }
 
 void Player::drop(EqSlotId slotId) {
-    EqSlot& slot = equipment[slotId];
+    auto& slot = equipment[slotId];
     if (!slot.item)
         return;
 
@@ -145,6 +153,14 @@ void Player::drop(EqSlotId slotId) {
     body->GetWorld()->DestroyJoint(slot.joint);
 
     slot = EqSlot();
+}
+
+void Player::switchHands() {
+    const auto leftItem = equipment[EqSlotId::LEFT_HAND].item, rightItem = equipment[EqSlotId::RIGHT_HAND].item;
+    drop(EqSlotId::LEFT_HAND);
+    drop(EqSlotId::RIGHT_HAND);
+    equip(leftItem, EqSlotId::RIGHT_HAND);
+    equip(rightItem, EqSlotId::LEFT_HAND);
 }
 
 void Player::triggerAction(EqSlotId slotId) {

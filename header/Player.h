@@ -50,7 +50,7 @@ class Player : public Entity {
     void equip(Item* const item, EqSlotId);
     void drop(EqSlotId);
     void drop(Item* item) { drop(findKeyWithItem(item)); };
-    EqSlot getSlotWithItem(const Item* item) const { return equipment.at(findKeyWithItem(item)); }
+    void switchHands();
 
     void prepareItem(EqSlotId);
     void triggerAction(EqSlotId);

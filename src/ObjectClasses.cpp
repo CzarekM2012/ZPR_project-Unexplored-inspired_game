@@ -66,11 +66,11 @@ std::vector<b2PolygonShape> Sword::getBaseShapes() const {
     std::vector<b2PolygonShape> shapeVec;
     b2PolygonShape shape;
 
-    b2Vec2 triangle[] = {b2Vec2(-3, -1), b2Vec2(0, 8), b2Vec2(3, -1)};
+    b2Vec2 triangle[] = {b2Vec2(-3, 3), b2Vec2(0, 12), b2Vec2(3, 3)};
     shape.Set(triangle, 3);
     shapeVec.push_back(shape);
 
-    shape.SetAsBox(0.5, 2, b2Vec2(0, -2), 0);
+    shape.SetAsBox(0.5, 2, b2Vec2(0, 2), 0);
     shapeVec.push_back(shape);
 
     return shapeVec;
@@ -118,8 +118,12 @@ std::vector<b2PolygonShape> Axe::getBaseShapes() const {
     std::vector<b2PolygonShape> shapeVec;
     b2PolygonShape shape;
 
-    b2Vec2 triangle[] = {b2Vec2(0, 3), b2Vec2(-7, 8), b2Vec2(7, 8)};
-    shape.Set(triangle, 3);
+    b2Vec2 triangle1[] = {b2Vec2(1, 7), b2Vec2(-7, 3), b2Vec2(-7, 8)};
+    shape.Set(triangle1, 3);
+    shapeVec.push_back(shape);
+
+    b2Vec2 triangle2[] = {b2Vec2(-1, 7), b2Vec2(7, 3), b2Vec2(7, 8)};
+    shape.Set(triangle2, 3);
     shapeVec.push_back(shape);
 
     shape.SetAsBox(0.5, 6, b2Vec2(0, 3), 0);

@@ -14,6 +14,7 @@ struct Action {
         ACT_RIGHT,
         ACT_PREP_LEFT,
         ACT_PREP_RIGHT,
+        SWITCH_HANDS
     };
 
     int playerId = -1;
