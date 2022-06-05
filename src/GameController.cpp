@@ -76,8 +76,8 @@ void GameController::prepareGame() {
     std::array<std::tuple<PhysicalObject*, b2Vec2>, 4> equimpents_parameters = {
         std::make_tuple(new Axe(), b2Vec2(86, 47)),
         std::make_tuple(new Axe(), b2Vec2(104, 47)),
-        std::make_tuple(new Dagger(), b2Vec2(20, 50)),
-        std::make_tuple(new Dagger(), b2Vec2(170, 50))};
+        std::make_tuple(new Dagger(), b2Vec2(20, 45)),
+        std::make_tuple(new Dagger(), b2Vec2(170, 45))};
     std::for_each(equimpents_parameters.begin(), equimpents_parameters.end(), [&](auto& params) {
         auto object = std::get<0>(params);
         state.add(object);

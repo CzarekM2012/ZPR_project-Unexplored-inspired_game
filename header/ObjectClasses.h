@@ -69,9 +69,6 @@ class Dagger : public Item {
 
 /// Defensive item, puts colliding weapons on cooldown
 class Shield : public Item {
-   protected:
-    int defense;
-
    public:
     Shield();
 
