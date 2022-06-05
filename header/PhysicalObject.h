@@ -59,7 +59,6 @@ class PhysicalObject {
     float getDensity() const { return density; }
     float getDamping() const { return damping; }
     float getFriction() const { return friction; }
-    float getLength() const;
     Angle getAngle() const { return Angle(body->GetAngle(), Angle::unit::RAD); }
 
     void setDynamic(bool value) { dynamic = value; }

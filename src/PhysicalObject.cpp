@@ -102,21 +102,6 @@ void PhysicalObject::destroyBody() {  ///< Cannot be triggered from collision ca
     views.clear();
 }
 
-float PhysicalObject::getLength() const {
-    float max = 0, min = 0;
-    for (auto shape : shapes) {
-        for (int i = 0; i < shape.m_count; ++i) {
-            float value = shape.m_vertices[i].y;
-            if (value > max)
-                max = value;
-
-            if (value < min)
-                min = value;
-        }
-    }
-    return max - min;
-}
-
 void PhysicalObject::setPrimaryColor(sf::Color color) {
     primaryColor = color;
     resetColors();

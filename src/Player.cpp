@@ -120,13 +120,14 @@ void Player::adjustJointDefToItem(const Item* item) {
     jointDef.bodyA = body;
     auto itemBody = item->getBodyPtr();
     jointDef.bodyB = itemBody;
-    jointDef.localAnchorB.Set(0, -DIST_HELD - (item->getLength() / 2 - itemBody->GetLocalCenter().y));  // This way items can be rotated around the player
+    jointDef.localAnchorB.Set(0, -DIST_HELD);  // This way items can be rotated around the player
 
     // Box2d angles are form (-inf, inf), instead of (-pi, pi>.
     // If referenceAngle was set to 0, item would rotate around joint until angles of bodies of item and player got equal
     // to compensate for all rotations they made in reference to each other
     // In order to avoid that referenceAngle is set to -<number_of_rotations>*FULL_ANGLE
-    jointDef.referenceAngle = -round((body->GetAngle() - itemBody->GetAngle()) / (2 * b2_pi)) * 2 * b2_pi;
+    const float FULL_ANGLE = 2 * b2_pi;
+    jointDef.referenceAngle = -round((body->GetAngle() - itemBody->GetAngle()) / FULL_ANGLE) * FULL_ANGLE;
 }
 
 void Player::drop(EqSlotId slotId) {
