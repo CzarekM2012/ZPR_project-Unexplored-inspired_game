@@ -94,7 +94,7 @@ void Player::resetItemAngle(Item* item) {
 }
 
 void Player::equip(Item* const item, EqSlotId slotId) {
-    EqSlot& slot = equipment[slotId];
+    auto& slot = equipment[slotId];
     if (slot.item) {
         drop(slotId);
     }
@@ -123,7 +123,7 @@ void Player::adjustJointDefToItem(const Item* item) {
 }
 
 void Player::drop(EqSlotId slotId) {
-    EqSlot& slot = equipment[slotId];
+    auto& slot = equipment[slotId];
     if (!slot.item)
         return;
 
@@ -143,7 +143,7 @@ void Player::triggerAction(EqSlotId slotId) {
 }
 
 void Player::prepareItem(EqSlotId slotId) {
-    auto slot = equipment[slotId];
+    auto& slot = equipment[slotId];
     if (slot.item && slot.item->canBeUsed())
         slot.angle = Angle(slot.item->prepareAngle);
 }
