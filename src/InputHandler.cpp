@@ -104,12 +104,8 @@ void InputHandler::handleEvent(sf::Event event) {
                 action.type = Action::Type::SWITCH_HANDS;
                 break;
 
-            case JoystickButton::L3:
-                action.type = Action::Type::DROP_LEFT;
-                break;
-
-            case JoystickButton::R3:
-                action.type = Action::Type::DROP_RIGHT;
+            case JoystickButton::A:
+                action.type = Action::Type::DROP;
                 break;
 
             case JoystickButton::LB:
@@ -151,15 +147,15 @@ void InputHandler::handleEvent(sf::Event event) {
                 break;
 
             case sf::Keyboard::Num2:
-                action.type = Action::Type::DROP_LEFT;
-                break;
-
-            case sf::Keyboard::Num3:
                 action.type = Action::Type::PICK_RIGHT;
                 break;
 
+            case sf::Keyboard::Num3:
+                action.type = Action::Type::SWITCH_HANDS;
+                break;
+
             case sf::Keyboard::Num4:
-                action.type = Action::Type::DROP_RIGHT;
+                action.type = Action::Type::DROP;
                 break;
 
             case sf::Keyboard::Num5:

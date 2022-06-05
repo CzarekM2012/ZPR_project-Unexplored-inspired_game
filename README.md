@@ -73,7 +73,20 @@ All following commands should be executed from within the main project directory
 ## Controls
 
 ### Controller
-Left analog stick should control movement, while the right one controls rotation
+Left analog stick controls movement, right one controls the rotation.  
+X -> pick up item with left hand / swap item with one on the ground  
+B -> pick up item with right hand / swap item with one on the ground  
+Y -> swap hands  
+A -> drop both items  
+LB -> use left item's ability  
+RB -> use right item's ability  
 
-### Keyboard (debug only)
-Use WSAD to move and Q/E to rotate left/right
+### Keyboard (debug only, works when no controller is connected)
+Use WSAD to move and Q/E to rotate left/right.  
+R -> Restart game (works event with connected gamepads)  
+1 -> pick up item with left hand / swap item with one on the ground  
+2 -> pick up item with right hand / swap item with one on the ground  
+3 -> swap hands  
+4 -> drop both items  
+5 -> use left item's ability  
+6 -> use right item's ability  

@@ -39,10 +39,10 @@ class InputHandler {
         Y = 3,
         LB = 4,
         RB = 5,
-        LS = 6,  ///< Left stick press
-        RS = 7,  ///< Right stick press
-        L3 = 8,
-        R3 = 9
+        LS = 6,  ///< Left system button
+        RS = 7,  ///< Right system button
+        L3 = 8,  ///< Left stick press
+        R3 = 9   ///< Right stick press
     };
 
     /// This is set by InputHandler in every pass, and then checked by GameController each tick; contrary to Actions, that are sent into message queue only once, when they appear

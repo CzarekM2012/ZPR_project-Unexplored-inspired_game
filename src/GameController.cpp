@@ -265,9 +265,9 @@ void GameController::processAction(const Action& action) {
             break;
         }
 
-        case Action::Type::DROP_LEFT:
+        case Action::Type::DROP:
 
-            player->drop(Player::EqSlotId::LEFT_HAND);
+            player->dropAll();
             break;
 
         case Action::Type::PICK_RIGHT: {
@@ -276,11 +276,6 @@ void GameController::processAction(const Action& action) {
                 player->equip(foundItem, Player::EqSlotId::RIGHT_HAND);
             break;
         }
-
-        case Action::Type::DROP_RIGHT:
-
-            player->drop(Player::EqSlotId::RIGHT_HAND);
-            break;
 
         case Action::Type::ACT_PREP_LEFT:
 
