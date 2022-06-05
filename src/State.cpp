@@ -11,7 +11,7 @@ PhysicalObject* State::add(PhysicalObject* objectPtr) {
 }
 
 void State::remove(PhysicalObject* objectPtr) {
-    auto it = find_if(objects.begin(), objects.end(), [&](std::unique_ptr<PhysicalObject>& object) { return object.get() == objectPtr; });
+    const auto it = find_if(objects.begin(), objects.end(), [&](const std::unique_ptr<PhysicalObject>& object) { return object.get() == objectPtr; });
     if (it != objects.end()) {
         it->reset();
         objects.erase(it);
@@ -21,6 +21,10 @@ void State::remove(PhysicalObject* objectPtr) {
 PhysicalObject* State::get(unsigned int index) const {
     return objects.size() > index ? objects[index].get() : nullptr;
 }
-PhysicalObject* State::getLast() {
+PhysicalObject* State::getLast() const {
     return objects.empty() ? nullptr : objects[objects.size() - 1].get();
+}
+
+int State::getObjectCount() const {
+    return objects.size();
 }

@@ -34,7 +34,7 @@ class PhysicalObject {
 
     PhysicalObject(){};
 
-    b2Body* createBody(b2World* world, b2Vec2 position, Angle angle = Angle());  ///< creates a box2d object and a view to render it. Params like shape or primaryColor are taken from virtual functions or set in constructors
+    b2Body* createBody(b2World* world, b2Vec2 position = b2Vec2(), Angle angle = Angle());  ///< creates a box2d object and a view to render it. Params like shape or primaryColor are taken from virtual functions or set in constructors
     b2Body* getBodyPtr() const { return body; }
 
     void clearFixtures();

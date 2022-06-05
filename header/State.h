@@ -22,8 +22,8 @@ class State {
     void remove(PhysicalObject* objectPtr);
 
     PhysicalObject* get(unsigned int index) const;
-    PhysicalObject* getLast();
-    int getObjectCount() const { return objects.size(); };
+    PhysicalObject* getLast() const;
+    int getObjectCount() const;
 };
 
 #endif  // STATE_H

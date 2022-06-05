@@ -1,3 +1,4 @@
+#include <math.h>
 #include <algorithm>
 #include <iostream>
 #include <memory>
@@ -152,17 +153,16 @@ void GameController::run() {
         }
 
         for (auto object : toRemove) {
-            int alive = 0;
-            for (int i = 0; i < InputHandler::PLAYER_COUNT_MAX; ++i) {
-                if (players[i] == object) {
-                    players[i]->drop(Player::EqSlotId::LEFT_HAND);
-                    players[i]->drop(Player::EqSlotId::RIGHT_HAND);
-                    players[i] = nullptr;
-                }
-
-                if (players[i])
-                    ++alive;
+            const auto playerIter = std::find(players.begin(), players.end(), object);
+            if (playerIter != players.end()) {  // object was found in players
+                auto& player = *playerIter;
+                player->dropAll();
+                player = nullptr;
             }
+
+            const auto alive = std::count_if(players.begin(), players.end(), [](const Player* player) {
+                return player != nullptr;
+            });
 
             std::cout << "Destroying object" << std::endl;
             object->destroyBody();
@@ -188,7 +188,7 @@ void GameController::run() {
         // Wait for the next tick
         // std::cout << "Duration = " << TIME_STEP.count() << ", Time to wait = " << (TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime)).count() << " Time spent: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime).count() << std::endl;
         // std::this_thread::sleep_for(TIME_STEP - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - lastTime));
-        while (TIME_STEP > std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastTime))  // TODO: Replace this with some form of non-active waiting
+        while (TIME_STEP > std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - lastTime))  // Non-active waiting methods we tried weren't precise enough to avoid animation stuttering
             ;
         lastTime = std::chrono::steady_clock::now();
         // fps += 1;
@@ -202,20 +202,20 @@ void GameController::run() {
 }
 
 void GameController::processPlayerInputStates(const int playerId) {
-    auto player = players.at(playerId);
+    const auto player = players.at(playerId);
     if (!player)
         return;
 
-    auto playerInput = InputHandler::inputStateTab.at(playerId);
-    auto bodyPtr = player->getBodyPtr();
+    const auto playerInput = InputHandler::inputStateTab.at(playerId);
+    const auto bodyPtr = player->getBodyPtr();
 
     auto movementVector = std::get<InputHandler::INPUT_MOVEMENT>(playerInput);
     movementVector *= FORCE_MOVE;  // b2vec2 has no * operator
     bodyPtr->ApplyLinearImpulseToCenter(movementVector, true);
 
-    Angle currentAngle = player->getAngle();
-    Angle targetAngle = std::get<InputHandler::INPUT_LOOK_ANGLE>(playerInput);
-    float diff = (targetAngle - currentAngle).get();
+    const Angle currentAngle = player->getAngle();
+    const Angle targetAngle = std::get<InputHandler::INPUT_LOOK_ANGLE>(playerInput);
+    const float diff = (targetAngle - currentAngle).get();
 
     auto force = FORCE_LOOK * diff / Angle::HALF_ANGLE_DEG;
     if (force >= 0)
@@ -247,45 +247,46 @@ void GameController::processAction(const Action& action) {
 
     std::cout << "Action from player " << action.playerId << std::endl;
 
-    Item* foundItem = nullptr;
     switch (action.type) {
-        case Action::Type::DEBUG:
+        case Action::Type::DEBUG: {
             std::cout << "Received DEBUG Action!" << std::endl;
-            drawableCopyMutex.lock();
+            const std::lock_guard<std::mutex> drawCopyLock(drawableCopyMutex);
             for (int i = 0; i < 4; ++i) {
                 auto box = new Box();
                 state.add(box);
                 box->createBody(world, b2Vec2(80, 10));
                 box->damage(99);
             }
-            drawableCopyMutex.unlock();
             break;
+        }
 
         case Action::Type::RESTART:
             std::cout << "Received RESTART Action!" << std::endl;
             restartGame();
             break;
 
-        case Action::Type::PICK_LEFT:
+        case Action::Type::PICK_LEFT: {
             std::cout << "Received PICKUP_LEFT Action!" << std::endl;
 
-            foundItem = getFirstPickableItem(player);
+            const auto foundItem = getFirstPickableItem(player);
             if (foundItem != nullptr)
                 player->equip(foundItem, Player::EqSlotId::LEFT_HAND);
             break;
+        }
 
         case Action::Type::DROP_LEFT:
             std::cout << "Received DROP_LEFT Action!" << std::endl;
             player->drop(Player::EqSlotId::LEFT_HAND);
             break;
 
-        case Action::Type::PICK_RIGHT:
+        case Action::Type::PICK_RIGHT: {
             std::cout << "Received PICKUP_RIGHT Action!" << std::endl;
 
-            foundItem = getFirstPickableItem(player);
+            const auto foundItem = getFirstPickableItem(player);
             if (foundItem != nullptr)
                 player->equip(foundItem, Player::EqSlotId::RIGHT_HAND);
             break;
+        }
 
         case Action::Type::DROP_RIGHT:
             std::cout << "Received DROP_RIGHT Action!" << std::endl;
@@ -324,9 +325,10 @@ void GameController::processAction(const Action& action) {
 
 void GameController::restartGame() {
     std::cout << "Restarting..." << std::endl;
-    drawableCopyMutex.lock();
-    state.objects.clear();
-    drawableCopyMutex.unlock();
+    {
+        std::lock_guard<std::mutex> drawCopyLock(drawableCopyMutex);
+        state.objects.clear();
+    }
     players.fill(nullptr);
     delete world;
     prepareGame();
@@ -334,27 +336,30 @@ void GameController::restartGame() {
 }
 
 Item* GameController::getFirstPickableItem(Player* player) const {
-    // TODO: Replace loop with something like:
-    // std::copy_if(state.objects.begin(), state.objects.end(), foundObjects.begin(),
-    //    [&player](std::shared_ptr<PhysicalObject> object){return (object->getBodyPtr()->GetPosition() - player->getBodyPtr()->GetPosition()).Length() < 10 && std::dynamic_pointer_cast<Item>(object);});
-    // player->equipLeftHand(std::dynamic_pointer_cast<Item>(*foundObjects.begin()));
+    std::vector<PhysicalObject*> itemPointers;
+    std::transform(state.objects.begin(), state.objects.end(), std::back_inserter(itemPointers), [&](const auto& pointer) {
+        return pointer.get();
+    });  // Unpack std::unique_pointers
+
+    std::vector<PhysicalObject*> ownerlessItems;
+    std::copy_if(itemPointers.begin(), itemPointers.end(), std::back_inserter(ownerlessItems), [&](const auto& objectPointer) {
+        auto itemPointer = dynamic_cast<Item*>(objectPointer);
+        return (itemPointer && itemPointer->getOwner() == nullptr);
+    });  // filter out non-Item pointers and Item pointers with owner
 
     auto playerBody = player->getBodyPtr();
     auto playerPos = playerBody->GetPosition();
 
-    for (auto&& object_it : state.objects) {
-        auto body = object_it->getBodyPtr();
-        auto pos = body->GetPosition();
+    auto pointerIter = std::min_element(ownerlessItems.begin(), ownerlessItems.end(), [&](const auto& lower, const auto& higher) {
+        auto lowerPos = lower->getBodyPtr()->GetPosition(), higherPos = higher->getBodyPtr()->GetPosition();
+        return (playerPos - lowerPos).LengthSquared() < (playerPos - higherPos).LengthSquared();
+    });  // find item with lowest distance from player
 
-        if (PICKUP_RANGE * PICKUP_RANGE < (pos.x - playerPos.x) * (pos.x - playerPos.x) + (pos.y - playerPos.y) * (pos.y - playerPos.y))
-            continue;
-
-        if (auto item = dynamic_cast<Item*>(object_it.get())) {
-            if (item->getOwner() == nullptr) {
-                std::cout << "Found " << typeid(*object_it).name() << " at (" << pos.x << " " << pos.y << ")" << std::endl;
-                return item;
-            }
-        }
+    if (pointerIter != ownerlessItems.end()) {
+        auto itemPointer = (*pointerIter);
+        auto itemPos = itemPointer->getBodyPtr()->GetPosition();
+        if (pow(PICKUP_RANGE, 2) >= (itemPos - playerPos).LengthSquared())
+            return dynamic_cast<Item*>(itemPointer);
     }
     return nullptr;
 }

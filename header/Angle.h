@@ -27,9 +27,9 @@ class Angle {
     };
     Angle(float val = 0.f, unit unit = unit::DEG);
     float get(unit unit = unit::DEG);
-    Angle operator+(const Angle& other);
-    Angle operator-(const Angle& other);
-    Angle operator-();
+    Angle operator+(const Angle& other) const;
+    Angle operator-(const Angle& other) const;
+    Angle operator-() const;
     Angle& operator+=(const Angle& other);
     Angle& operator-=(const Angle& other);
 };

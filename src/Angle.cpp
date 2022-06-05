@@ -25,15 +25,15 @@ float Angle::get(unit unit) {
     return returnValue;
 }
 
-Angle Angle::operator+(const Angle& other) {
+Angle Angle::operator+(const Angle& other) const {
     return Angle(value + other.value);
 }
 
-Angle Angle::operator-(const Angle& other) {
+Angle Angle::operator-(const Angle& other) const {
     return Angle(value - other.value);
 }
 
-Angle Angle::operator-() {
+Angle Angle::operator-() const {
     return Angle(-value);
 }
 
