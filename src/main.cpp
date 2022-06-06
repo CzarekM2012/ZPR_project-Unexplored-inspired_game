@@ -6,7 +6,7 @@
  - top-down view
  - static camera, limited interface
  - simple, polygon-based character and object models (and matching hitboxes)
- - mainly melee with some ranged (and maybe magical) weapons
+ - melee weapons and shields
  - items provide players with custom actions like lunge or throw
  - requires controllers
 
@@ -35,7 +35,6 @@ const int ACTION_Q_SIZE = 10;
 int main() {
     std::cout << "Started" << std::endl;
 
-    // sf::RenderWindow window(sf::VideoMode(1920, 1080), "ZPR Game");
     sf::RenderWindow window(sf::VideoMode(960, 540), "ZPR Game");
     Renderer renderer(&window);
 
@@ -43,18 +42,20 @@ int main() {
     InputHandler inputHandler(action_q);
     GameController gameController(action_q);
 
-    std::thread gameLogicThread(&GameController::run, &gameController);  // ~Use a GameController function on gameController object
+    gameController.prepareGame();
+    std::thread gameLogicThread(&GameController::run, &gameController);
+
     while (window.isOpen()) {
         sf::Event event;
 
-        if (window.pollEvent(event) && event.type == sf::Event::Closed) {  // Event doesn't by itself tell if something has happened, need to check pollEvent return
-            window.close();
+        if (window.pollEvent(event)) {
+            inputHandler.handleEvent(event);
+            if (event.type == sf::Event::Closed) {  // Event doesn't tell by itself if something had happened, need to check pollEvent return
+                window.close();
+            }
         }
-
-        inputHandler.handleInput(event);  // This should be called even if no new event has appeared
-                                          // (for e.g. checking if keyboard keys are still pressed)
-        renderer.render(gameController.getStateCopy());
-        // std::this_thread::sleep_for(10ms);
+        inputHandler.handleStates();
+        renderer.render(gameController.getDrawablesCopy());
     }
     std::cout << "Window closed" << std::endl;
 

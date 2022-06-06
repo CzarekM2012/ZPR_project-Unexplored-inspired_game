@@ -1,8 +1,14 @@
 # add files of main project to the executable
 add_executable(${PROJECT_NAME}
+    Angle.cpp
+    State.cpp
     GameController.cpp
     InputHandler.cpp
     PhysicalObject.cpp
+    ObjectClasses.cpp
+    Item.cpp
+    Entity.cpp
+    Player.cpp
     Renderer.cpp
     main.cpp)
 

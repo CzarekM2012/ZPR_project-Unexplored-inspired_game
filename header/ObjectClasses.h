@@ -1,185 +1,78 @@
-#pragma once
+#ifndef OBJECT_CLASSES_H
+#define OBJECT_CLASSES_H
+
+#include <memory>
 
 #include <box2d/box2d.h>
 #include <SFML/Graphics.hpp>
-#include <memory>
 
-#define UNUSED(x) (void)(x)  // For now to disable "unused parameter" error
+#include "Entity.h"
+#include "Item.h"
+#include "PhysicalObject.h"
+#include "Player.h"
 
-/// A typical object with health pool. Most can be destroyed
-class Entity : public PhysicalObject {
-   protected:
-    bool invulnerable = false;
-    int hp = 1;
-
-   public:
-    bool isInvulnerable() const { return invulnerable; };
-
-    void damage(int value) {
-        hp = hp - value;
-        if (hp < 0) {
-            hp = 0;
-            body->DestroyFixture(body->GetFixtureList());
-        }
-    }
-};
-
+/// An object with a shape of a rectangle, has adjustible width and height
 class RectangleObject : public Entity {
    protected:
     float width;
     float height;
 
    public:
-    void setSize(float width, float height) {
-        this->width = width;
-        this->height = height;
-    }
-
-    b2Shape* getShape() const {
-        b2PolygonShape* shape = new b2PolygonShape();
-        shape->SetAsBox(width / 2, height / 2);
-        return shape;
-    }
+    /// Adjusts width and height, should be called before createBody()
+    void setSize(float width, float height);
+    virtual std::vector<b2PolygonShape> getBaseShapes() const;
 };
 
-/// A simple object to test physics
+/// A simple, destructible object to push around
 class Box : public RectangleObject {
    public:
-    Box() {
-        hp = 100;
-        width = 10;
-        height = 10;
-        density = 0.1f;
-        damping = 0.1f;
-        color = sf::Color::Yellow;
-    }
-
-    Box(int w, int h)
-        : Box() {
-        width = w;
-        height = h;
-    }
+    Box();
+    Box(int w, int h);
 };
 
 /// Immovable and indestructibe obstacle
 class Wall : public RectangleObject {
    public:
-    Wall() {
-        hp = invulnerable;
-        dynamic = false;
-        color = sf::Color::Black;
-    }
-
-    Wall(int w, int h)
-        : Wall() {
-        width = w;
-        height = h;
-    }
+    Wall();
+    Wall(int w, int h);
 };
 
-/// Items can be equiped by players. They don't collide until equipped
-class Item : public PhysicalObject {
-   private:
-    std::weak_ptr<Entity> owner;
-
+/// Sword is held automatically in front. Player can stab on contact and charge on use.
+class Sword : public Item {
    public:
-    std::weak_ptr<Entity> getOwner() { return owner; };
-    void setOwner(std::shared_ptr<Entity> newOwner) { owner = newOwner; };
+    Sword();
+
+    void useTick(int tick);  ///< Bring sword in front of the player and charge forward
+    virtual std::vector<b2PolygonShape> getBaseShapes() const;
+    void onContact(PhysicalObject* const other);  ///< Deal damage on contact, more when actively used
 };
 
-/// Weapons can be used to deal damage to entities
-class Weapon : public Item {
-   protected:
-    int damage;
-};
-
-/// A basic weapon to test game mechanics
-class Sword : public Weapon {
+/// Axe can be swinged on use. Deals severe damage but only when swinging.
+class Axe : public Item {
    public:
-    Sword() {
-        damage = 10;
-        color = sf::Color(180, 180, 180);
-    };
-
-    b2Shape* getShape() const {
-        b2PolygonShape* shape = new b2PolygonShape();
-        b2Vec2 triangle[] = {b2Vec2(-2, -2), b2Vec2(0, 3), b2Vec2(2, -2)};
-        shape->Set(triangle, 3);
-        return shape;
-    }
+    Axe();
+    void useTick(int tick);
+    virtual std::vector<b2PolygonShape> getBaseShapes() const;
+    void onContact(PhysicalObject* const other);
 };
 
-/// A basic shield to test game mechanics
+/// Dagger is also held in front. Player can stab on contact or use it to make a throw.
+class Dagger : public Item {
+   public:
+    Dagger();
+
+    void useTick(int tick);  ///< Throw the dagger
+    virtual std::vector<b2PolygonShape> getBaseShapes() const;
+    void onContact(PhysicalObject* const other);  ///< Deal damage on contact, more when thrown
+};
+
+/// Defensive item, puts colliding weapons on cooldown
 class Shield : public Item {
-   protected:
-    int defense;
-
    public:
-    Shield() {
-        defense = 7;
-        color = sf::Color(180, 180, 180);
-    }
+    Shield();
 
-    b2Shape* getShape() const {
-        b2PolygonShape* shape = new b2PolygonShape();
-        shape->SetAsBox(1, 4);
-        return shape;
-    }
+    virtual std::vector<b2PolygonShape> getBaseShapes() const;
+    void onContact(PhysicalObject* const other);  ///< If shield colliding with another item, set that item on cooldown
 };
 
-/// Controlled by the player. Most complex than most entities
-class Player : public Entity {
-    std::shared_ptr<Item> item_lh;
-
-   public:
-    Player() {
-        hp = 100;
-        color = sf::Color::Green;
-    }
-
-    void equipLeftHand(std::shared_ptr<Item> item) {
-        item_lh = item;
-        updateEquipment();
-    }
-
-    void updateEquipment() {
-        this->body->CreateFixture(item_lh->getShape(), item_lh->getDensity());
-    }
-
-    b2Shape* getShape() const {
-        b2PolygonShape* shape = new b2PolygonShape();
-        b2Vec2 pentagon[] = {b2Vec2(-5, -5), b2Vec2(-5, 5), b2Vec2(0, 7), b2Vec2(5, 5), b2Vec2(5, -5)};
-        shape->Set(pentagon, 5);
-        return shape;
-    }
-};
-
-// class Example : public Other {
-// public:
-//     virtual b2Body * createPhysicalObject(b2World* world, float x, float y) {
-
-// 	    auto bodyDef = new b2BodyDef();
-//         bodyDef->position.Set(x, y);
-//         //dynamic
-// 	    bodyDef->type = b2_dynamicBody;
-//         //static
-// 	    bodyDef->type = b2_staticBody;
-
-// 	    body = world->CreateBody(bodyDef);
-//         //dynamic
-//         body->SetLinearDamping(DAMPING);
-//         body->SetAngularDamping(DAMPING);
-
-// 	    auto fixtureDef = new b2FixtureDef();
-// 	    fixtureDef->shape = shape;
-//         //dynamic
-//         fixtureDef->density = 1.0f;
-// 	    fixtureDef->friction = 0.3f;
-// 	    this->body->CreateFixture(fixtureDef);
-//         //static
-// 	    this->body->CreateFixture(shape, 0);
-
-// 	    view = std::make_unique<sf::ConvexShape>(*generateView(body));
-// 	    setColor(color);
-//     };
-// };
+#endif  // OBJECT_CLASSES_H

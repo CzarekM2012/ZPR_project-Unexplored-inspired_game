@@ -1,29 +1,29 @@
-#pragma once
+#ifndef STATE_H
+#define STATE_H
 
 #include <algorithm>
+
 #include <memory>
 #include <vector>
 
 #include "PhysicalObject.h"
 
-/// A simple vector of PhysicalObject. Represents whole state of the game
+/// A simple vector of PhysicalObject unique pointers. Represents whole state of the game
 class State {
    public:
-    std::vector<std::shared_ptr<PhysicalObject>> objects;
+    std::vector<std::unique_ptr<PhysicalObject>> objects;
 
     State(){};
+    State(const State& state) = delete;
+    State& operator=(const State&) = delete;
 
-    std::shared_ptr<PhysicalObject> add(
-        std::shared_ptr<PhysicalObject> object) {
-        objects.push_back(object);
-        return objects[objects.size() - 1];
-    };
+    PhysicalObject* add(std::unique_ptr<PhysicalObject> objectPtr);
+    PhysicalObject* add(PhysicalObject* objectPtr);
+    void remove(PhysicalObject* objectPtr);
 
-    std::shared_ptr<PhysicalObject> get(unsigned int index) const {
-        return objects.size() > index ? objects[index] : nullptr;
-    }  // TODO: Rewrite as an overloaded operator []
-    std::shared_ptr<PhysicalObject> getLast() {
-        return objects.empty() ? nullptr : objects[objects.size() - 1];
-    };
-    int getObjectCount() const { return objects.size(); };
+    PhysicalObject* get(unsigned int index) const;
+    PhysicalObject* getLast() const;
+    int getObjectCount() const;
 };
+
+#endif  // STATE_H
